@@ -1,0 +1,146 @@
+{
+  "dot": {
+    "enabled": true,
+    "network": "pdot",
+    "defaultMetrics": [],
+    "accounts": [
+      {
+        "alias": "vault",
+        "publicKey": "0x9deb6fe44723040e8bac68dbff3cede4777ecdbd733a95a5f9ecf09efe848c1f"
+      }
+    ]
+  },
+  "flip": {
+    "enabled": true,
+    "network": "perseverance",
+    "defaultMetrics": [
+      {
+        "name": "cf_authorities_warning_threshold_count",
+        "value": 140
+      },
+      {
+        "name": "cf_authorities_critical_threshold_count",
+        "value": 120
+      },
+      {
+        "name": "cf_backup_authorities_warning_threshold_count",
+        "value": 40
+      },
+      {
+        "name": "cf_backup_authorities_critical_threshold_count",
+        "value": 25
+      },
+      {
+        "name": "cf_expected_rotation_duration_blocks",
+        "value": 2400
+      }
+    ],
+    "accounts": [
+      {
+        "alias": "Bashful",
+        "ss58Adress": "cFLbassb4hwQ9iA7dzdVdyumRqkaXnkdYECrThhmrqjFukdVo"
+      },
+      {
+        "alias": "Doc",
+        "ss58Adress": "cFLdocJo3bjT7JbT7R46cA89QfvoitrKr9P3TsMcdkVWeeVLa"
+      },
+      {
+        "alias": "Dopey",
+        "ss58Adress": "cFLdopvNB7LaiBbJoNdNC26e9Gc1FNJKFtvNZjAmXAAVnzCk4"
+      }
+    ],
+    "skipEvents": [
+      {
+        "section": "transactionPayment",
+        "method": "TransactionFeePaid"
+      },
+      {
+        "section": "system",
+        "method": "ExtrinsicSuccess"
+      }
+    ]
+  },
+  "btc": {
+    "enabled": false,
+    "network": "testnet",
+    "defaultMetrics": [],
+    "wallets": []
+  },
+  "eth": {
+    "enabled": true,
+    "networkId": 5,
+    "network": "gorli",
+    "defaultMetrics": [],
+    "contracts": [
+      {
+        "alias": "state-chain-gateway",
+        "address": "0xC960C4eEe4ADf40d24374D85094f3219cf2DD8EB"
+      },
+      {
+        "alias": "key-manager",
+        "address": "0x56a10b82180D4b8F6203541FEaF2c88a3999e847"
+      },
+      {
+        "alias": "vault",
+        "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+      },
+      {
+        "alias": "flip",
+        "address": "0x1194C91d47Fc1b65bE18db38380B5344682b67db"
+      },
+      {
+        "alias": "usdc",
+        "address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f"
+      }
+    ],
+    "wallets": [
+      {
+        "alias": "deployer",
+        "address": "0xa56A6be23b6Cf39D9448FF6e897C29c41c8fbDFF"
+      },
+      {
+        "alias": "bashful",
+        "address": "0x58f63aa23974665ecf2b08b7c0b72e4286aa822b"
+      },
+      {
+        "alias": "doc",
+        "address": "0x93bba670696Ad5412c9d40d0326b1Fa608FE02B3"
+      },
+      {
+        "alias": "dopey",
+        "address": "0x8A64ac13B9C271CDe34fA1a540CeF0a12Ed340f2"
+      },
+      {
+        "alias": "vault",
+        "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+      }
+    ],
+    "tokens": [
+      {
+        "address": "0x8e71CEe1679bceFE1D426C7f23EAdE9d68e62650",
+        "symbol": "FLIP"
+      },
+      {
+        "address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
+        "symbol": "USDC"
+      }
+    ]
+  },
+  "github": {
+    "enabled": true,
+    "repositories": [
+      {
+        "owner": "ethereum",
+        "repo": "go-ethereum"
+      },
+      {
+        "owner": "bitcoin",
+        "repo": "bitcoin"
+      },
+      {
+        "owner": "paritytech",
+        "repo": "polkadot"
+      }
+    ]
+  }
+}

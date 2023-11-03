@@ -1,0 +1,66 @@
+on: workflow_call
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🏁
+        uses: actions/checkout@v3
+
+      - name: Get Node.JS version from package.json 👀
+        id: get-versions
+        run: echo "nodeVersion=$(jq -r .engines.node ./package.json)" >> $GITHUB_OUTPUT
+
+      - name: Install pnpm 💿
+        run: npm install -g pnpm@8
+
+      - name: Setup Node 🎮
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.get-versions.outputs.nodeVersion }}
+          cache: "pnpm"
+
+      - name: Install dependencies 📝
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Lint 📝
+        run: pnpm lint
+  schemaValidation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🏁
+        uses: actions/checkout@v3
+
+      - name: Get Node.JS version from package.json 👀
+        id: get-versions
+        run: echo "nodeVersion=$(jq -r .engines.node ./package.json)" >> $GITHUB_OUTPUT
+
+      - name: Install pnpm 💿
+        run: npm install -g pnpm@8
+
+      - name: Setup Node 🎮
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.get-versions.outputs.nodeVersion }}
+          cache: "pnpm"
+
+      - name: Install dependencies 📝
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Create schema 📝
+        run: pnpm schema
+
+      - name: Validate schema 📝
+        run: pnpm validate
+#
+#  prettier:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout 🏁
+#        uses: actions/checkout@v3
+#
+#      - name: Prettify code
+#        uses: creyD/prettier_action@v4.3
+#        with:
+#          # This part is also where you can pass other options, for example:
+#          file_pattern: "{**/*,*}.{ts}"
+#          dry: true

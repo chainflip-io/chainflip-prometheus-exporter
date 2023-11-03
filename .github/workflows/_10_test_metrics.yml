@@ -1,0 +1,45 @@
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        default: "latest"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      METRICS_FILE_NAME: metrics.txt
+    services:
+      network-exporter:
+        image: ghcr.io/chainflip-io/chainflip-network-exporter:dev-${{ github.sha }}
+        env:
+          CF_NETWORK: sisyphos
+          NETWORK_EXPORTER_PORT: 9000
+          CF_WATCHER_PORT: 9001
+          DOT_WATCHER_PORT: 9002
+          ETH_WATCHER_PORT: 9003
+          BTC_WATCHER_PORT: 9004
+          ETH_NETWORK_ID: 5
+          ETH_WS_ENDPOINT: ${{ secrets.CF_NE_ETH_WS_ENDPOINT }}
+          CF_WS_ENDPOINT: wss://sisyphos.chainflip.xyz
+          DOT_WS_ENDPOINT: wss://sisydot.chainflip.xyz
+          BTC_HTTP_ENDPOINT: https://flip:flip@sisybtc.chainflip.xyz
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        ports:
+          - "9000:9000"
+    steps:
+      - name: Wait for some metrics to be available
+        run: sleep 20
+
+      - name: Check metrics
+        id: check_metrics
+        run: curl -sSfo $METRICS_FILE_NAME --retry 5 --retry-all-errors http://localhost:9000/metrics
+
+      - name: Check metrics output
+        run: |
+          cat $METRICS_FILE_NAME | grep btc_
+          cat $METRICS_FILE_NAME | grep eth_
+          cat $METRICS_FILE_NAME | grep cf_
+          cat $METRICS_FILE_NAME | grep dot_

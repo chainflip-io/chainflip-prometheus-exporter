@@ -1,0 +1,11 @@
+name: ci-main
+on:
+  push:
+    branches:
+      - main
+jobs:
+  pre-check:
+    uses: ./.github/workflows/_00_pre_check.yml
+  build:
+    needs: [pre-check]
+    uses: ./.github/workflows/_01_docker.yml

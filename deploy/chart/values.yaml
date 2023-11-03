@@ -1,0 +1,14 @@
+onepassword:
+  vault: ""
+  secretName: ""
+  configSecretName: ""
+
+image:
+  repository: ghcr.io/chainflip-io/chainflip-network-exporter
+  tag: ""
+
+port: 9000
+
+env: {}
+
+resources: {}

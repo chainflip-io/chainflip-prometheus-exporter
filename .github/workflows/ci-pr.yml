@@ -1,0 +1,17 @@
+name: ci-pr
+on:
+  pull_request:
+jobs:
+  pre-check:
+    uses: ./.github/workflows/_00_pre_check.yml
+  build:
+    needs: [pre-check]
+    uses: ./.github/workflows/_01_docker.yml
+    with:
+      prefix: dev-
+  test-metrics:
+    needs: [build]
+    secrets: inherit
+    uses: ./.github/workflows/_10_test_metrics.yml
+    with:
+      tag: ${{ needs.build.outputs.tag }}
