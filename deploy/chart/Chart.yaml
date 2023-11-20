@@ -1,5 +1,0 @@
-name: chainflip-network-exporter
-version: 0.0.1
-apiVersion: v2
-description: Scrape data from all supported chains
-type: application

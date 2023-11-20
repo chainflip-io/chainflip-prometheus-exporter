@@ -31,6 +31,7 @@ jobs:
           flavor: |
             latest=true
           tags: |
+            type=semver,pattern={{version}}
             type=sha,format=long,prefix=${{ inputs.prefix }}
 
       - name: Login to GitHub Container Registry ➡️🐳

@@ -42,7 +42,7 @@
   },
   "eth": {
     "enabled": true,
-    "networkId": 5,
+    "networkId": 1,
     "network": "mainnet",
     "defaultMetrics": [],
     "contracts": [
