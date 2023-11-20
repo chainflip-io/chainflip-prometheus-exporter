@@ -3,6 +3,17 @@
 Prometheus exporter to retrieve important data for our monitoring and alerting system.
 Designed to retrieve data from several APIs on multiple chains.
 
+## Deploying on Kubernetes
+
+```shell
+helm repo add chainflip https://chainflip-io.github.io/chainflip-helm-charts
+helm install chainflip-prometheus-exporter chainflip/chainflip-prometheus-exporter
+```
+
+This will deploy the exporter pointing at the Berghain mainnet public RPC. You will need to manually add configuration
+and secrets for other networks. You can see a full example config [here](config/local.json). Required environment variables can be found 
+in [.env.example](.env.example).
+
 ## Contributing
 
 ### Getting started
