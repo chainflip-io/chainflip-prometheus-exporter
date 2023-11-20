@@ -20,8 +20,8 @@ jobs:
           ETH_WATCHER_PORT: 9003
           BTC_WATCHER_PORT: 9004
           ETH_NETWORK_ID: 5
-          ETH_WS_ENDPOINT: ${{ secrets.CF_NE_ETH_WS_ENDPOINT }}
-          CF_WS_ENDPOINT: wss://berghain-rpc.chainflip.io
+          ETH_WS_ENDPOINT: ${{ secrets.CF_ETH_MAINNET_WS }}
+          CF_WS_ENDPOINT: wss://mainnet-rpc.chainflip.io
           DOT_WS_ENDPOINT: wss://rpc.polkadot.io
           BTC_HTTP_ENDPOINT: https://flip:${{ secrets.CF_BTC_RPC_PASSWORD }}@btc-mainnet-rpc.chainflip.io
         credentials:
