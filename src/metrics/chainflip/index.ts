@@ -11,4 +11,5 @@ export * from "./guageBlockHeight";
 export * from "./gaugeDotBlockTime";
 export * from "./gaugeEthBlockTime";
 export * from "./gaugeBtcBlockTime";
-export * from "./gaugeBackupValidator"
+export * from "./gaugeBackupValidator";
+export * from "./gaugeReputation";
