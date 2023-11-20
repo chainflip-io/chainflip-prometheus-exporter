@@ -12,7 +12,7 @@ import {
   gaugeRotationDuration,
   gaugeSuspendedValidatorKeygenFailed,
   gaugeDotBlockTime,
-  gaugeEthBlockTime, gaugeBtcBlockTime, gaugeBackupValidator
+  gaugeEthBlockTime, gaugeBtcBlockTime, gaugeBackupValidator, gaugeReputation
 } from "../metrics/chainflip";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { customRpcs } from "../utils/customRpcSpecification";
@@ -90,6 +90,7 @@ async function startWatcher(context: Context) {
       await gaugeEthBlockTime(context);
       await gaugeBtcBlockTime(context);
       await gaugeBackupValidator(context);
+      await gaugeReputation(context);
       metric.set(0);
     });
     await api.query.system.events(async (events: any) => {

@@ -11,19 +11,19 @@ jobs:
       METRICS_FILE_NAME: metrics.txt
     services:
       network-exporter:
-        image: ghcr.io/chainflip-io/chainflip-network-exporter:dev-${{ github.sha }}
+        image: ghcr.io/chainflip-io/chainflip-prometheus-exporter:dev-${{ github.sha }}
         env:
-          CF_NETWORK: sisyphos
+          CF_NETWORK: berghain
           NETWORK_EXPORTER_PORT: 9000
           CF_WATCHER_PORT: 9001
           DOT_WATCHER_PORT: 9002
           ETH_WATCHER_PORT: 9003
           BTC_WATCHER_PORT: 9004
           ETH_NETWORK_ID: 5
-          ETH_WS_ENDPOINT: ${{ secrets.CF_NE_ETH_WS_ENDPOINT }}
-          CF_WS_ENDPOINT: wss://sisyphos.chainflip.xyz
-          DOT_WS_ENDPOINT: wss://sisydot.chainflip.xyz
-          BTC_HTTP_ENDPOINT: https://flip:flip@sisybtc.chainflip.xyz
+          ETH_WS_ENDPOINT: ${{ secrets.CF_ETH_MAINNET_WS }}
+          CF_WS_ENDPOINT: wss://mainnet-rpc.chainflip.io
+          DOT_WS_ENDPOINT: wss://rpc.polkadot.io
+          BTC_HTTP_ENDPOINT: https://flip:${{ secrets.CF_BTC_RPC_PASSWORD }}@btc-mainnet-rpc.chainflip.io
         credentials:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
