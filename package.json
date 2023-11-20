@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "build": "tsc",
-    "lint": "eslint .",
+    "lint": "eslint ./src*",
     "test": "echo \"Error: no test specified\" && exit 1",
     "metrics": "curl localhost:9000/metrics",
     "dev": "tsx watch src/app.ts",
