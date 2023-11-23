@@ -17,5 +17,5 @@ export const countContractEvents = async (context: Context) => {
   if (registry.getSingleMetric(metricName) === undefined)
     registry.registerMetric(metric);
 
-  metric.labels("ethereum", event, contractAlias).inc(1);
+  metric.labels(event, contractAlias).inc(1);
 };

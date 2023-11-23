@@ -113,11 +113,11 @@ async function startWatcher(context: Context) {
 
     flipContract.deployed().then(() => logger.info("Flip contract added"));
     flipContract.on("*", async (event: any) => {
-      if (event.fragment?.name !== undefined) {
+      if (event?.event !== undefined) {
         await countContractEvents({
           ...context,
           contractAlias: "flip",
-          event: event.fragment.name,
+          event: event.event,
         });
       }
     });
@@ -126,11 +126,11 @@ async function startWatcher(context: Context) {
       .deployed()
       .then(() => logger.info("Stake manager contract added"));
     stateChainGatewayContract.on("*", async (event: any) => {
-      if (event.fragment?.name !== undefined) {
+      if (event?.event !== undefined) {
         await countContractEvents({
           ...context,
           contractAlias: "state-chain-gateway",
-          event: event.fragment.name,
+          event: event.event,
         });
       }
     });
@@ -139,22 +139,22 @@ async function startWatcher(context: Context) {
       .deployed()
       .then(() => logger.info("Key Manager contract added"));
     keyManagerContract.on("*", async (event: any) => {
-      if (event.fragment?.name !== undefined) {
+      if (event?.event !== undefined) {
         await countContractEvents({
           ...context,
           contractAlias: "key-manager",
-          event: event.fragment.name,
+          event: event.event,
         });
       }
     });
 
     vaultContract.deployed().then(() => logger.info("Vault contract added"));
     vaultContract.on("*", async (event: any) => {
-      if (event.fragment?.name !== undefined) {
+      if (event?.event !== undefined) {
         await countContractEvents({
           ...context,
           contractAlias: "vault",
-          event: event.fragment.name,
+          event: event.event,
         });
       }
     });
