@@ -16,7 +16,7 @@ export const gaugeTokenBalance = async (context: Context, symbol: string, blockN
   const config = context.config as EthConfig;
   const contract = context.contract as Contract;
   const { wallets } = config;
-  
+
   let stateChainGatewayContract;
   config.contracts.forEach(contract => {
     if(contract.alias === "state-chain-gateway")
@@ -32,26 +32,28 @@ export const gaugeTokenBalance = async (context: Context, symbol: string, blockN
   let transferToLogs;
   let filterFromGateway;
   let transferFromLogs;
-  if(symbol === "FLIP"){
-    filterToGateway = contract.filters.Transfer(null, stateChainGatewayContract );
+  if(symbol === "FLIP") {
+    filterToGateway = contract.filters.Transfer(null, stateChainGatewayContract);
     transferToLogs = await contract.queryFilter(filterToGateway);
     filterFromGateway = contract.filters.Transfer(stateChainGatewayContract);
     transferFromLogs = await contract.queryFilter(filterFromGateway);
   }
   let totalBalance: ethers.BigNumber;
-  
+
   for (const { address, alias } of wallets) {
     try {
       totalBalance = await contract.balanceOf(address);
       let totalBalanceParsed = Number(ethers.utils.formatUnits(totalBalance, 18));
-      if(symbol === "FLIP"){
+      if(symbol === "FLIP") {
         transferToLogs?.forEach(element => {
-          if(element.args?.from == address) {
-            totalBalanceParsed = totalBalanceParsed + Number(ethers.utils.formatUnits(element.args?.value, 18));          }
+          if(element.args?.from === address) {
+            totalBalanceParsed = totalBalanceParsed + Number(ethers.utils.formatUnits(element.args?.value, 18));
+          }
         });
         transferFromLogs?.forEach(element => {
-          if(element.args?.to == address) {
-            totalBalanceParsed = totalBalanceParsed - Number(ethers.utils.formatUnits(element.args?.value, 18));          }
+          if(element.args?.to === address) {
+            totalBalanceParsed = totalBalanceParsed - Number(ethers.utils.formatUnits(element.args?.value, 18));
+          }
         });
       }
       const contractAddress = contract.address;
