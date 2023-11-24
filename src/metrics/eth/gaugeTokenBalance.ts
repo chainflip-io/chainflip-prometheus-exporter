@@ -11,22 +11,49 @@ const metric = new promClient.Gauge({
   registers: [],
 });
 
-export const gaugeTokenBalance = async (context: Context, symbol: string) => {
+export const gaugeTokenBalance = async (context: Context, symbol: string, blockNumber: number) => {
   const { logger, registry, metricFailure } = context;
   const config = context.config as EthConfig;
   const contract = context.contract as Contract;
   const { wallets } = config;
-
+  
+  let stateChainGatewayContract;
+  config.contracts.forEach(contract => {
+    if(contract.alias === "state-chain-gateway")
+      stateChainGatewayContract = contract.address;
+  });
   logger.debug(`Scraping ${metricName}`, { symbol });
 
   if (registry.getSingleMetric(metricName) === undefined)
     registry.registerMetric(metric);
   metricFailure.labels({ metric: metricName }).set(0);
 
+  let filterToGateway;
+  let transferToLogs;
+  let filterFromGateway;
+  let transferFromLogs;
+  if(symbol === "FLIP"){
+    filterToGateway = contract.filters.Transfer(null, stateChainGatewayContract );
+    transferToLogs = await contract.queryFilter(filterToGateway);
+    filterFromGateway = contract.filters.Transfer(stateChainGatewayContract);
+    transferFromLogs = await contract.queryFilter(filterFromGateway);
+  }
+  let totalBalance: ethers.BigNumber;
+  
   for (const { address, alias } of wallets) {
     try {
-      const rawBalance = await contract.balanceOf(address);
-      const tokenBalance = ethers.utils.formatUnits(rawBalance, 18);
+      totalBalance = await contract.balanceOf(address);
+      let totalBalanceParsed = Number(ethers.utils.formatUnits(totalBalance, 18));
+      if(symbol === "FLIP"){
+        transferToLogs?.forEach(element => {
+          if(element.args?.from == address) {
+            totalBalanceParsed = totalBalanceParsed + Number(ethers.utils.formatUnits(element.args?.value, 18));          }
+        });
+        transferFromLogs?.forEach(element => {
+          if(element.args?.to == address) {
+            totalBalanceParsed = totalBalanceParsed - Number(ethers.utils.formatUnits(element.args?.value, 18));          }
+        });
+      }
       const contractAddress = contract.address;
       metric
         .labels({
@@ -35,7 +62,7 @@ export const gaugeTokenBalance = async (context: Context, symbol: string) => {
           alias,
           contract: contractAddress,
         })
-        .set(parseFloat(tokenBalance));
+        .set(totalBalanceParsed);
     } catch (error) {
       logger.error(error);
       metricFailure.labels({ metric: metricName }).set(1);
