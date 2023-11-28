@@ -11,7 +11,7 @@ const metric = new promClient.Gauge({
   registers: [],
 });
 
-export const gaugeTokenBalance = async (context: Context, symbol: string, blockNumber: number) => {
+export const gaugeTokenBalance = async (context: Context, symbol: string) => {
   const { logger, registry, metricFailure } = context;
   const config = context.config as EthConfig;
   const contract = context.contract as Contract;
