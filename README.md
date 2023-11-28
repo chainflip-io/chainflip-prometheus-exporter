@@ -11,7 +11,8 @@ helm install chainflip-prometheus-exporter chainflip/chainflip-prometheus-export
 ```
 
 This will deploy the exporter pointing at the Berghain mainnet public RPC. You will need to manually add configuration
-and secrets for other networks. You can see a full example config [here](config/local.json). Required environment variables can be found 
+and secrets for other networks. You can see a full example config [here](config/local.json). Required environment
+variables can be found
 in [.env.example](.env.example).
 
 ## Contributing
@@ -53,9 +54,48 @@ This will display the metrics in the terminal.
 
 ### Custom config file
 
-Check out the config file in `config/local.json`. This can be modified to point at different chains and networks. You can update the tracked wallets and Chainflip accounts.
+Check out the config file in `config/local.json`. This can be modified to point at different chains and networks. You
+can update the tracked wallets and Chainflip accounts.
+
+#### Adding your validator
+
+Update `flip.accounts` with your validator address and alias. This will add metrics for your validator.
+
+```json
+{
+    "flip": {
+	  "accounts": [
+		{
+		    "alias": "MY_NODE_ALIAS",
+		    "ss58Adress": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
+		}
+	  ]
+    }
+}
+```
+
+#### Setting default metrics
+
+If you would like to expose some constants to Prometheus, you can add them to `defaultMetrics` in the config file. These
+will be exposed as a gauge.
+
+```json
+{
+    "defaultMetrics": {
+	  "cf_expected_rotation_duration_blocks": 2400
+    }
+}
+```
+
+THis can be useful for alerting.
+
+### Current limitations
+
+1. You must use a Bitcoin node that accepts Basic authentication. The currently used Bitcoin client does not support API
+   key authentication.
 
 ### Example metrics
+
 ```text
 # HELP cf_authorities_warning_threshold_count Default metric
 # TYPE cf_authorities_warning_threshold_count gauge
