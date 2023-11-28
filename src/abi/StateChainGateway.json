@@ -10,6 +10,11 @@
         "internalType": "uint256",
         "name": "minFunding",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint48",
+        "name": "redemptionDelay",
+        "type": "uint48"
       }
     ],
     "stateMutability": "nonpayable",
@@ -199,6 +204,12 @@
         "internalType": "uint48",
         "name": "expiryTime",
         "type": "uint48"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "executor",
+        "type": "address"
       }
     ],
     "name": "RedemptionRegistered",
@@ -266,7 +277,18 @@
       }
     ],
     "name": "executeRedemption",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -410,6 +432,11 @@
             "internalType": "uint48",
             "name": "expiryTime",
             "type": "uint48"
+          },
+          {
+            "internalType": "address",
+            "name": "executor",
+            "type": "address"
           }
         ],
         "internalType": "struct IStateChainGateway.Redemption",
@@ -490,6 +517,11 @@
         "internalType": "uint48",
         "name": "expiryTime",
         "type": "uint48"
+      },
+      {
+        "internalType": "address",
+        "name": "executor",
+        "type": "address"
       }
     ],
     "name": "registerRedemption",
