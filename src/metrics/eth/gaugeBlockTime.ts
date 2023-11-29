@@ -11,15 +11,14 @@ const metric = new promClient.Gauge({
 let previous: number = 0;
 
 export const gaugeBlockTime = async (context: Context) => {
+
   const { logger, provider, registry, blockNumber, metricFailure } = context;
-
-  logger.debug(`Scraping ${metricName}`);
-
-  if (registry.getSingleMetric(metricName) === undefined)
-    registry.registerMetric(metric);
-  metricFailure.labels({ metric: metricName }).set(0);
-
   try {
+    logger.debug(`Scraping ${metricName}`);
+
+    if (registry.getSingleMetric(metricName) === undefined)
+      registry.registerMetric(metric);
+
     const timestamp: number = (await provider.getBlock(blockNumber)).timestamp;
     if (previous === 0) {
       previous = Number(timestamp);
@@ -29,6 +28,7 @@ export const gaugeBlockTime = async (context: Context) => {
       metric.set(metricValue);
       previous = Number(timestamp);
     }
+    metricFailure.labels({ metric: metricName }).set(0);
   } catch (error) {
     logger.error(error);
     metricFailure.labels({ metric: metricName }).set(1);
