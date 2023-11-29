@@ -38,13 +38,12 @@ async function startWatcher(context: Context) {
     registry.registerMetric(metricFailure);
 
   try {
-    let api!: ApiPromise;
     const provider = new WsProvider(env.DOT_WS_ENDPOINT, 5000);
     provider.on("disconnected", async (err) => {
       logger.error(`ws connection closed ${err}`);
       metric.set(1);
     });
-    api = await ApiPromise.create({ provider, noInitWarn: true });
+    const api: ApiPromise = await ApiPromise.create({ provider, noInitWarn: true });
     await api.rpc.chain.subscribeNewHeads(async (header) => {
       await gaugeBlockHeight({ ...context, header });
       await gaugeBlockTime({ ...context, api });

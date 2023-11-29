@@ -46,7 +46,7 @@ export default async function startEthereumService(context: Context) {
 }
 
 process.on("uncaughtException", async err => {
-  loggerCopy.error(`Error opening ETH ws connection`);
+  loggerCopy.error(`Error opening ETH ws connection: ${err}`);
   loggerCopy.info(`retrying in 15s`);
   setTimeout(() => {
     startWatcher(mainContext); // Retry after a delay
