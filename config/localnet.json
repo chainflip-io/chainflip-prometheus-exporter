@@ -74,23 +74,23 @@
     "contracts": [
       {
         "alias": "state-chain-gateway",
-        "address": "0xC960C4eEe4ADf40d24374D85094f3219cf2DD8EB"
+        "address": "0xeebe00ac0756308ac4aabfd76c05c4f3088b8883"
       },
       {
         "alias": "key-manager",
-        "address": "0x56a10b82180D4b8F6203541FEaF2c88a3999e847"
+        "address": "0xa16e02e87b7454126e5e10d957a927a7f5b5d2be"
       },
       {
         "alias": "vault",
-        "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+        "address": "0xb7a5bd0345ef1cc5e66bf61bdec17d2461fbd968"
       },
       {
         "alias": "flip",
-        "address": "0x1194C91d47Fc1b65bE18db38380B5344682b67db"
+        "address": "0x10C6E9530F1C1AF873a391030a1D9E8ed0630D26"
       },
       {
         "alias": "usdc",
-        "address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f"
+        "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
       }
     ],
     "wallets": [

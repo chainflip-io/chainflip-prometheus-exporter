@@ -32,22 +32,25 @@ const metricFailure: promClient.Gauge = new promClient.Gauge({
 });
 
 // needed to be able to use logger and config in case of uncaughtException
-let logger1: Logger;
-let config1: EthConfig;
-let registry1: promClient.Registry;
+let loggerCopy: Logger;
+let mainRegistry: promClient.Registry;
 let wsProvider: ethers.providers.WebSocketProvider;
+let mainContext: Context;
 export default async function startEthereumService(context: Context) {
-  const { logger, config, registry } = context;
+  const { logger, registry } = context;
   logger.info("Starting Ethereum listeners");
-  logger1 = logger;
-  config1 = config as EthConfig;
-  registry1 = registry;
-  await startWatcher(context);
+  loggerCopy = logger;
+  mainRegistry = registry;
+  mainContext = context;
+  await startWatcher(mainContext);
 }
 
 process.on("uncaughtException", async err => {
-  logger1.error(err);
-  // TODO: handle metric for failure, increment it
+  loggerCopy.error(`Error opening ETH ws connection: ${err}`);
+  loggerCopy.info(`retrying in 15s`);
+  setTimeout(() => {
+    startWatcher(mainContext); // Retry after a delay
+  }, 15000); // 15s
   metric.set(1);
 });
 
@@ -55,17 +58,20 @@ async function startWatcher(context: Context) {
   const { logger, env } = context;
   context = {...context, metricFailure}
   const config = context.config as EthConfig;
-  if (registry1.getSingleMetric(metricName) === undefined)
-    registry1.registerMetric(metric);
-  if (registry1.getSingleMetric(metricFailureName) === undefined)
-    registry1.registerMetric(metricFailure);
-
-  metric.set(0);
-
   try {
+
+    if (mainRegistry.getSingleMetric(metricName) === undefined)
+      mainRegistry.registerMetric(metric);
+    if (mainRegistry.getSingleMetric(metricFailureName) === undefined)
+      mainRegistry.registerMetric(metricFailure);
+
     wsProvider = new ethers.providers.WebSocketProvider(env.ETH_WS_ENDPOINT);
+    await wsProvider.ready;
+    metric.set(0);
+
     wsProvider._websocket.on("close", async (err: any, origin: any) => {
-      logger.error(`ws connection closed ${err} ${origin}`);
+      logger.error(`ETH ws connection closed ${err} ${origin}`);
+      logger.info(`retrying in 5s`)
       await wsProvider.destroy();
       setTimeout(() => {
         startWatcher(context); // Retry after a delay
@@ -100,7 +106,7 @@ async function startWatcher(context: Context) {
       wsProvider
     );
 
-    context.provider = wsProvider;
+    context.provider = new ethers.providers.JsonRpcProvider(env.ETH_HTTP_ENDPOINT);
 
     wsProvider.on("block", async (blockNumber: number) => {
       await gaugeEthBalance(context);
@@ -108,7 +114,7 @@ async function startWatcher(context: Context) {
       await gaugeTokenBalance({ ...context, contract: usdcContract }, "USDC");
       await gaugeBlockHeight({ ...context, blockNumber });
       await gaugeBlockTime({ ...context, blockNumber });
-      await gaugeReorgSize({...context, blockNumber});
+      // await gaugeReorgSize({...context, blockNumber}); //TODO fix metric
     });
 
     flipContract.deployed().then(() => logger.info("Flip contract added"));
@@ -160,9 +166,6 @@ async function startWatcher(context: Context) {
     });
   } catch (e) {
     logger.error(`catch: ${e}`);
-    setTimeout(() => {
-      logger.debug("retrying...");
-      startWatcher(context); // Retry after a delay
-    }, 5000); // 5s
+    await wsProvider.destroy();
   }
 }

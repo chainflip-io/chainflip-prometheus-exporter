@@ -15,21 +15,20 @@ export const gaugeEthBalance = async (context: Context) => {
   const { logger, provider, registry, metricFailure } = context;
   const config = context.config as EthConfig;
   const { wallets } = config;
+  try {
+    logger.debug(`Scraping ${metricName}`);
 
-  logger.debug(`Scraping ${metricName}`);
+    if (registry.getSingleMetric(metricName) === undefined)
+      registry.registerMetric(metric);
 
-  if (registry.getSingleMetric(metricName) === undefined)
-    registry.registerMetric(metric);
-  metricFailure.labels({ metric: metricName }).set(0);
-
-  for (const { address, alias } of wallets) {
-    try {
-      const weiBalance = await provider.getBalance(address);
-      const ethBalance = ethers.utils.formatEther(weiBalance);
-      metric.labels({ address, alias }).set(Number(ethBalance));
-    } catch (error) {
-      logger.debug(error);
-      metricFailure.labels({ metric: metricName }).set(1);
+    for (const { address, alias } of wallets) {
+        const weiBalance = await provider.getBalance(address);
+        const ethBalance = ethers.utils.formatEther(weiBalance);
+        metric.labels({ address, alias }).set(Number(ethBalance));
     }
+    metricFailure.labels({ metric: metricName }).set(0);
+  } catch (error) {
+    logger.debug(error);
+    metricFailure.labels({ metric: metricName }).set(1);
   }
 };
