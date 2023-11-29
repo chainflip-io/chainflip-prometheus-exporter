@@ -16,29 +16,28 @@ export const gaugeTokenBalance = async (context: Context, symbol: string) => {
   const config = context.config as EthConfig;
   const contract = context.contract as Contract;
   const { wallets } = config;
+  try {
+    logger.debug(`Scraping ${metricName}`, { symbol });
 
-  logger.debug(`Scraping ${metricName}`, { symbol });
+    if (registry.getSingleMetric(metricName) === undefined)
+      registry.registerMetric(metric);
 
-  if (registry.getSingleMetric(metricName) === undefined)
-    registry.registerMetric(metric);
-  metricFailure.labels({ metric: metricName }).set(0);
-
-  for (const { address, alias } of wallets) {
-    try {
-      const rawBalance = await contract.balanceOf(address);
-      const tokenBalance = ethers.utils.formatUnits(rawBalance, 18);
-      const contractAddress = contract.address;
-      metric
-        .labels({
-          symbol,
-          address,
-          alias,
-          contract: contractAddress,
-        })
-        .set(parseFloat(tokenBalance));
-    } catch (error) {
-      logger.error(error);
-      metricFailure.labels({ metric: metricName }).set(1);
+    for (const { address, alias } of wallets) {
+        const rawBalance = await contract.balanceOf(address);
+        const tokenBalance = ethers.utils.formatUnits(rawBalance, 18);
+        const contractAddress = contract.address;
+        metric
+          .labels({
+            symbol,
+            address,
+            alias,
+            contract: contractAddress,
+          })
+          .set(parseFloat(tokenBalance));
     }
+    metricFailure.labels({ metric: metricName }).set(0);
+  } catch (error) {
+    logger.error(error);
+    metricFailure.labels({ metric: metricName }).set(1);
   }
 };
