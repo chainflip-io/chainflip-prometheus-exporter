@@ -1,5 +1,5 @@
 import jsonvalidator from 'jsonschema'
-import local from './local.json'
+import local from './localnet.json'
 import schema from './schema.json'
 
 // Localnet
