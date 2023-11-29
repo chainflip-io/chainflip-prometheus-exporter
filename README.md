@@ -57,6 +57,27 @@ This will display the metrics in the terminal.
 Check out the config file in `config/local.json`. This can be modified to point at different chains and networks. You
 can update the tracked wallets and Chainflip accounts.
 
+#### Enable/disable chain metrics
+
+You can enable or disable tracking for any of the chains at your leisure.
+
+```json
+    {
+    "eth": {
+	  "enabled": true
+    },
+    "dot": {
+	  "enabled": true
+    },
+    "btc": {
+	  "enabled": true
+    },
+    "flip": {
+	  "enabled": true
+    }
+}
+``` 
+
 #### Adding your validator
 
 Update `flip.accounts` with your validator address and alias. This will add metrics for your validator.
