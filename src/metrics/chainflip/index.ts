@@ -13,3 +13,6 @@ export * from "./gaugeEthBlockTime";
 export * from "./gaugeBtcBlockTime";
 export * from "./gaugeBackupValidator";
 export * from "./gaugeReputation";
+export * from "./gaugeBuildVersion";
+export * from "./gaugeBlockWeight";
+export * from "./gaugePendingRedemptions";

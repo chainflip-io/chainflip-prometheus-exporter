@@ -16,6 +16,8 @@ export const gaugeTokenBalance = async (context: Context, symbol: string) => {
   const config = context.config as EthConfig;
   const contract = context.contract as Contract;
   const { wallets } = config;
+  try {
+    logger.debug(`Scraping ${metricName}`, { symbol });
 
   let stateChainGatewayContract;
   config.contracts.forEach(contract => {
@@ -69,5 +71,9 @@ export const gaugeTokenBalance = async (context: Context, symbol: string) => {
       logger.error(error);
       metricFailure.labels({ metric: metricName }).set(1);
     }
+    metricFailure.labels({ metric: metricName }).set(0);
+  } catch (error) {
+    logger.error(error);
+    metricFailure.labels({ metric: metricName }).set(1);
   }
 };

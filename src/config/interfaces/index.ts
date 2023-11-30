@@ -71,6 +71,7 @@ export interface FlipConfig extends ConfigBase {
   defaultMetrics: DefaultMetrics[];
   accounts: FlipConfigAccount[];
   skipEvents: SkipEvent[];
+  eventLog: boolean;
 }
 
 export interface Config {

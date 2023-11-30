@@ -38,32 +38,19 @@ async function startWatcher(context: Context) {
     registry.registerMetric(metricFailure);
 
   try {
-    let api!: ApiPromise;
-    try {
-      const provider = new WsProvider(env.DOT_WS_ENDPOINT, 5000);
-      provider.on("disconnected", async (err) => {
-        logger.error(`ws connection closed ${err}`);
-        metric.set(1);
-      });
-      api = await ApiPromise.create({ provider, noInitWarn: true });
-    } catch (e) {
-      logger.error(e);
-    }
-    try {
-      await api.rpc.chain.subscribeNewHeads(async (header) => {
-        await gaugeBlockHeight({ ...context, header });
-        await gaugeBlockTime({ ...context, api });
-        await gaugeDotBalance({ ...context, api });
-        metric.set(0);
-      });
-    } catch (e) {
-      logger.error(e);
-    }
+    const provider = new WsProvider(env.DOT_WS_ENDPOINT, 5000);
+    provider.on("disconnected", async (err) => {
+      logger.error(`ws connection closed ${err}`);
+      metric.set(1);
+    });
+    const api: ApiPromise = await ApiPromise.create({ provider, noInitWarn: true });
+    await api.rpc.chain.subscribeNewHeads(async (header) => {
+      await gaugeBlockHeight({ ...context, header });
+      await gaugeBlockTime({ ...context, api });
+      await gaugeDotBalance({ ...context, api });
+      metric.set(0);
+    });
   } catch (e) {
     logger.error(e);
-
-    setTimeout(() => {
-      startWatcher(context); // Retry after a delay
-    }, 5000); // 5s
   }
 }

@@ -24,7 +24,7 @@ const CONFIG_PATH: string =
   process.env.CONFIG_PATH || `config/${CF_NETWORK}.json`;
 
 const DOT_WS_ENDPOINT: string =
-  process.env.DOT_WS_ENDPOINT || "ws://localhost:9945";
+  process.env.DOT_WS_ENDPOINT || "ws://localhost:9947";
 
 const ETH_WS_ENDPOINT: string =
   process.env.ETH_WS_ENDPOINT || "ws://localhost:8546";
