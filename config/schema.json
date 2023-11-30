@@ -284,6 +284,9 @@
         "enabled": {
           "type": "boolean"
         },
+        "eventLog": {
+          "type": "boolean"
+        },
         "network": {
           "type": "string"
         },
@@ -311,6 +314,7 @@
         "accounts",
         "defaultMetrics",
         "enabled",
+        "eventLog",
         "network",
         "skipEvents"
       ],
