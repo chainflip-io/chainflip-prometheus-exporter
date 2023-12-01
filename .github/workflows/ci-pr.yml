@@ -6,6 +6,7 @@ jobs:
     uses: ./.github/workflows/_00_pre_check.yml
   build:
     needs: [pre-check]
+    secrets: inherit
     uses: ./.github/workflows/_01_docker.yml
     with:
       prefix: dev-
