@@ -1,6 +1,6 @@
 # Chainflip Prometheus Exporter
 
-Prometheus exporter to retrieve important data for our monitoring and alerting system.
+Prometheus exporter to retrieve important data from Chainflip Network and converting it to prometheus metrics fromat.
 Designed to retrieve data from several APIs on multiple chains.
 
 ## Deploying on Kubernetes
