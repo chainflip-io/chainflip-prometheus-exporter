@@ -11,3 +11,4 @@ jobs:
   build:
     needs: [pre-check]
     uses: ./.github/workflows/_01_docker.yml
+    secrets: inherit

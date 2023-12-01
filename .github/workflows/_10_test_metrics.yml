@@ -25,7 +25,7 @@ jobs:
           DOT_WS_ENDPOINT: wss://rpc.polkadot.io
           BTC_HTTP_ENDPOINT: https://flip:${{ secrets.CF_BTC_RPC_PASSWORD }}@btc-mainnet-rpc.chainflip.io
         credentials:
-          username: ${{ github.actor }}
+          username: chainflip-bot
           password: ${{ secrets.CF_PROMETHEUS_EXPORTER_GITHUB_TOKEN }}
         ports:
           - "9000:9000"
