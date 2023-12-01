@@ -88,25 +88,25 @@ async function startWatcher(context: Context) {
     } catch (e) {
       logger.error(e);
     }
-    await api.rpc.chain.subscribeNewHeads((header) => {
-      gaugeBitcoinBalance(context);
-      gaugeBlockHeight({ ...context, header });
-      gaugeRotating(context);
-      gaugeAuthorities(context);
-      gaugeCurrentEpochDurationBlocks(context);
-      gaugeBlocksPerEpoch(context);
-      gaugeSuspendedValidatorKeygenFailed(context);
-      gaugeFlipTotalSupply(context);
-      gaugeRotationDuration(context);
-      gaugeDotBlockTime(context);
-      gaugeEthBlockTime(context);
-      gaugeBtcBlockTime(context);
-      gaugeBackupValidator(context);
-      gaugeReputation(context);
-      gaugeBuildVersion(context);
-      // gaugeBlockWeight(context);
-      gaugePendingRedemptions(context);
-      gaugeValidatorStatus(context);
+    await api.rpc.chain.subscribeNewHeads(async (header) => {
+      await gaugeBitcoinBalance(context);
+      await gaugeBlockHeight({ ...context, header });
+      await gaugeRotating(context);
+      await gaugeAuthorities(context);
+      await gaugeCurrentEpochDurationBlocks(context);
+      await gaugeBlocksPerEpoch(context);
+      await gaugeSuspendedValidatorKeygenFailed(context);
+      await gaugeFlipTotalSupply(context);
+      await gaugeRotationDuration(context);
+      await gaugeDotBlockTime(context);
+      await gaugeEthBlockTime(context);
+      await gaugeBtcBlockTime(context);
+      await gaugeBackupValidator(context);
+      await gaugeReputation(context);
+      await gaugeBuildVersion(context);
+      // await gaugeBlockWeight(context);
+      await gaugePendingRedemptions(context);
+      await gaugeValidatorStatus(context);
 
       metric.set(0);
     });
