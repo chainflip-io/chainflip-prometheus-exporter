@@ -193,10 +193,12 @@ const stateChainTypes = {
       chain_signing_context: 'SigningContext',
     },
     RpcAuctionState: {
-      auction_size_range: '(u32, u32)',
       blocks_per_epoch: 'u32',
-      redemption_period_as_percentage: 'u8',
       current_epoch_started_at: 'u32',
+      redemption_period_as_percentage: 'u8',
+      min_funding: 'u128',
+      auction_size_range: '(u32, u32)',
+      min_active_bid: 'u128',
     },
     RpcPenalty: {
       reputation_points: 'i32',

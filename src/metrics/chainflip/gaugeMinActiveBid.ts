@@ -7,15 +7,12 @@ const metricName: string = "cf_min_active_bid";
 const metric: Gauge = new promClient.Gauge({
   name: metricName,
   help: "the lowest winning bid",
-  labelNames: ["ss58", "alias"],
   registers: [],
 });
 
 export const gaugeMinActiveBid = async (context: Context): Promise<void> => {
   const { logger, api, registry, metricFailure } = context;
   logger.debug(`Scraping ${metricName}`);
-  const config = context.config as FlipConfig;
-  const { accounts } = config;
 
   if (registry.getSingleMetric(metricName) === undefined)
     registry.registerMetric(metric);
