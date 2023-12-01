@@ -26,7 +26,7 @@ jobs:
           BTC_HTTP_ENDPOINT: https://flip:${{ secrets.CF_BTC_RPC_PASSWORD }}@btc-mainnet-rpc.chainflip.io
         credentials:
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.CF_PROMETHEUS_EXPORTER_GITHUB_TOKEN }}
         ports:
           - "9000:9000"
     steps:
