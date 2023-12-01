@@ -1,5 +1,6 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import {
+  countEvents,
   gaugeBlockHeight,
   gaugeBlockTime,
   gaugeDotBalance,
@@ -24,7 +25,7 @@ export default async function startPolkadotService(context: Context) {
 
 async function startWatcher(context: Context) {
   const { logger, env, registry } = context;
-  context = {...context, metricFailure}
+  context = { ...context, metricFailure };
 
   const metricName: string = "dot_watcher_failure";
   const metric: promClient.Gauge = new promClient.Gauge({
@@ -43,12 +44,18 @@ async function startWatcher(context: Context) {
       logger.error(`ws connection closed ${err}`);
       metric.set(1);
     });
-    const api: ApiPromise = await ApiPromise.create({ provider, noInitWarn: true });
+    const api: ApiPromise = await ApiPromise.create({
+      provider,
+      noInitWarn: true,
+    });
     await api.rpc.chain.subscribeNewHeads(async (header) => {
       await gaugeBlockHeight({ ...context, header });
       await gaugeBlockTime({ ...context, api });
       await gaugeDotBalance({ ...context, api });
       metric.set(0);
+    });
+    await api.query.system.events(async (events: any) => {
+      await countEvents({ ...context, events });
     });
   } catch (e) {
     logger.error(e);
