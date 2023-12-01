@@ -20,6 +20,7 @@ import {
   gaugeBlockWeight,
   gaugePendingRedemptions,
   gaugeValidatorStatus,
+  gaugeMinActiveBid,
 } from "../metrics/chainflip";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { customRpcs } from "../utils/customRpcSpecification";
@@ -107,7 +108,7 @@ async function startWatcher(context: Context) {
       // await gaugeBlockWeight(context);
       await gaugePendingRedemptions(context);
       await gaugeValidatorStatus(context);
-
+      await gaugeMinActiveBid(context);
       metric.set(0);
     });
     await api.query.system.events(async (events: any) => {
