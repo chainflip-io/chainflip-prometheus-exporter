@@ -39,15 +39,15 @@
 	  "accounts": [
 		{
 		    "alias": "Bashful",
-		    "ss58Adress": "cFLbassb4hwQ9iA7dzdVdyumRqkaXnkdYECrThhmrqjFukdVo"
+		    "ss58Address": "cFLbassb4hwQ9iA7dzdVdyumRqkaXnkdYECrThhmrqjFukdVo"
 		},
 		{
 		    "alias": "Doc",
-		    "ss58Adress": "cFLdocJo3bjT7JbT7R46cA89QfvoitrKr9P3TsMcdkVWeeVLa"
+		    "ss58Address": "cFLdocJo3bjT7JbT7R46cA89QfvoitrKr9P3TsMcdkVWeeVLa"
 		},
 		{
 		    "alias": "Dopey",
-		    "ss58Adress": "cFLdopvNB7LaiBbJoNdNC26e9Gc1FNJKFtvNZjAmXAAVnzCk4"
+		    "ss58Address": "cFLdopvNB7LaiBbJoNdNC26e9Gc1FNJKFtvNZjAmXAAVnzCk4"
 		}
 	  ],
 	  "skipEvents": [

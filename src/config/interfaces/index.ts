@@ -15,7 +15,7 @@ interface GitHubRepo {
 
 interface FlipConfigAccount {
   alias: string;
-  ss58Adress: string;
+  ss58Address: string;
 }
 
 interface SkipEvent {

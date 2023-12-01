@@ -12,15 +12,15 @@
     "accounts": [
       {
         "alias": "bashful",
-        "ss58Adress": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
+        "ss58Address": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
       },
       {
         "alias": "doc",
-        "ss58Adress": "cFP2cGErEhxzJfVUxk1gHVuE1ALxHJQx335o19bT7QoSWwjhU"
+        "ss58Address": "cFP2cGErEhxzJfVUxk1gHVuE1ALxHJQx335o19bT7QoSWwjhU"
       },
       {
         "alias": "dopey",
-        "ss58Adress": "cFKzr7DwLCRtSkou5H5moKri7g9WwJ4tAbVJv6dZGhLb811Tc"
+        "ss58Address": "cFKzr7DwLCRtSkou5H5moKri7g9WwJ4tAbVJv6dZGhLb811Tc"
       }
     ],
     "skipEvents": [

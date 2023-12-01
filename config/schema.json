@@ -250,13 +250,13 @@
               "alias": {
                 "type": "string"
               },
-              "ss58Adress": {
+              "ss58Address": {
                 "type": "string"
               }
             },
             "required": [
               "alias",
-              "ss58Adress"
+              "ss58Address"
             ],
             "type": "object"
           },

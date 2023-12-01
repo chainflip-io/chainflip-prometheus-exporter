@@ -23,9 +23,9 @@ export const gaugeReputation = async (context: Context): Promise<void> => {
   metricFailure.labels({ metric: metricName }).set(0);
 
   try {
-    for (const { ss58Adress, alias } of accounts) {
-        const reputation = await api.query.reputation.reputations(ss58Adress);
-        metric.labels(ss58Adress, alias).set(Number(reputation.reputationPoints))
+    for (const { ss58Address, alias } of accounts) {
+        const reputation = await api.query.reputation.reputations(ss58Address);
+        metric.labels(ss58Address, alias).set(Number(reputation.reputationPoints))
     }
   } catch (e) {
     logger.error(e);
