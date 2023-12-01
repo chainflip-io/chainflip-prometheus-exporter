@@ -38,6 +38,13 @@ const metricBidding: Gauge = new promClient.Gauge({
   registers: [],
   labelNames: ["ss58Address", "alias"],
 });
+const metricNameValidatorBalance: string = "cf_validator_balance";
+const metricBalance: Gauge = new promClient.Gauge({
+  name: metricNameValidatorBalance,
+  help: "Validator balance amount (bidding amount)",
+  registers: [],
+  labelNames: ["ss58Address", "alias"],
+});
 
 export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
   const { logger, api, registry, metricFailure } = context;
@@ -61,17 +68,21 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
     registry.registerMetric(metricQualified);
   if (registry.getSingleMetric(metricNameValidatorBidding) === undefined)
     registry.registerMetric(metricBidding);
+  if (registry.getSingleMetric(metricNameValidatorBalance) === undefined)
+    registry.registerMetric(metricBalance);
 
   metricFailure.labels({ metric: metricNameValidatorOnline }).set(0);
   metricFailure.labels({ metric: metricNameValidatorAuthority }).set(0);
   metricFailure.labels({ metric: metricNameValidatorBackup }).set(0);
   metricFailure.labels({ metric: metricNameValidatorQualified }).set(0);
   metricFailure.labels({ metric: metricNameValidatorBidding }).set(0);
+  metricFailure.labels({ metric: metricNameValidatorBalance }).set(0);
 
   for (const { ss58Address, alias } of config.accounts) {
     try {
       const result = await makeRpcRequest(api, "account_info_v2", ss58Address);
       const {
+        balance,
         is_current_authority,
         is_current_backup,
         is_online,
@@ -89,6 +100,11 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
         .set(is_current_backup ? 1 : 0);
       metricQualified.labels({ alias, ss58Address }).set(is_qualified ? 1 : 0);
       metricBidding.labels({ alias, ss58Address }).set(is_bidding ? 1 : 0);
+
+      const balanceValue: number = Number(Number(balance) / 10 ** 18);
+      metricBalance
+        .labels({ alias, ss58Address })
+        .set(balanceValue || 0);
     } catch (e) {
       logger.error(e);
       metricFailure.labels({ metric: metricNameValidatorOnline }).set(1);
@@ -96,6 +112,7 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
       metricFailure.labels({ metric: metricNameValidatorBackup }).set(1);
       metricFailure.labels({ metric: metricNameValidatorQualified }).set(1);
       metricFailure.labels({ metric: metricNameValidatorBidding }).set(1);
+      metricFailure.labels({ metric: metricNameValidatorBalance }).set(1);
     }
   }
 };
