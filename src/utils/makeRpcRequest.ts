@@ -57,6 +57,7 @@ const validators = {
     blocks_per_epoch: EpochDuration,
     redemption_period_as_percentage: U8,
     current_epoch_started_at: CurrentEpochStartedAt,
+    min_active_bid: U128,
   }),
   authority_emission_per_block: Amount,
   backup_emission_per_block: Amount,
