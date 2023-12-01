@@ -104,7 +104,7 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
       const balanceValue: number = Number(Number(balance) / 10 ** 18);
       metricBalance
         .labels({ alias, ss58Address })
-        .set(balanceValue ? balanceValue : 0);
+        .set(balanceValue || 0);
     } catch (e) {
       logger.error(e);
       metricFailure.labels({ metric: metricNameValidatorOnline }).set(1);
