@@ -115,7 +115,7 @@ async function startWatcher(context: Context) {
       wsProvider
     );
 
-    context.provider = new ethers.providers.JsonRpcProvider(env.ETH_HTTP_ENDPOINT);
+    context.provider = wsProvider;
 
     wsProvider.on("block", async (blockNumber: number) => {
       await gaugeEthBalance(context);

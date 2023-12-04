@@ -16,3 +16,5 @@ export * from "./gaugeReputation";
 export * from "./gaugeBuildVersion";
 export * from "./gaugeBlockWeight";
 export * from "./gaugePendingRedemptions";
+export * from "./gaugeValidatorStatus";
+export * from "./gaugeMinActiveBid";

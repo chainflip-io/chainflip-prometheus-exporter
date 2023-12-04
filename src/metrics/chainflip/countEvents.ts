@@ -69,13 +69,13 @@ export const countEvents = async (context: Context): Promise<void> => {
                 .set(event.data.attemptCount);
         }
         if (event.method === "SlashingPerformed") {
-            for (const {ss58Adress, alias} of accounts) {
-                const hex = `0x${Buffer.from(decodeAddress(ss58Adress)).toString(
+            for (const {ss58Address, alias} of accounts) {
+                const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString(
                     "hex"
                 )}`;
-                if (event.data.who.toString() === ss58Adress) {
+                if (event.data.who.toString() === ss58Address) {
                     metricSlash
-                        .labels(`${event.section}:${event.method}`, ss58Adress, hex, alias)
+                        .labels(`${event.section}:${event.method}`, ss58Address, hex, alias)
                         .inc(1);
                 }
             }

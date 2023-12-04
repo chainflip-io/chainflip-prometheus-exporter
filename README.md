@@ -88,7 +88,7 @@ Update `flip.accounts` with your validator address and alias. This will add metr
 	  "accounts": [
 		{
 		    "alias": "MY_NODE_ALIAS",
-		    "ss58Adress": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
+		    "ss58Address": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
 		}
 	  ]
     }

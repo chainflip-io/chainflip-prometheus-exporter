@@ -1,21 +1,18 @@
 import promClient, { Gauge } from "prom-client";
 import { Context } from "../../lib/interfaces";
 import { FlipConfig } from "../../config/interfaces";
+import makeRpcRequest from "../../utils/makeRpcRequest";
 
-const metricName: string = "cf_reputation";
+const metricName: string = "cf_min_active_bid";
 const metric: Gauge = new promClient.Gauge({
   name: metricName,
-  help: "The reputation of a validator",
-  labelNames: ["ss58", "alias"],
+  help: "the lowest winning bid",
   registers: [],
 });
 
-export const gaugeReputation = async (context: Context): Promise<void> => {
+export const gaugeMinActiveBid = async (context: Context): Promise<void> => {
   const { logger, api, registry, metricFailure } = context;
   logger.debug(`Scraping ${metricName}`);
-  const config = context.config as FlipConfig;
-  const { accounts } = config;
-
 
   if (registry.getSingleMetric(metricName) === undefined)
     registry.registerMetric(metric);
@@ -23,10 +20,12 @@ export const gaugeReputation = async (context: Context): Promise<void> => {
   metricFailure.labels({ metric: metricName }).set(0);
 
   try {
-    for (const { ss58Address, alias } of accounts) {
-        const reputation = await api.query.reputation.reputations(ss58Address);
-        metric.labels(ss58Address, alias).set(Number(reputation.reputationPoints))
-    }
+    const result = await makeRpcRequest(api, "auction_state");
+    const { min_active_bid } = result;
+
+    const MAB: number = Number(Number(min_active_bid) / 10 ** 18);
+
+    metric.set(MAB);
   } catch (e) {
     logger.error(e);
     metricFailure.labels({ metric: metricName }).set(1);
