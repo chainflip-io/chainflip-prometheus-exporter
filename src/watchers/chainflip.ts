@@ -70,23 +70,21 @@ async function startWatcher(context: Context) {
 
     try {
         let api!: ApiPromise;
-        try {
-            const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
-            provider.on("disconnected", async err => {
-                logger.error(`ws connection closed ${err}`);
-                metric.set(1);
-            });
-            api = await ApiPromise.create({
-                provider,
-                noInitWarn: true,
-                types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
-                rpc: {...customRpcs}
-            });
 
-            context.api = api;
-        } catch (e) {
-            logger.error(e);
-        }
+        const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
+        provider.on("disconnected", async err => {
+            logger.error(`ws connection closed ${err}`);
+            metric.set(1);
+        });
+        api = await ApiPromise.create({
+            provider,
+            noInitWarn: true,
+            types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
+            rpc: {...customRpcs}
+        });
+
+        context.api = api;
+
         await api.rpc.chain.subscribeNewHeads(async header => {
 
             await gaugeBitcoinBalance(context);
@@ -113,9 +111,6 @@ async function startWatcher(context: Context) {
             await countEvents({...context, events});
         });
     } catch (e) {
-        logger.error(e);
-        setTimeout(() => {
-            startWatcher(context); // Retry after a delay
-        }, 5000); // 5s
+        logger.error("catch " + e);
     }
 }
