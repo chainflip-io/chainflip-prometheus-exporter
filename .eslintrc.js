@@ -17,6 +17,7 @@ module.exports = {
     "quote-props": "off",
     "comma-dangle": "off",
     "eol-last": "off",
+    "no-var": "off",
     "no-useless-return": "off",
     "no-multiple-empty-lines": "off",
     "padded-blocks": "off",

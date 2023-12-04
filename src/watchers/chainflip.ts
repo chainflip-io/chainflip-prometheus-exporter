@@ -21,6 +21,7 @@ import {
   gaugePendingRedemptions,
   gaugeValidatorStatus,
   gaugeMinActiveBid,
+  eventsRotationInfo,
 } from "../metrics/chainflip";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { customRpcs } from "../utils/customRpcSpecification";
@@ -42,74 +43,80 @@ export default async (context: Context): Promise<void> => {
 };
 
 declare global {
-  interface CustomApiPromise extends ApiPromise {
-    rpc: ApiPromise["rpc"] & {
-      cf: {
-        [K in keyof typeof customRpcs.cf]: (...args: any[]) => Promise<any>;
-      };
-    };
-  }
+    var rotationInProgress: boolean;
+    interface CustomApiPromise extends ApiPromise {
+        rpc: ApiPromise['rpc'] & {
+            cf: {
+                [K in keyof typeof customRpcs.cf]: (...args: any[]) => Promise<any>;
+            };
+        };
+    }
 
-  type DeepMutable<T> = {
-    -readonly [P in keyof T]: DeepMutable<T[P]>;
-  };
+    type DeepMutable<T> = {
+        -readonly [P in keyof T]: DeepMutable<T[P]>;
+    };
 }
 
+
 async function startWatcher(context: Context) {
-  const { logger, env, registry } = context;
-  context = { ...context, metricFailure };
+    const {logger, env, registry} = context;
+    context = {...context, metricFailure}
+    global.rotationInProgress = false;
+    const metricName: string = "cf_watcher_failure";
+    const metric: promClient.Gauge = new promClient.Gauge({
+        name: metricName,
+        help: "Chainflip watcher failing",
+        registers: [],
+    });
+    if (registry.getSingleMetric(metricName) === undefined)
+        registry.registerMetric(metric);
+    if (registry.getSingleMetric(metricFailureName) === undefined)
+        registry.registerMetric(metricFailure);
 
-  const metricName: string = "cf_watcher_failure";
-  const metric: promClient.Gauge = new promClient.Gauge({
-    name: metricName,
-    help: "Chainflip watcher failing",
-    registers: [],
-  });
-  if (registry.getSingleMetric(metricName) === undefined)
-    registry.registerMetric(metric);
-  if (registry.getSingleMetric(metricFailureName) === undefined)
-    registry.registerMetric(metricFailure);
-
-  try {
-    const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
-    provider.on("disconnected", async err => {
+    try {
+      const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
+      provider.on("disconnected", async (err) => {
         logger.error(`ws connection closed ${err}`);
         metric.set(1);
-    });
-    const api: ApiPromise = await ApiPromise.create({
+      });
+      const api: ApiPromise = await ApiPromise.create({
         provider,
         noInitWarn: true,
         types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
         rpc: {...customRpcs}
     });
 
-    context.api = api;
-
-    await api.rpc.chain.subscribeNewHeads(async header => {
-        await gaugeBitcoinBalance(context);
-        await gaugeBlockHeight({...context, header});
-        await gaugeRotating(context);
-        await gaugeAuthorities(context);
-        await gaugeCurrentEpochDurationBlocks(context);
-        await gaugeBlocksPerEpoch(context);
-        await gaugeSuspendedValidatorKeygenFailed(context);
-        await gaugeFlipTotalSupply(context);
-        await gaugeRotationDuration(context);
-        await gaugeDotBlockTime(context);
-        await gaugeEthBlockTime(context);
-        await gaugeBtcBlockTime(context);
-        await gaugeBackupValidator(context);
-        await gaugeReputation(context);
-        await gaugeBuildVersion(context);
-        // await gaugeBlockWeight(context);
-        await gaugePendingRedemptions(context);
+      context.api = api;
+      await api.rpc.chain.subscribeNewHeads(async header => {
+        gaugeBitcoinBalance(context);
+        gaugeBlockHeight({...context, header});
+        gaugeAuthorities(context);
+        gaugeCurrentEpochDurationBlocks(context);
+        gaugeBlocksPerEpoch(context);
+        gaugeSuspendedValidatorKeygenFailed(context);
+        gaugeFlipTotalSupply(context);
+        gaugeRotationDuration(context);
+        gaugeDotBlockTime(context);
+        gaugeEthBlockTime(context);
+        gaugeBtcBlockTime(context);
+        gaugeBackupValidator(context);
+        gaugeReputation(context);
+        gaugeBuildVersion(context);
+        gaugeValidatorStatus(context);
+        gaugeMinActiveBid(context);
+        // gaugeBlockWeight(context);
+        gaugePendingRedemptions(context);
 
         metric.set(0);
-    });
-    await api.query.system.events(async (events: any) => {
-        await countEvents({...context, events});
-    });
-  } catch (e) {
-      logger.error(`catch ${e}`);
-  }
+      });
+      await api.query.system.events(async (events: any) => {
+        // we want to listen to rotation events in the same block we start rotating
+        // hence we wait for this before checking the events
+        await gaugeRotating(context);
+        countEvents({...context, events});
+        eventsRotationInfo({...context, events});
+      });
+    } catch (e) {
+      logger.error(e);
+    }
 }
