@@ -57,7 +57,7 @@ process.on("uncaughtException", async err => {
 });
 
 async function startWatcher(context: Context) {
-  if(isWatcherRunning){
+  if(isWatcherRunning) {
     metric.set(0);
     return;
   }

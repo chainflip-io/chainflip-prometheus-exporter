@@ -69,14 +69,13 @@ async function startWatcher(context: Context) {
         registry.registerMetric(metricFailure);
 
     try {
-        let api!: ApiPromise;
 
         const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
         provider.on("disconnected", async err => {
             logger.error(`ws connection closed ${err}`);
             metric.set(1);
         });
-        api = await ApiPromise.create({
+        const api: ApiPromise = await ApiPromise.create({
             provider,
             noInitWarn: true,
             types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
@@ -111,6 +110,6 @@ async function startWatcher(context: Context) {
             await countEvents({...context, events});
         });
     } catch (e) {
-        logger.error("catch " + e);
+        logger.error(`catch ${e}`);
     }
 }

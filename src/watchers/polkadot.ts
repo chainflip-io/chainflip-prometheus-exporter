@@ -51,6 +51,6 @@ async function startWatcher(context: Context) {
       metric.set(0);
     });
   } catch (e) {
-    logger.error("catch " + e);
+    logger.error(`catch ${e}`);
   }
 }
