@@ -18,3 +18,4 @@ export * from "./gaugeBlockWeight";
 export * from "./gaugePendingRedemptions";
 export * from "./gaugeValidatorStatus";
 export * from "./gaugeMinActiveBid";
+export * from "./eventsRotationInfo";

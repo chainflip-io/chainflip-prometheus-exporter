@@ -20,7 +20,13 @@ export const gaugeRotating = async (context: Context): Promise<void> => {
     const rotationPhase: any = await api.query.validator.currentRotationPhase();
     const keys: any = Object.keys(rotationPhase.toJSON());
     let metricValue: number;
-    keys.includes("idle") ? (metricValue = 0) : (metricValue = 1);
+    if (keys.includes("idle")) {
+      global.rotationInProgress = false;
+      metricValue = 0
+    } else {
+      global.rotationInProgress = true;
+      metricValue = 1;
+    }
     metric.set(metricValue);
   } catch (err) {
     logger.error(err);
