@@ -16,6 +16,7 @@
     "dev": "tsx watch src/app.ts",
     "start:dev:local": "CF_NETWORK=localnet pnpm dev",
     "start:dev:berghain": "CF_NETWORK=berghain pnpm dev",
+    "start:dev:perseverance": "CF_NETWORK=perseverance pnpm dev",
     "schema": "pnpm ts-json-schema-generator --path './src/config/interfaces/index.ts' --id 'ConfigSchema' --tsconfig './tsconfig.json' --out './config/schema.json' ",
     "validate": "pnpm tsc --project tsconfig.validation.json && node ./dist/validation.js"
   },
