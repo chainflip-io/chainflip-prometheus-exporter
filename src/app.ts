@@ -10,7 +10,6 @@ import { Context } from "./lib/interfaces";
 import createContext from "./lib/createContext";
 import loadDefaultMetrics from "./lib/loadDefaultMetrics";
 import startBitcoinService from "./watchers/bitcoin";
-import startGithubService from "./watchers/github";
 
 const logger: Logger = winston.createLogger();
 logger.add(
@@ -45,11 +44,6 @@ const bitcoinRegistry = new promClient.Registry();
 bitcoinRegistry.setDefaultLabels({
     chain: "bitcoin",
     network: config.btc.network,
-  });
-
-const githubRegistry = new promClient.Registry();
-githubRegistry.setDefaultLabels({
-    chain: "github"
   });
 
 app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
@@ -101,16 +95,6 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
     startBitcoinService(bitcoinContext);
   }
 
-  if(config.github.enabled) {
-    const githubLogger: Logger = logger.child({ chain: "github" });
-    const githubContext: Context = createContext(
-      githubLogger,
-      githubRegistry,
-      env,
-      config.github
-    );
-    startGithubService(githubContext);
-  }
 });
 
 
@@ -120,7 +104,6 @@ app.get("/metrics", async (req, res) => {
         await chainflipRegistry.metrics() +
         await ethereumRegistry.metrics() +
         await polkadotRegistry.metrics() +
-        await bitcoinRegistry.metrics() +
-        await githubRegistry.metrics()
+        await bitcoinRegistry.metrics()
     );
 });
