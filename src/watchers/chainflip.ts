@@ -71,53 +71,45 @@ async function startWatcher(context: Context) {
     registry.registerMetric(metricFailure);
 
   try {
-    let api!: ApiPromise;
-    try {
-      const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
-      provider.on("disconnected", async (err) => {
+    const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
+    provider.on("disconnected", async err => {
         logger.error(`ws connection closed ${err}`);
         metric.set(1);
-      });
-      api = await ApiPromise.create({
+    });
+    const api: ApiPromise = await ApiPromise.create({
         provider,
         noInitWarn: true,
         types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
-        rpc: { ...customRpcs },
-      });
+        rpc: {...customRpcs}
+    });
 
-      context.api = api;
-    } catch (e) {
-      logger.error(e);
-    }
-    await api.rpc.chain.subscribeNewHeads(async (header) => {
-      await gaugeBitcoinBalance(context);
-      await gaugeBlockHeight({ ...context, header });
-      await gaugeRotating(context);
-      await gaugeAuthorities(context);
-      await gaugeCurrentEpochDurationBlocks(context);
-      await gaugeBlocksPerEpoch(context);
-      await gaugeSuspendedValidatorKeygenFailed(context);
-      await gaugeFlipTotalSupply(context);
-      await gaugeRotationDuration(context);
-      await gaugeDotBlockTime(context);
-      await gaugeEthBlockTime(context);
-      await gaugeBtcBlockTime(context);
-      await gaugeBackupValidator(context);
-      await gaugeReputation(context);
-      await gaugeBuildVersion(context);
-      // await gaugeBlockWeight(context);
-      await gaugePendingRedemptions(context);
-      await gaugeValidatorStatus(context);
-      await gaugeMinActiveBid(context);
-      metric.set(0);
+    context.api = api;
+
+    await api.rpc.chain.subscribeNewHeads(async header => {
+        await gaugeBitcoinBalance(context);
+        await gaugeBlockHeight({...context, header});
+        await gaugeRotating(context);
+        await gaugeAuthorities(context);
+        await gaugeCurrentEpochDurationBlocks(context);
+        await gaugeBlocksPerEpoch(context);
+        await gaugeSuspendedValidatorKeygenFailed(context);
+        await gaugeFlipTotalSupply(context);
+        await gaugeRotationDuration(context);
+        await gaugeDotBlockTime(context);
+        await gaugeEthBlockTime(context);
+        await gaugeBtcBlockTime(context);
+        await gaugeBackupValidator(context);
+        await gaugeReputation(context);
+        await gaugeBuildVersion(context);
+        // await gaugeBlockWeight(context);
+        await gaugePendingRedemptions(context);
+
+        metric.set(0);
     });
     await api.query.system.events(async (events: any) => {
-      await countEvents({ ...context, events });
+        await countEvents({...context, events});
     });
   } catch (e) {
-    logger.error(e);
-    setTimeout(() => {
-      startWatcher(context); // Retry after a delay
-    }, 5000); // 5s
+      logger.error(`catch ${e}`);
   }
 }

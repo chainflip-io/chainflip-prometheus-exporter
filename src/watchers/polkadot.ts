@@ -58,6 +58,6 @@ async function startWatcher(context: Context) {
       await countEvents({ ...context, events });
     });
   } catch (e) {
-    logger.error(e);
+    logger.error(`catch ${e}`);
   }
 }

@@ -36,6 +36,8 @@ let loggerCopy: Logger;
 let mainRegistry: promClient.Registry;
 let wsProvider: ethers.providers.WebSocketProvider;
 let mainContext: Context;
+let isWatcherRunning: boolean = false;
+
 export default async function startEthereumService(context: Context) {
   const { logger, registry } = context;
   logger.info("Starting Ethereum listeners");
@@ -55,6 +57,11 @@ process.on("uncaughtException", async err => {
 });
 
 async function startWatcher(context: Context) {
+  if(isWatcherRunning) {
+    metric.set(0);
+    return;
+  }
+
   const { logger, env } = context;
   context = {...context, metricFailure}
   const config = context.config as EthConfig;
@@ -67,12 +74,14 @@ async function startWatcher(context: Context) {
 
     wsProvider = new ethers.providers.WebSocketProvider(env.ETH_WS_ENDPOINT);
     await wsProvider.ready;
+    isWatcherRunning = true;
     metric.set(0);
 
     wsProvider._websocket.on("close", async (err: any, origin: any) => {
       logger.error(`ETH ws connection closed ${err} ${origin}`);
       logger.info(`retrying in 5s`)
       await wsProvider.destroy();
+      isWatcherRunning = false;
       setTimeout(() => {
         startWatcher(context); // Retry after a delay
       }, 5000); // 5s
@@ -167,5 +176,6 @@ async function startWatcher(context: Context) {
   } catch (e) {
     logger.error(`catch: ${e}`);
     await wsProvider.destroy();
+    isWatcherRunning = false;
   }
 }
