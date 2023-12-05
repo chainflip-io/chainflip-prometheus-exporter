@@ -10,5 +10,3 @@ jsonvalidator.validate(local.dot, schema.definitions.DotConfig, {throwAll: true}
 jsonvalidator.validate(local.eth, schema.definitions.EthConfig, {throwAll: true})
 
 jsonvalidator.validate(local.btc, schema.definitions.BtcConfig, {throwAll: true})
-
-jsonvalidator.validate(local.github, schema.definitions.GithubConfig, {throwAll: true})

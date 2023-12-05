@@ -126,22 +126,5 @@
 		    "symbol": "USDC"
 		}
 	  ]
-    },
-    "github": {
-	  "enabled": true,
-	  "repositories": [
-		{
-		    "owner": "ethereum",
-		    "repo": "go-ethereum"
-		},
-		{
-		    "owner": "bitcoin",
-		    "repo": "bitcoin"
-		},
-		{
-		    "owner": "paritytech",
-		    "repo": "polkadot"
-		}
-	  ]
     }
 }
