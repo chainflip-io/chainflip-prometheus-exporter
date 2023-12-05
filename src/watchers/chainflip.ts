@@ -22,6 +22,9 @@ import {
   gaugeValidatorStatus,
   gaugeMinActiveBid,
   eventsRotationInfo,
+  gaugeBroadcastRetryQueues,
+  gaugeTssRetryQueues,
+  gaugeSwappingQueue
 } from "../metrics/chainflip";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { customRpcs } from "../utils/customRpcSpecification";
@@ -106,6 +109,9 @@ async function startWatcher(context: Context) {
         gaugeMinActiveBid(context);
         // gaugeBlockWeight(context);
         gaugePendingRedemptions(context);
+        gaugeBroadcastRetryQueues(context);
+        gaugeTssRetryQueues(context);
+        gaugeSwappingQueue(context);
 
         metric.set(0);
       });
