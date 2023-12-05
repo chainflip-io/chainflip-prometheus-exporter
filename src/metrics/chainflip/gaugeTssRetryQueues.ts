@@ -32,48 +32,47 @@ export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
   try {
     // requestRetryQueue
     const dotRequestRetryQueue: any = await api.query.polkadotThresholdSigner.requestRetryQueue(null);
-    console.log(dotRequestRetryQueue.toJSON());
-    let dotRequestRetryQueueLenght: number = 0;
+    let dotRequestRetryQueueLength: number = 0;
     dotRequestRetryQueue.toJSON().forEach((element: any[]) => {
-      dotRequestRetryQueueLenght += element.length;
+      dotRequestRetryQueueLength += element.length;
     });
-    metricRequestRetryQueue.labels("polkadot").set(dotRequestRetryQueueLenght);
+    metricRequestRetryQueue.labels("polkadot").set(dotRequestRetryQueueLength);
 
     const btcRequestRetryQueue: any = await api.query.bitcoinThresholdSigner.requestRetryQueue(null);
-    let btcRequestRetryQueueLenght: number = 0;
+    let btcRequestRetryQueueLength: number = 0;
     btcRequestRetryQueue.toJSON().forEach((element: any[]) => {
-      btcRequestRetryQueueLenght += element.length;
+      btcRequestRetryQueueLength += element.length;
     });
-    metricRequestRetryQueue.labels("bitcoin").set(btcRequestRetryQueueLenght);
+    metricRequestRetryQueue.labels("bitcoin").set(btcRequestRetryQueueLength);
 
     const ethRequestRetryQueue: any = await api.query.ethereumThresholdSigner.requestRetryQueue(null);
-    let ethRequestRetryQueueLenght: number = 0;
+    let ethRequestRetryQueueLength: number = 0;
     ethRequestRetryQueue.toJSON().forEach((element: any[]) => {
-      ethRequestRetryQueueLenght += element.length;
+      ethRequestRetryQueueLength += element.length;
     });
-    metricRequestRetryQueue.labels("ethereum").set(ethRequestRetryQueueLenght);
+    metricRequestRetryQueue.labels("ethereum").set(ethRequestRetryQueueLength);
 
     // ceremonyRetryQueues
     const dotCeremonyRetryQueue: any = await api.query.polkadotThresholdSigner.ceremonyRetryQueues(null);
-    let dotCeremonyRetryQueueLenght: number = 0;
+    let dotCeremonyRetryQueueLength: number = 0;
     dotCeremonyRetryQueue.toJSON().forEach((element: any[]) => {
-      dotCeremonyRetryQueueLenght += element.length;
+      dotCeremonyRetryQueueLength += element.length;
     });
-    metricPendingCeremonyRetryQueue.labels("polkadot").set(dotCeremonyRetryQueueLenght);
+    metricPendingCeremonyRetryQueue.labels("polkadot").set(dotCeremonyRetryQueueLength);
 
     const btcCeremonyRetryQueue: any = await api.query.bitcoinThresholdSigner.ceremonyRetryQueues(null);
-    let btcCeremonyRetryQueueLenght: number = 0;
+    let btcCeremonyRetryQueueLength: number = 0;
     btcCeremonyRetryQueue.toJSON().forEach((element: any[]) => {
-      btcCeremonyRetryQueueLenght += element.length;
+      btcCeremonyRetryQueueLength += element.length;
     });
-    metricPendingCeremonyRetryQueue.labels("bitcoin").set(btcCeremonyRetryQueueLenght);
+    metricPendingCeremonyRetryQueue.labels("bitcoin").set(btcCeremonyRetryQueueLength);
 
     const ethCeremonyRetryQueue: any = await api.query.ethereumThresholdSigner.ceremonyRetryQueues(null);
-    let ethCeremonyRetryQueueLenght: number = 0;
+    let ethCeremonyRetryQueueLength: number = 0;
     ethCeremonyRetryQueue.toJSON().forEach((element: any[]) => {
-      ethCeremonyRetryQueueLenght += element.length;
+      ethCeremonyRetryQueueLength += element.length;
     });
-    metricPendingCeremonyRetryQueue.labels("ethereum").set(ethCeremonyRetryQueueLenght);
+    metricPendingCeremonyRetryQueue.labels("ethereum").set(ethCeremonyRetryQueueLength);
   } catch (err) {
     logger.error(err);
     metricFailure.labels({ metric: metricNameRequestRetryQueue }).set(1);
