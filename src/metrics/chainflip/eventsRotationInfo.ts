@@ -5,9 +5,9 @@ import {decodeAddress} from "@polkadot/util-crypto";
 import makeRpcRequest from "../../utils/makeRpcRequest"
 
 
-const metricName: string = "cf_rotation_phase_attempts";
-const metric: Counter = new promClient.Counter({
-    name: metricName,
+const metricNameRotationPhaseAttempt: string = "cf_rotation_phase_attempts";
+const metricRotationPhaseAttempt: Counter = new promClient.Counter({
+    name: metricNameRotationPhaseAttempt,
     help: "Count the number of attempts for each phase of the rotation",
     labelNames: ["phase"],
     registers: [],
@@ -32,10 +32,10 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
     const config = context.config as FlipConfig;
     const {accounts, skipEvents} = config;
 
-    logger.debug(`Scraping ${metricName}`);
+    logger.debug(`Scraping ${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`);
 
-    if (registry.getSingleMetric(metricName) === undefined)
-        registry.registerMetric(metric);
+    if (registry.getSingleMetric(metricNameRotationPhaseAttempt) === undefined)
+        registry.registerMetric(metricRotationPhaseAttempt);
     if (registry.getSingleMetric(metricNameBanned) === undefined)
         registry.registerMetric(metricBanned);
     if (registry.getSingleMetric(metricNameBalanceBanned) === undefined)
@@ -47,7 +47,7 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
                 try{
                     const phase = event.data.newPhase.toJSON();
                     const phaseName = Object.keys(phase)[0];
-                    metric.labels(phaseName).inc();
+                    metricRotationPhaseAttempt.labels(phaseName).inc();
                     const bannedNodes = phase[phaseName].banned.length;
                     metricBanned.set(bannedNodes);
                     if (bannedNodes > 0) {
@@ -65,7 +65,7 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
             }
         }
     } else{
-        metric.reset();
+        metricRotationPhaseAttempt.reset();
         metricBanned.reset();
         metricBalanceBanned.reset();
     }
