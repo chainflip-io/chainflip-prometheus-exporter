@@ -18,16 +18,16 @@ export const gaugeBroadcastRetryQueues = async (context: Context): Promise<void>
   metricFailure.labels({ metric: metricName }).set(0);
 
   try {
-    const dotQueue: any = await api.query.polkadotBroadcaster.broadcastRetryQueue();
-    const dotQueueLenght: number = dotQueue.toJSON().length;
+    const dotQueue: any[] = await api.query.polkadotBroadcaster.broadcastRetryQueue();
+    const dotQueueLenght: number = dotQueue.length;
     metric.labels("polkadot").set(dotQueueLenght);
 
-    const btcQueue: any = await api.query.bitcoinBroadcaster.broadcastRetryQueue();
-    const btcQueueLenght: number = btcQueue.toJSON().length;
+    const btcQueue: any[] = await api.query.bitcoinBroadcaster.broadcastRetryQueue();
+    const btcQueueLenght: number = btcQueue.length;
     metric.labels("bitcoin").set(btcQueueLenght);
 
-    const ethQueue: any = await api.query.ethereumBroadcaster.broadcastRetryQueue();
-    const ethQueueLenght: number = ethQueue.toJSON().length;
+    const ethQueue: any[] = await api.query.ethereumBroadcaster.broadcastRetryQueue();
+    const ethQueueLenght: number = ethQueue.length;
     metric.labels("ethereum").set(ethQueueLenght);
 
   } catch (err) {

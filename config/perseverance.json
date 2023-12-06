@@ -1,0 +1,99 @@
+{
+  "dot": {
+    "enabled": true,
+    "network": "pdot",
+    "defaultMetrics": [],
+    "accounts": []
+  },
+  "flip": {
+    "enabled": true,
+    "network": "berghain",
+    "defaultMetrics": [],
+    "accounts": [
+      {
+        "alias": "bashful",
+        "ss58Address": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
+      },
+      {
+        "alias": "doc",
+        "ss58Address": "cFP2cGErEhxzJfVUxk1gHVuE1ALxHJQx335o19bT7QoSWwjhU"
+      },
+      {
+        "alias": "dopey",
+        "ss58Address": "cFKzr7DwLCRtSkou5H5moKri7g9WwJ4tAbVJv6dZGhLb811Tc"
+      }
+    ],
+    "skipEvents": [
+      {
+        "section": "transactionPayment",
+        "method": "TransactionFeePaid"
+      },
+      {
+        "section": "system",
+        "method": "ExtrinsicSuccess"
+      }
+    ]
+  },
+  "btc": {
+    "enabled": true,
+    "network": "mainnet",
+    "defaultMetrics": [],
+    "wallets": []
+  },
+  "eth": {
+    "enabled": true,
+    "networkId": 1,
+    "network": "mainnet",
+    "defaultMetrics": [],
+    "contracts": [
+      {
+        "alias": "state-chain-gateway",
+        "address": "0x38aa40b7b5a70d738babf6699a45dacddbbeb3fc"
+      },
+      {
+        "alias": "key-manager",
+        "address": "0xaa4376388c6432d36cff33198d9f80295482f120"
+      },
+      {
+        "alias": "vault",
+        "address": "0x40caff3f3b6706da904a7895e0fc7f7922437e9b"
+      },
+      {
+        "alias": "flip",
+        "address": "0x0485D65da68b2A6b48C3fA28D7CCAce196798B94"
+      },
+      {
+        "alias": "usdc",
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      }
+    ],
+    "wallets": [
+      {
+        "alias": "bashful",
+        "address": "0x9c1bc912afa4eb8a516ed50378e6163360264e84"
+      },
+      {
+        "alias": "doc",
+        "address": "0x0cb6f56ccefd56fbefca4146ca1dd9949100eb62"
+      },
+      {
+        "alias": "dopey",
+        "address": "0xd0b108995911377d8d32b652c5dd1c233a6afc87"
+      },
+      {
+        "alias": "vault",
+        "address": "0xF5e10380213880111522dd0efD3dbb45b9f62Bcc"
+      }
+    ],
+    "tokens": [
+      {
+        "address": "0x826180541412D574cf1336d22c0C0a287822678A",
+        "symbol": "FLIP"
+      },
+      {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "symbol": "USDC"
+      }
+    ]
+  }
+}
