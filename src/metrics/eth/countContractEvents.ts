@@ -1,21 +1,20 @@
-import promClient from "prom-client";
-import { Context } from "../../lib/interfaces";
+import promClient from 'prom-client';
+import { Context } from '../../lib/interfaces';
 
-const metricName = "eth_contract_events_count";
+const metricName = 'eth_contract_events_count';
 const metric = new promClient.Counter({
-  name: metricName,
-  help: "Total of contract events",
-  labelNames: ["event", "alias"],
-  registers: [],
+    name: metricName,
+    help: 'Total of contract events',
+    labelNames: ['event', 'alias'],
+    registers: [],
 });
 
 export const countContractEvents = async (context: Context) => {
-  const { logger, registry, event, contractAlias } = context;
+    const { logger, registry, event, contractAlias } = context;
 
-  logger.debug(`Scraping ${metricName}`);
+    logger.debug(`Scraping ${metricName}`);
 
-  if (registry.getSingleMetric(metricName) === undefined)
-    registry.registerMetric(metric);
+    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-  metric.labels(event, contractAlias).inc(1);
+    metric.labels(event, contractAlias).inc(1);
 };

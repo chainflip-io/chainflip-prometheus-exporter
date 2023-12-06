@@ -1,38 +1,39 @@
-import promClient, {Counter, Gauge} from "prom-client";
-import {Context} from "../../lib/interfaces";
-import {FlipConfig} from "../../config/interfaces";
-import {decodeAddress} from "@polkadot/util-crypto";
-import makeRpcRequest from "../../utils/makeRpcRequest"
+import promClient, { Counter, Gauge } from 'prom-client';
+import { Context } from '../../lib/interfaces';
+import { FlipConfig } from '../../config/interfaces';
+import { decodeAddress } from '@polkadot/util-crypto';
+import makeRpcRequest from '../../utils/makeRpcRequest';
 
-
-const metricNameRotationPhaseAttempt: string = "cf_rotation_phase_attempts";
+const metricNameRotationPhaseAttempt: string = 'cf_rotation_phase_attempts';
 const metricRotationPhaseAttempt: Counter = new promClient.Counter({
     name: metricNameRotationPhaseAttempt,
-    help: "Count the number of attempts for each phase of the rotation",
-    labelNames: ["phase"],
+    help: 'Count the number of attempts for each phase of the rotation',
+    labelNames: ['phase'],
     registers: [],
 });
 
-const metricNameBanned: string = "cf_banned_nodes";
+const metricNameBanned: string = 'cf_banned_nodes';
 const metricBanned: Gauge = new promClient.Gauge({
     name: metricNameBanned,
-    help: "Count the number of banned nodes during a rotation",
+    help: 'Count the number of banned nodes during a rotation',
     registers: [],
 });
 
-const metricNameBalanceBanned: string = "cf_balance_of_banned_nodes";
+const metricNameBalanceBanned: string = 'cf_balance_of_banned_nodes';
 const metricBalanceBanned: Gauge = new promClient.Gauge({
     name: metricNameBalanceBanned,
-    help: "Total balance of banned nodes during a rotation",
+    help: 'Total balance of banned nodes during a rotation',
     registers: [],
 });
 
 export const eventsRotationInfo = async (context: Context): Promise<void> => {
-    const {logger, registry, events, api} = context;
+    const { logger, registry, events, api } = context;
     const config = context.config as FlipConfig;
-    const {accounts, skipEvents} = config;
+    const { accounts, skipEvents } = config;
 
-    logger.debug(`Scraping ${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`);
+    logger.debug(
+        `Scraping ${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`,
+    );
 
     if (registry.getSingleMetric(metricNameRotationPhaseAttempt) === undefined)
         registry.registerMetric(metricRotationPhaseAttempt);
@@ -41,10 +42,10 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricNameBalanceBanned) === undefined)
         registry.registerMetric(metricBalanceBanned);
 
-    if(global.rotationInProgress) {
-        for (const {event} of events) {
-            if (event.section === "validator" && event.method === "RotationPhaseUpdated") {
-                try{
+    if (global.rotationInProgress) {
+        for (const { event } of events) {
+            if (event.section === 'validator' && event.method === 'RotationPhaseUpdated') {
+                try {
                     const phase = event.data.newPhase.toJSON();
                     const phaseName = Object.keys(phase)[0];
                     metricRotationPhaseAttempt.labels(phaseName).inc();
@@ -52,19 +53,18 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
                     metricBanned.set(bannedNodes);
                     if (bannedNodes > 0) {
                         let totalBannedBalance = 0;
-                        for(const idSs58 of phase[phaseName].banned) {
-                            const result = await makeRpcRequest(api,'account_info_v2', idSs58);
+                        for (const idSs58 of phase[phaseName].banned) {
+                            const result = await makeRpcRequest(api, 'account_info_v2', idSs58);
                             totalBannedBalance += Number(result.balance) / 1e18;
                         }
                         metricBalanceBanned.set(Number(totalBannedBalance));
                     }
-                }catch(e) {
+                } catch (e) {
                     console.log(`Err: ${e}`);
                 }
-
             }
         }
-    } else{
+    } else {
         metricRotationPhaseAttempt.reset();
         metricBanned.reset();
         metricBalanceBanned.reset();
