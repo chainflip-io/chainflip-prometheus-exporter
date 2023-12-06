@@ -27,7 +27,7 @@ export const gaugePendingRedemptions = async (context: Context): Promise<void> =
     metricFailure.labels({metric: metricPendingRedemptionBalanceName}).set(0);
 
 
-    logger.debug(`Scraping ${metricPendingRedemptionName}`);
+    logger.debug(`Scraping ${metricPendingRedemptionName}, ${metricPendingRedemptionBalanceName}`);
     try {
         const pendingRedemptions = await api.query.funding.pendingRedemptions.entries();
         let totalRedemptionBalance: number = 0;
