@@ -1,2 +1,2 @@
-export * from "./gaugeBlockHeight";
-export * from "./gaugeBlockTime";
+export * from './gaugeBlockHeight';
+export * from './gaugeBlockTime';
