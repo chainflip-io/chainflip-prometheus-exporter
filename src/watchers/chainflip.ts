@@ -107,9 +107,11 @@ async function startWatcher(context: Context) {
             gaugeMinActiveBid(context);
             // gaugeBlockWeight(context);
             gaugePendingRedemptions(context);
-            gaugeBroadcastRetryQueues(context);
+            // The metrics below have been disabled(or partially disabled) due to an error in the decoding of the values returned
+            // which polkadot API is not able to interpret and cause all the other metrics to fail
+            // gaugeBroadcastRetryQueues(context);
             gaugeTssRetryQueues(context);
-            gaugeSwappingQueue(context);
+            // gaugeSwappingQueue(context);
 
             metric.set(0);
         });
