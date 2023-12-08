@@ -41,22 +41,19 @@ export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricNameCeremonyRetryQueue }).set(0);
     metricFailure.labels({ metric: metricNamePendingCeremonies }).set(0);
 
-    try {
-        // pendingCeremonies
-        const dotPendingCeremonies: any =
-            await api.query.polkadotThresholdSigner.requestRetryQueue.entries();
-        const dotPendingCeremoniesLenght: number = dotPendingCeremonies.length;
-        metricPendingCeremonies.labels('polkadot').set(dotPendingCeremoniesLenght);
+  try {
+    // pendingCeremonies
+    // const dotPendingCeremonies: any = await api.query.polkadotThresholdSigner.requestRetryQueue.entries();
+    // const dotPendingCeremoniesLenght: number = dotPendingCeremonies.length;
+    // metricPendingCeremonies.labels("polkadot").set(dotPendingCeremoniesLenght)
 
-        const btcPendingCeremonies: any =
-            await api.query.bitcoinThresholdSigner.requestRetryQueue.entries();
-        const btcPendingCeremoniesLenght: number = btcPendingCeremonies.length;
-        metricPendingCeremonies.labels('polkadot').set(btcPendingCeremoniesLenght);
+    // const btcPendingCeremonies: any = await api.query.bitcoinThresholdSigner.requestRetryQueue.entries();
+    // const btcPendingCeremoniesLenght: number = btcPendingCeremonies.length;
+    // metricPendingCeremonies.labels("polkadot").set(btcPendingCeremoniesLenght)
 
-        const ethPendingCeremonies: any =
-            await api.query.ethereumThresholdSigner.requestRetryQueue.entries();
-        const ethPendingCeremoniesLenght: number = ethPendingCeremonies.length;
-        metricPendingCeremonies.labels('polkadot').set(ethPendingCeremoniesLenght);
+    // const ethPendingCeremonies: any = await api.query.ethereumThresholdSigner.requestRetryQueue.entries();
+    // const ethPendingCeremoniesLenght: number = ethPendingCeremonies.length;
+    // metricPendingCeremonies.labels("polkadot").set(ethPendingCeremoniesLenght)
 
         // requestRetryQueue
         const dotRequestRetryQueue: any =

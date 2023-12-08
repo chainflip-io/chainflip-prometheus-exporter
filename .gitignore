@@ -5,3 +5,4 @@ dist
 .env.perseverance
 .env.berghain
 config/ignore.json
+config/perseverance.json

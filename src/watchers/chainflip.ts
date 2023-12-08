@@ -87,29 +87,31 @@ async function startWatcher(context: Context) {
             rpc: { ...customRpcs },
         });
 
-        context.api = api;
-        await api.rpc.chain.subscribeNewHeads(async (header) => {
-            gaugeBitcoinBalance(context);
-            gaugeBlockHeight({ ...context, header });
-            gaugeAuthorities(context);
-            gaugeCurrentEpochDurationBlocks(context);
-            gaugeBlocksPerEpoch(context);
-            gaugeSuspendedValidatorKeygenFailed(context);
-            gaugeFlipTotalSupply(context);
-            gaugeRotationDuration(context);
-            gaugeDotBlockTime(context);
-            gaugeEthBlockTime(context);
-            gaugeBtcBlockTime(context);
-            gaugeBackupValidator(context);
-            gaugeReputation(context);
-            gaugeBuildVersion(context);
-            gaugeValidatorStatus(context);
-            gaugeMinActiveBid(context);
-            // gaugeBlockWeight(context);
-            gaugePendingRedemptions(context);
-            gaugeBroadcastRetryQueues(context);
-            gaugeTssRetryQueues(context);
-            gaugeSwappingQueue(context);
+      context.api = api;
+      await api.rpc.chain.subscribeNewHeads(async header => {
+        gaugeBitcoinBalance(context);
+        gaugeBlockHeight({...context, header});
+        gaugeAuthorities(context);
+        gaugeCurrentEpochDurationBlocks(context);
+        gaugeBlocksPerEpoch(context);
+        gaugeSuspendedValidatorKeygenFailed(context);
+        gaugeFlipTotalSupply(context);
+        gaugeRotationDuration(context);
+        gaugeDotBlockTime(context);
+        gaugeEthBlockTime(context);
+        gaugeBtcBlockTime(context);
+        gaugeBackupValidator(context);
+        gaugeReputation(context);
+        gaugeBuildVersion(context);
+        gaugeValidatorStatus(context);
+        gaugeMinActiveBid(context);
+        // gaugeBlockWeight(context);
+        gaugePendingRedemptions(context);
+        // The metrics below have been disabled(or partially disabled) due to an error in the decoding of the values returned
+        // which polkadot API is not able to interpret and cause all the other metrics to fail
+        // gaugeBroadcastRetryQueues(context);
+        gaugeTssRetryQueues(context);
+        // gaugeSwappingQueue(context);
 
             metric.set(0);
         });
