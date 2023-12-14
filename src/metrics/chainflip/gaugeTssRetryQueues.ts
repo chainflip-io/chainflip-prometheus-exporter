@@ -5,7 +5,7 @@ const metricNamePendingCeremonies: string = 'cf_tss_pending_ceremonies';
 const metricPendingCeremonies: Gauge = new promClient.Gauge({
     name: metricNamePendingCeremonies,
     help: 'Size of the TSS pending ceremonies queue, it contains an entry for every ceremony of TSS we are performing',
-    labelNames: ['broadcaster'],
+    labelNames: ['tss'],
     registers: [],
 });
 
@@ -13,7 +13,7 @@ const metricNameRequestRetryQueue: string = 'cf_tss_request_retry_queue';
 const metricRequestRetryQueue: Gauge = new promClient.Gauge({
     name: metricNameRequestRetryQueue,
     help: 'Size of the TSS request retry queue, it contains an entry for every request of TSS we receive if it gets rescheduled',
-    labelNames: ['broadcaster'],
+    labelNames: ['tss'],
     registers: [],
 });
 
@@ -21,7 +21,7 @@ const metricNameCeremonyRetryQueue: string = 'cf_tss_ceremony_retry_queue';
 const metricPendingCeremonyRetryQueue: Gauge = new promClient.Gauge({
     name: metricNameCeremonyRetryQueue,
     help: 'Size of the TSS retry queue, it contains an entry for every ceremony with a block at which it should be retried',
-    labelNames: ['broadcaster'],
+    labelNames: ['tss'],
     registers: [],
 });
 

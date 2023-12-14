@@ -19,7 +19,7 @@ export * from './gaugePendingRedemptions';
 export * from './gaugeValidatorStatus';
 export * from './gaugeMinActiveBid';
 export * from './eventsRotationInfo';
-export * from './gaugeBroadcastRetryQueues';
+export * from './gaugePendingBroadcast';
 export * from './gaugeTssRetryQueues';
 export * from './gaugeSwappingQueue';
 export * from './gaugeBtcUtxos';
