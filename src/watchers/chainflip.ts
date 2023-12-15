@@ -22,10 +22,10 @@ import {
     gaugeValidatorStatus,
     gaugeMinActiveBid,
     eventsRotationInfo,
-    gaugeBroadcastRetryQueues,
     gaugeTssRetryQueues,
     gaugeSwappingQueue,
     gaugeBtcUtxos,
+    gaugePendingBroadcast,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -111,7 +111,7 @@ async function startWatcher(context: Context) {
             gaugePendingRedemptions(context);
             // The metrics below have been disabled(or partially disabled) due to an error in the decoding of the values returned
             // which polkadot API is not able to interpret and cause all the other metrics to fail
-            // gaugeBroadcastRetryQueues(context);
+            gaugePendingBroadcast(context);
             gaugeTssRetryQueues(context);
             // gaugeSwappingQueue(context);
 
