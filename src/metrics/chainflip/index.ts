@@ -22,3 +22,4 @@ export * from './eventsRotationInfo';
 export * from './gaugeBroadcastRetryQueues';
 export * from './gaugeTssRetryQueues';
 export * from './gaugeSwappingQueue';
+export * from './gaugeBtcUtxos';
