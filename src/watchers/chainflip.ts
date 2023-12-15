@@ -10,7 +10,7 @@ import {
     gaugeFlipTotalSupply,
     gaugeRotating,
     gaugeRotationDuration,
-    gaugeSuspendedValidatorKeygenFailed,
+    gaugeSuspendedValidator,
     gaugeDotBlockTime,
     gaugeEthBlockTime,
     gaugeBtcBlockTime,
@@ -95,7 +95,7 @@ async function startWatcher(context: Context) {
             gaugeAuthorities(context);
             gaugeCurrentEpochDurationBlocks(context);
             gaugeBlocksPerEpoch(context);
-            gaugeSuspendedValidatorKeygenFailed(context);
+            gaugeSuspendedValidator(context);
             gaugeFlipTotalSupply(context);
             gaugeRotationDuration(context);
             gaugeDotBlockTime(context);

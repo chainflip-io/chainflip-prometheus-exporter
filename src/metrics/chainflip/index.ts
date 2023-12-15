@@ -6,7 +6,7 @@ export * from './gaugeCurrentEpochDurationBlocks';
 export * from './gaugeFlipTotalSupply';
 export * from './gaugeRotating';
 export * from './gaugeRotationDuration';
-export * from './gaugeSuspendedValidatorsKeygenFailed';
+export * from './gaugeSuspendedValidator';
 export * from './guageBlockHeight';
 export * from './gaugeDotBlockTime';
 export * from './gaugeEthBlockTime';
