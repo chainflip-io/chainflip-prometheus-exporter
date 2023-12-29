@@ -6,7 +6,6 @@ export const gaugeEpoch = async (context: Context): Promise<void> => {
     try {
         const epoch: any = await api.query.validator.currentEpoch();
         global.epochIndex = Number(epoch);
-        console.log(global.epochIndex);
     } catch (err) {
         logger.error(err);
     }
