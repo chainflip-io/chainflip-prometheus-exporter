@@ -26,6 +26,8 @@ import {
     gaugeSwappingQueue,
     gaugeBtcUtxos,
     gaugePendingBroadcast,
+    gaugeEpoch,
+    gaugeWitness,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -48,6 +50,7 @@ export default async (context: Context): Promise<void> => {
 
 declare global {
     var rotationInProgress: boolean;
+    var epochIndex: number;
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
             cf: {
@@ -90,6 +93,8 @@ async function startWatcher(context: Context) {
 
         context.api = api;
         await api.rpc.chain.subscribeNewHeads(async (header) => {
+            gaugeEpoch(context);
+            gaugeWitness({ ...context, header });
             gaugeBitcoinBalance(context);
             gaugeBlockHeight({ ...context, header });
             gaugeAuthorities(context);

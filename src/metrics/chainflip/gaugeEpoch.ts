@@ -1,0 +1,12 @@
+import { Context } from '../../lib/interfaces';
+
+export const gaugeEpoch = async (context: Context): Promise<void> => {
+    const { logger, api, registry, metricFailure } = context;
+
+    try {
+        const epoch: any = await api.query.validator.currentEpoch();
+        global.epochIndex = Number(epoch);
+    } catch (err) {
+        logger.error(err);
+    }
+};

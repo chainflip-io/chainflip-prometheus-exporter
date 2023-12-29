@@ -23,3 +23,5 @@ export * from './gaugePendingBroadcast';
 export * from './gaugeTssRetryQueues';
 export * from './gaugeSwappingQueue';
 export * from './gaugeBtcUtxos';
+export * from './gaugeEpoch';
+export * from './gaugeWitness';
