@@ -1,6 +1,5 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { createType, createTypeUnsafe } from '@polkadot/types';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
 const witnessHashEth = new Set<any>();
