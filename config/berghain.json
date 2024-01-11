@@ -83,6 +83,10 @@
       {
         "alias": "vault",
         "address": "0xF5e10380213880111522dd0efD3dbb45b9f62Bcc"
+      },
+      {
+        "alias": "state-chain-gateway",
+        "address": "0x6995Ab7c4D7F4B03f467Cf4c8E920427d9621DBd"
       }
     ],
     "tokens": [
