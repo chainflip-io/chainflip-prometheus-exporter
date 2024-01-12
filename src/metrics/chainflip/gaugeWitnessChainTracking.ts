@@ -16,7 +16,7 @@ const metric: Gauge = new promClient.Gauge({
 
 export const gaugeWitnessChainTracking = async (context: Context): Promise<void> => {
     if (global.epochIndex) {
-        const { logger, api, registry, metricFailure, header } = context;
+        const { logger, api, registry, metricFailure } = context;
         logger.debug(`Scraping ${metricName}`);
 
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
