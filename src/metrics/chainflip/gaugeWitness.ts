@@ -88,39 +88,27 @@ export const gaugeWitness = async (context: Context): Promise<void> => {
                         witnessHashEth.add(blakeHash);
                     }
                     // TODO: fix btc chainTracking, hash returned is not correct
-                    // if(callData && callData.section === 'bitcoinChainTracking'){
-                    //     console.log("BITCOIN")
-                    //     console.log(callData)
-                    //     console.log(index, ex.toJSON())
+                    if(callData && callData.section === 'bitcoinChainTracking'){
+                        const finalData = callData.args
 
-                    //     // console.log(callData)
-                    //     const finalData = callData.args
-                    //     console.log(finalData)
-                    //     console.log(finalData.new_chain_state.trackedData)
+                        const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
+                        // parse the data and removed useless comas (damn polkadot api)
+                        finalData.new_chain_state.blockHeight = blockHeight;
 
-                    //     const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
-                    //     // parse the data and removed useless comas (damn polkadot api)
-                    //     finalData.new_chain_state.blockHeight = blockHeight;
+                        // remove all the fees, we don't keep them into account for btc
+                        finalData.new_chain_state.trackedData.btcFeeInfo = {
+                            feePerInputUtxo: '7500',
+                            feePerOutputUtxo: '4300',
+                            minFeeRequiredPerTx: '1200',
+                        };
 
-                    //     // remove all the fees, we don't keep them into account for btc
-                    //     finalData.new_chain_state.trackedData.btcFeeInfo = {
-                    //         feePerInputUtxo: '0',
-                    //         feePerOutputUtxo: '0',
-                    //         minFeeRequiredPerTx: '0',
-                    //     };
+                        // create the extrinsic we need to witness (ETH chain tracking in this case)
+                        const extrinsic = api.tx.bitcoinChainTracking.updateChainState(finalData.new_chain_state)
 
-                    //     // create the extrinsic we need to witness (ETH chain tracking in this case)
-                    //     const extrinsic = api.tx.bitcoinChainTracking.updateChainState(finalData.new_chain_state)
-                    //     console.log(extrinsic.toHuman())
-                    //     console.log(extrinsic.toHuman().method)
-                    //     console.log(extrinsic.toHuman().method.args.new_chain_state)
-
-                    //     // obtain the hash of the extrinsic call
-                    //     const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                    //     console.log(blakeHash)
-
-                    //     witnessHashBtc.add(blakeHash);
-                    // }
+                        // obtain the hash of the extrinsic call
+                        const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
+                        witnessHashBtc.add(blakeHash);
+                    }
 
                     if (callData && callData.section === 'polkadotChainTracking') {
                         const finalData = callData.args;
