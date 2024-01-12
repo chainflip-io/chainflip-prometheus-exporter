@@ -14,7 +14,7 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeWitness = async (context: Context): Promise<void> => {
+export const gaugeWitnessChainTracking = async (context: Context): Promise<void> => {
     if (global.epochIndex) {
         const { logger, api, registry, metricFailure, header } = context;
         logger.debug(`Scraping ${metricName}`);
