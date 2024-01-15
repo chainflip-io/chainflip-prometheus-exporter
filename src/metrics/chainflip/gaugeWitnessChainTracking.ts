@@ -69,11 +69,12 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if(witnessHash.has(blockNumber)){
-                            witnessHash.get(blockNumber)?.add(JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                                })
+                        if (witnessHash.has(blockNumber)) {
+                            witnessHash.get(blockNumber)?.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
                             );
                         } else {
                             const tmpSet = new Set<string>();
@@ -108,11 +109,12 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if(witnessHash.has(blockNumber)){
-                            witnessHash.get(blockNumber)?.add(JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                                })
+                        if (witnessHash.has(blockNumber)) {
+                            witnessHash.get(blockNumber)?.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
                             );
                         } else {
                             const tmpSet = new Set<string>();
@@ -145,11 +147,12 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if(witnessHash.has(blockNumber)){
-                            witnessHash.get(blockNumber)?.add(JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                                })
+                        if (witnessHash.has(blockNumber)) {
+                            witnessHash.get(blockNumber)?.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
                             );
                         } else {
                             const tmpSet = new Set<string>();
