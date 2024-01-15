@@ -2,15 +2,13 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
-const witnessHashEth = new Set<any>();
-const witnessHashBtc = new Set<any>();
-const witnessHashDot = new Set<any>();
+const witnessHash = new Map<number, Set<string>>();
 
 const metricName: string = 'cf_chain_tracking_witness_count';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
     help: 'Number of validator witnessing ChainStateUpdated for an external chain',
-    labelNames: ['chain'],
+    labelNames: ['extrinsic'],
     registers: [],
 });
 
@@ -22,48 +20,35 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
         metricFailure.labels({ metric: metricName }).set(0);
         try {
-            let witnessNumber = [];
-            for (const elem of witnessHashEth) {
-                const votes: string = (
-                    await api.query.witnesser.votes(global.epochIndex, elem)
-                ).toHuman();
-                const binary = hex2bin(votes);
-                const number = binary.match(/1/g)?.length;
-                witnessNumber.push(number || 0);
-            }
-            if (witnessNumber.length > 0) {
-                metric.labels('Ethereum').set(Math.min(...witnessNumber));
-            }
-            witnessNumber = [];
-            for (const elem of witnessHashBtc) {
-                const votes: string = (
-                    await api.query.witnesser.votes(global.epochIndex, elem)
-                ).toHuman();
-                const binary = hex2bin(votes);
-                const number = binary.match(/1/g)?.length;
-                witnessNumber.push(number || 0);
-            }
-            if (witnessNumber.length > 0) {
-                metric.labels('Bitcoin').set(Math.min(...witnessNumber));
-            }
-            witnessNumber = [];
-            for (const elem of witnessHashDot) {
-                const votes: string = (
-                    await api.query.witnesser.votes(global.epochIndex, elem)
-                ).toHuman();
-                const binary = hex2bin(votes);
-                const number = binary.match(/1/g)?.length;
-                witnessNumber.push(number || 0);
-            }
-            if (witnessNumber.length > 0) {
-                metric.labels('Polkadot').set(Math.min(...witnessNumber));
-            }
-            witnessHashEth.clear();
-            witnessHashBtc.clear();
-            witnessHashDot.clear();
-
             const signedBlock = await api.rpc.chain.getBlock();
+            console.log(witnessHash)
+            for (const elem of witnessHash) {
+                if (signedBlock.block.header.number - elem[0] > 5) {
+                    for (const hash of elem[1]) {
+                        const parsedObj = JSON.parse(hash);
+                        const votes: string = (
+                            await api.query.witnesser.votes(global.epochIndex, parsedObj.hash)
+                        ).toHuman();
+                        if (votes) {
+                            const binary = hex2bin(votes);
+                            const number = binary.match(/1/g)?.length || 0;
+
+                            metric.labels(parsedObj.type).set(number);
+                            // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                            if (number < 150) {
+                                console.log(parsedObj.type);
+                                console.log(
+                                    `${parsedObj.hash} witnesssed by ${number} validators!`,
+                                );
+                            }
+                        }
+                    }
+                    witnessHash.delete(elem[0]);
+                }
+            }
+
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
+                const blockNumber: number = Number(signedBlock.block.header.number);
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
                     const callData = ex.toHuman().method.args.call;
 
@@ -85,7 +70,22 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        witnessHashEth.add(blakeHash);
+                        if(witnessHash.has(blockNumber)){
+                            witnessHash.get(blockNumber)?.add(JSON.stringify({
+                                type: `${callData.section}:${callData.method}`,
+                                hash: blakeHash,
+                                })
+                            );
+                        } else {
+                            const tmpSet = new Set<string>();
+                            tmpSet.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                            );
+                            witnessHash.set(blockNumber, tmpSet);
+                        }
                     }
                     // TODO: fix btc chainTracking, hash returned is not correct
                     if (callData && callData.section === 'bitcoinChainTracking') {
@@ -109,9 +109,23 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        witnessHashBtc.add(blakeHash);
+                        if(witnessHash.has(blockNumber)){
+                            witnessHash.get(blockNumber)?.add(JSON.stringify({
+                                type: `${callData.section}:${callData.method}`,
+                                hash: blakeHash,
+                                })
+                            );
+                        } else {
+                            const tmpSet = new Set<string>();
+                            tmpSet.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                            );
+                            witnessHash.set(blockNumber, tmpSet);
+                        }
                     }
-
                     if (callData && callData.section === 'polkadotChainTracking') {
                         const finalData = callData.args;
                         // set medianTip to 0, it is not kept into account for the chaintracking
@@ -132,7 +146,22 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        witnessHashDot.add(blakeHash);
+                        if(witnessHash.has(blockNumber)){
+                            witnessHash.get(blockNumber)?.add(JSON.stringify({
+                                type: `${callData.section}:${callData.method}`,
+                                hash: blakeHash,
+                                })
+                            );
+                        } else {
+                            const tmpSet = new Set<string>();
+                            tmpSet.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                            );
+                            witnessHash.set(blockNumber, tmpSet);
+                        }
                     }
                 }
             });

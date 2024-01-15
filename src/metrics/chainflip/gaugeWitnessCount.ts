@@ -2,10 +2,6 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 
 const witnessHash = new Map<number, Set<string>>();
-type innerCall = {
-    type: string;
-    hash: string;
-};
 
 const metricName: string = 'cf_witness_count';
 const metric: Gauge = new promClient.Gauge({
