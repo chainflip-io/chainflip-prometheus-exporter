@@ -21,7 +21,6 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
         metricFailure.labels({ metric: metricName }).set(0);
         try {
             const signedBlock = await api.rpc.chain.getBlock();
-            console.log(witnessHash)
             for (const elem of witnessHash) {
                 if (signedBlock.block.header.number - elem[0] > 5) {
                     for (const hash of elem[1]) {
