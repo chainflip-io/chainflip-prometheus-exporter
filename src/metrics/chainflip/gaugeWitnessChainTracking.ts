@@ -20,8 +20,8 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
         metricFailure.labels({ metric: metricName }).set(0);
-        console.log(witnessHash10.size)
-        console.log(witnessHash50.size)
+        console.log(witnessHash10.size);
+        console.log(witnessHash50.size);
         try {
             const signedBlock = await api.rpc.chain.getBlock();
             for (const elem of witnessHash10) {
@@ -99,14 +99,24 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
                         if (blockHeight > ethBlock) {
-                            insertOrReplace(witnessHash10, JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                            }), blockNumber, `${callData.section}:${callData.method}`);
-                            insertOrReplace(witnessHash50, JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                            }), blockNumber, `${callData.section}:${callData.method}`);
+                            insertOrReplace(
+                                witnessHash10,
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                                blockNumber,
+                                `${callData.section}:${callData.method}`,
+                            );
+                            insertOrReplace(
+                                witnessHash50,
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                                blockNumber,
+                                `${callData.section}:${callData.method}`,
+                            );
                             ethBlock = blockHeight;
                         }
                     }
@@ -132,14 +142,24 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
                         if (blockHeight > btcBlock) {
-                            insertOrReplace(witnessHash10, JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                            }), blockNumber, `${callData.section}:${callData.method}`);
-                            insertOrReplace(witnessHash50, JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                            }), blockNumber, `${callData.section}:${callData.method}`);
+                            insertOrReplace(
+                                witnessHash10,
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                                blockNumber,
+                                `${callData.section}:${callData.method}`,
+                            );
+                            insertOrReplace(
+                                witnessHash50,
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                                blockNumber,
+                                `${callData.section}:${callData.method}`,
+                            );
                             btcBlock = blockHeight;
                         }
                     }
@@ -164,14 +184,24 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
                         if (blockHeight > dotBlock) {
-                            insertOrReplace(witnessHash10, JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                            }), blockNumber, `${callData.section}:${callData.method}`);
-                            insertOrReplace(witnessHash50, JSON.stringify({
-                                type: `${callData.section}:${callData.method}`,
-                                hash: blakeHash,
-                            }), blockNumber, `${callData.section}:${callData.method}`);
+                            insertOrReplace(
+                                witnessHash10,
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                                blockNumber,
+                                `${callData.section}:${callData.method}`,
+                            );
+                            insertOrReplace(
+                                witnessHash50,
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: blakeHash,
+                                }),
+                                blockNumber,
+                                `${callData.section}:${callData.method}`,
+                            );
                             dotBlock = blockHeight;
                         }
                     }
@@ -184,28 +214,26 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
     }
 };
 
-function insertOrReplace(map: Map<number, Set<string>>, elem: string, blockNumber: number, callData: string) {
+function insertOrReplace(
+    map: Map<number, Set<string>>,
+    elem: string,
+    blockNumber: number,
+    callData: string,
+) {
     if (map.has(blockNumber)) {
         const set = map.get(blockNumber);
         // if it has already elements we need to check and delete the one sharing the chainTracking
         // we want only 1 extrinsic for each chain max (the one with the latest block reported)
         set?.forEach((element) => {
             const parsedObj = JSON.parse(element);
-            if (
-                parsedObj.type === callData
-            ) {
+            if (parsedObj.type === callData) {
                 set?.delete(element);
             }
         });
-        set?.add(
-            elem,
-        );
-        
+        set?.add(elem);
     } else {
         const tmpSet = new Set<string>();
-        tmpSet.add(
-            elem,
-        );
+        tmpSet.add(elem);
         map.set(blockNumber, tmpSet);
     }
 }

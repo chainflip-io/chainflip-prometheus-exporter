@@ -4,7 +4,6 @@ import { Context } from '../../lib/interfaces';
 const witnessHash10 = new Map<number, Set<string>>();
 const witnessHash50 = new Map<number, Set<string>>();
 
-
 const metricName: string = 'cf_witness_count';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
@@ -33,7 +32,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                         if (votes) {
                             const binary = hex2bin(votes);
                             const number = binary.match(/1/g)?.length || 0;
-                            metric.labels(parsedObj.type, "10").set(number);
+                            metric.labels(parsedObj.type, '10').set(number);
                             // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                             if (number < 150) {
                                 console.log(`${parsedObj.type} after 10 blocks`);
@@ -56,7 +55,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                         if (votes) {
                             const binary = hex2bin(votes);
                             const number = binary.match(/1/g)?.length || 0;
-                            metric.labels(parsedObj.type, "50").set(number);
+                            metric.labels(parsedObj.type, '50').set(number);
                             // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                             if (number < 150) {
                                 console.log(`${parsedObj.type} after 50 blocks`);
