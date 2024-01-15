@@ -45,7 +45,9 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                     witnessHash.delete(elem[0]);
                 }
             }
-
+            let btcBlock = 0;
+            let ethBlock = 0;
+            let dotBlock = 0;
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
                 const blockNumber: number = Number(signedBlock.block.header.number);
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
@@ -69,25 +71,36 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (witnessHash.has(blockNumber)) {
-                            witnessHash.get(blockNumber)?.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: blakeHash,
-                                }),
-                            );
-                        } else {
-                            const tmpSet = new Set<string>();
-                            tmpSet.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: blakeHash,
-                                }),
-                            );
-                            witnessHash.set(blockNumber, tmpSet);
+                        if( blockHeight > ethBlock) {
+                            if (witnessHash.has(blockNumber)) {
+                                let set = witnessHash.get(blockNumber);
+                                //if it has already elements we need to check and delete the one sharing the chainTracking
+                                //we want only 1 extrinsic for each chain max (the one with the latest block reported)
+                                set?.forEach(elem => {
+                                    let parsedObj = JSON.parse(elem);
+                                    if(parsedObj.type === "ethereumChainTracking:updateChainState") {
+                                        witnessHash.get(blockNumber)?.delete(elem);
+                                    }
+                                })
+                                set?.add(
+                                    JSON.stringify({
+                                        type: `${callData.section}:${callData.method}`,
+                                        hash: blakeHash,
+                                    }),
+                                );
+                            } else {
+                                const tmpSet = new Set<string>();
+                                tmpSet.add(
+                                    JSON.stringify({
+                                        type: `${callData.section}:${callData.method}`,
+                                        hash: blakeHash,
+                                    }),
+                                );
+                                witnessHash.set(blockNumber, tmpSet);
+                            }
+                            ethBlock = blockHeight;
                         }
                     }
-                    // TODO: fix btc chainTracking, hash returned is not correct
                     if (callData && callData.section === 'bitcoinChainTracking') {
                         const finalData = callData.args;
 
@@ -109,22 +122,34 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (witnessHash.has(blockNumber)) {
-                            witnessHash.get(blockNumber)?.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: blakeHash,
-                                }),
-                            );
-                        } else {
-                            const tmpSet = new Set<string>();
-                            tmpSet.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: blakeHash,
-                                }),
-                            );
-                            witnessHash.set(blockNumber, tmpSet);
+                        if( blockHeight > btcBlock) {
+                            if (witnessHash.has(blockNumber)) {
+                                let set = witnessHash.get(blockNumber);
+                                //if it has already elements we need to check and delete the one sharing the chainTracking
+                                //we want only 1 extrinsic for each chain max (the one with the latest block reported)
+                                set?.forEach(elem => {
+                                    let parsedObj = JSON.parse(elem);
+                                    if(parsedObj.type === "bitcoinChainTracking:updateChainState") {
+                                        witnessHash.get(blockNumber)?.delete(elem);
+                                    }
+                                })
+                                set?.add(
+                                    JSON.stringify({
+                                        type: `${callData.section}:${callData.method}`,
+                                        hash: blakeHash,
+                                    }),
+                                );
+                            } else {
+                                const tmpSet = new Set<string>();
+                                tmpSet.add(
+                                    JSON.stringify({
+                                        type: `${callData.section}:${callData.method}`,
+                                        hash: blakeHash,
+                                    }),
+                                );
+                                witnessHash.set(blockNumber, tmpSet);
+                            }
+                            btcBlock = blockHeight;
                         }
                     }
                     if (callData && callData.section === 'polkadotChainTracking') {
@@ -147,22 +172,34 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (witnessHash.has(blockNumber)) {
-                            witnessHash.get(blockNumber)?.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: blakeHash,
-                                }),
-                            );
-                        } else {
-                            const tmpSet = new Set<string>();
-                            tmpSet.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: blakeHash,
-                                }),
-                            );
-                            witnessHash.set(blockNumber, tmpSet);
+                        if( blockHeight > dotBlock) {
+                            if (witnessHash.has(blockNumber)) {
+                                let set = witnessHash.get(blockNumber);
+                                //if it has already elements we need to check and delete the one sharing the chainTracking
+                                //we want only 1 extrinsic for each chain max (the one with the latest block reported)
+                                set?.forEach(elem => {
+                                    let parsedObj = JSON.parse(elem);
+                                    if(parsedObj.type === "polkadotChainTracking:updateChainState") {
+                                        witnessHash.get(blockNumber)?.delete(elem);
+                                    }
+                                })
+                                set?.add(
+                                    JSON.stringify({
+                                        type: `${callData.section}:${callData.method}`,
+                                        hash: blakeHash,
+                                    }),
+                                );
+                            } else {
+                                const tmpSet = new Set<string>();
+                                tmpSet.add(
+                                    JSON.stringify({
+                                        type: `${callData.section}:${callData.method}`,
+                                        hash: blakeHash,
+                                    }),
+                                );
+                                witnessHash.set(blockNumber, tmpSet);
+                            }
+                            dotBlock = blockHeight;
                         }
                     }
                 }
