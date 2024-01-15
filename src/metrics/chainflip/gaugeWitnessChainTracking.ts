@@ -95,7 +95,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         // parse the data and removed useless comas (damn polkadot api)
                         finalData.new_chain_state.blockHeight = blockHeight;
 
-                        // remove all the fees, we don't keep them into account for btc
+                        // set the default value for the fees (we use these values to witness)
                         finalData.new_chain_state.trackedData.btcFeeInfo = {
                             feePerInputUtxo: '7500',
                             feePerOutputUtxo: '4300',
