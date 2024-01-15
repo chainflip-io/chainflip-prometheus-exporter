@@ -20,8 +20,6 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
         metricFailure.labels({ metric: metricName }).set(0);
-        console.log(witnessHash10.size);
-        console.log(witnessHash50.size);
         try {
             const signedBlock = await api.rpc.chain.getBlock();
             for (const elem of witnessHash10) {
