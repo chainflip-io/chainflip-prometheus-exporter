@@ -9,7 +9,7 @@ const witnessHashDot = new Set<any>();
 const metricName: string = 'cf_chain_tracking_witness_count';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
-    help: 'Is the Network in a rotation',
+    help: 'Number of validator witnessing ChainStateUpdated for an external chain',
     labelNames: ['chain'],
     registers: [],
 });
@@ -88,8 +88,8 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         witnessHashEth.add(blakeHash);
                     }
                     // TODO: fix btc chainTracking, hash returned is not correct
-                    if(callData && callData.section === 'bitcoinChainTracking'){
-                        const finalData = callData.args
+                    if (callData && callData.section === 'bitcoinChainTracking') {
+                        const finalData = callData.args;
 
                         const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
                         // parse the data and removed useless comas (damn polkadot api)
@@ -103,7 +103,9 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         };
 
                         // create the extrinsic we need to witness (ETH chain tracking in this case)
-                        const extrinsic = api.tx.bitcoinChainTracking.updateChainState(finalData.new_chain_state)
+                        const extrinsic = api.tx.bitcoinChainTracking.updateChainState(
+                            finalData.new_chain_state,
+                        );
 
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);

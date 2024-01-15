@@ -1,17 +1,16 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { blake2AsHex } from '@polkadot/util-crypto';
 
 const witnessHash = new Map<number, Set<string>>();
 type innerCall = {
-    type: string,
-    hash: string,
-}
+    type: string;
+    hash: string;
+};
 
 const metricName: string = 'cf_witness_count';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
-    help: 'Is the Network in a rotation',
+    help: 'Number of validator witnessing an extrinsic',
     labelNames: ['extrinsic'],
     registers: [],
 });
@@ -19,55 +18,58 @@ const metric: Gauge = new promClient.Gauge({
 export const gaugeWitnessCount = async (context: Context): Promise<void> => {
     if (global.epochIndex) {
         const { logger, api, registry, metricFailure, header } = context;
-        console.log("\n\n")
         logger.debug(`Scraping ${metricName}`);
 
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
         metricFailure.labels({ metric: metricName }).set(0);
         try {
-
             const signedBlock = await api.rpc.chain.getBlock();
 
-            for (const elem of witnessHash){
-                if(signedBlock.block.header.number - elem[0] > 3){
-                    console.log(Number(signedBlock.block.header.number))
-                    // console.log(elem);
-                    console.log(elem[0]) //key  = blockNumber
-                    // console.log(elem[1]) //set containing the hashes
-                    for (const hash of elem[1]){
-                        let parsedObj = JSON.parse(hash)
+            for (const elem of witnessHash) {
+                if (signedBlock.block.header.number - elem[0] > 5) {
+                    for (const hash of elem[1]) {
+                        const parsedObj = JSON.parse(hash);
                         const votes: string = (
                             await api.query.witnesser.votes(global.epochIndex, parsedObj.hash)
                         ).toHuman();
-                        if(votes) {
-                            console.log(parsedObj)
-                            console.log(votes)
+                        if (votes) {
                             const binary = hex2bin(votes);
-                            const number = binary.match(/1/g)?.length;
-                            console.log(number)
+                            const number = binary.match(/1/g)?.length || 0;
+                            metric.labels(parsedObj.type).set(number);
+                            // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                            if (number < 150) {
+                                console.log(parsedObj.type);
+                                console.log(
+                                    `${parsedObj.hash} witnesssed by ${number} validators!`,
+                                );
+                            }
                         }
                     }
                     witnessHash.delete(elem[0]);
                 }
             }
-            // console.log(witnessHash)
+            // chech the witnessAtEpoch extrinsics in a block and save the encoded callHash to check later
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
-                const blockNumber:number = Number(signedBlock.block.header.number);
-                // console.log(blockNumber)
+                const blockNumber: number = Number(signedBlock.block.header.number);
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
                     const callData = ex.toHuman().method.args.call;
-                    // console.log(callData)
-                    if(callData.method != "updateChainState"){
-                        // console.log(callData)
-                        // console.log('\n\n');
-                        // console.log(callData)
-                        // console.log(ex.method.args[0].hash.toHex())
+                    if (callData.method !== 'updateChainState') {
                         const hashToCheck = ex.method.args[0].hash.toHex();
-                        if(witnessHash.has(blockNumber)){
-                            witnessHash.get(blockNumber).add(JSON.stringify({type: callData.section + ":" + callData.method, hash: hashToCheck}));
+                        if (witnessHash.has(blockNumber)) {
+                            witnessHash.get(blockNumber)?.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: hashToCheck,
+                                }),
+                            );
                         } else {
-                            let tmpSet = new Set<string>();
-                            tmpSet.add(JSON.stringify({type: callData.section + ":" + callData.method, hash: hashToCheck}))
+                            const tmpSet = new Set<string>();
+                            tmpSet.add(
+                                JSON.stringify({
+                                    type: `${callData.section}:${callData.method}`,
+                                    hash: hashToCheck,
+                                }),
+                            );
                             witnessHash.set(blockNumber, tmpSet);
                         }
                     }
