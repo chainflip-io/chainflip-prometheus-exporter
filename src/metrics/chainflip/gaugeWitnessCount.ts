@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { hex2bin, insertOrReplace } from '../../utils/utils';
 
 const witnessHash10 = new Map<number, Set<string>>();
 const witnessHash50 = new Map<number, Set<string>>();
@@ -75,30 +76,24 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                     const callData = ex.toHuman().method.args.call;
                     if (callData.method !== 'updateChainState') {
                         const hashToCheck = ex.method.args[0].hash.toHex();
-                        if (witnessHash10.has(blockNumber)) {
-                            witnessHash10.get(blockNumber)?.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: hashToCheck,
-                                }),
-                            );
-                            witnessHash50.get(blockNumber)?.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: hashToCheck,
-                                }),
-                            );
-                        } else {
-                            const tmpSet = new Set<string>();
-                            tmpSet.add(
-                                JSON.stringify({
-                                    type: `${callData.section}:${callData.method}`,
-                                    hash: hashToCheck,
-                                }),
-                            );
-                            witnessHash10.set(blockNumber, tmpSet);
-                            witnessHash50.set(blockNumber, tmpSet);
-                        }
+                        insertOrReplace(
+                            witnessHash10,
+                            JSON.stringify({
+                                type: `${callData.section}:${callData.method}`,
+                                hash: hashToCheck,
+                            }),
+                            blockNumber,
+                            ``,
+                        );
+                        insertOrReplace(
+                            witnessHash50,
+                            JSON.stringify({
+                                type: `${callData.section}:${callData.method}`,
+                                hash: hashToCheck,
+                            }),
+                            blockNumber,
+                            ``,
+                        );
                     }
                 }
             });
@@ -108,64 +103,3 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
         }
     }
 };
-
-function hex2bin(hex: string) {
-    hex = hex.replace('0x', '').toLowerCase();
-    var out = '';
-    for (var c of hex) {
-        switch (c) {
-            case '0':
-                out += '0000';
-                break;
-            case '1':
-                out += '0001';
-                break;
-            case '2':
-                out += '0010';
-                break;
-            case '3':
-                out += '0011';
-                break;
-            case '4':
-                out += '0100';
-                break;
-            case '5':
-                out += '0101';
-                break;
-            case '6':
-                out += '0110';
-                break;
-            case '7':
-                out += '0111';
-                break;
-            case '8':
-                out += '1000';
-                break;
-            case '9':
-                out += '1001';
-                break;
-            case 'a':
-                out += '1010';
-                break;
-            case 'b':
-                out += '1011';
-                break;
-            case 'c':
-                out += '1100';
-                break;
-            case 'd':
-                out += '1101';
-                break;
-            case 'e':
-                out += '1110';
-                break;
-            case 'f':
-                out += '1111';
-                break;
-            default:
-                return '';
-        }
-    }
-
-    return out;
-}
