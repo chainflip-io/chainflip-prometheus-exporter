@@ -36,9 +36,8 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                             metric.labels(parsedObj.type, '10').set(number);
                             // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                             if (number < 150) {
-                                console.log(`${parsedObj.type} after 10 blocks`);
-                                console.log(
-                                    `${parsedObj.hash} witnesssed by ${number} validators!`,
+                                logger.info(
+                                    `${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
                                 );
                             }
                         }
@@ -59,9 +58,8 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                             metric.labels(parsedObj.type, '50').set(number);
                             // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                             if (number < 150) {
-                                console.log(`${parsedObj.type} after 50 blocks`);
-                                console.log(
-                                    `${parsedObj.hash} witnesssed by ${number} validators!`,
+                                logger.info(
+                                    `${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
                                 );
                             }
                         }
