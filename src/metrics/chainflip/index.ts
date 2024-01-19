@@ -26,3 +26,4 @@ export * from './gaugeBtcUtxos';
 export * from './gaugeEpoch';
 export * from './gaugeWitnessChainTracking';
 export * from './gaugeWitnessCount';
+export * from './guageExternalChainsBlockHeight';
