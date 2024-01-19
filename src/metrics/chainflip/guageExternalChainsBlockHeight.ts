@@ -18,28 +18,28 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
 
     try {
         // Ethereum
-        const ethBlockHeigth = Number(
+        const ethBlockHeight = Number(
             (await api.query.ethereumChainTracking.currentChainState())
                 .toHuman()
                 .blockHeight.replace(/,/g, ''),
         );
-        metric.labels('ethereum').set(ethBlockHeigth);
+        metric.labels('ethereum').set(ethBlockHeight);
 
         // Bitcoin
-        const btcBlockHeigth = Number(
+        const btcBlockHeight = Number(
             (await api.query.bitcoinChainTracking.currentChainState())
                 .toHuman()
                 .blockHeight.replace(/,/g, ''),
         );
-        metric.labels('bitcoin').set(btcBlockHeigth);
+        metric.labels('bitcoin').set(btcBlockHeight);
 
         // Polkadot
-        const dotBlockHeigth = Number(
+        const dotBlockHeight = Number(
             (await api.query.polkadotChainTracking.currentChainState())
                 .toHuman()
                 .blockHeight.replace(/,/g, ''),
         );
-        metric.labels('polkadot').set(dotBlockHeigth);
+        metric.labels('polkadot').set(dotBlockHeight);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricName }).set(1);
