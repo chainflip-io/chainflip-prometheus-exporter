@@ -50,7 +50,10 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
     logger.info(`Network Prometheus Exporter started on port ${env.NETWORK_EXPORTER_PORT}`);
 
     if (config.flip.enabled) {
-        const chainflipLogger: Logger = logger.child({ chain: 'chainflip' });
+        const chainflipLogger: Logger = logger.child({
+            chain: 'chainflip',
+            network: config.flip.network,
+        });
         const chainflipContext: Context = createContext(
             chainflipLogger,
             chainflipRegistry,
@@ -62,7 +65,10 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
     }
 
     if (config.dot.enabled) {
-        const polkadotLogger: Logger = logger.child({ chain: 'polkadot' });
+        const polkadotLogger: Logger = logger.child({
+            chain: 'polkadot',
+            network: config.dot.network,
+        });
         const polkadotContext: Context = createContext(
             polkadotLogger,
             polkadotRegistry,
@@ -73,7 +79,10 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
     }
 
     if (config.eth.enabled) {
-        const ethereumLogger: Logger = logger.child({ chain: 'ethereum' });
+        const ethereumLogger: Logger = logger.child({
+            chain: 'ethereum',
+            network: config.eth.network,
+        });
         const ethereumContext: Context = createContext(
             ethereumLogger,
             ethereumRegistry,
@@ -85,7 +94,10 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
     }
 
     if (config.btc.enabled) {
-        const bitcoinLogger: Logger = logger.child({ chain: 'bitcoin' });
+        const bitcoinLogger: Logger = logger.child({
+            chain: 'bitcoin',
+            network: config.btc.network,
+        });
         const bitcoinContext: Context = createContext(
             bitcoinLogger,
             bitcoinRegistry,
