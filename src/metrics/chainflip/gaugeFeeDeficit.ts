@@ -5,7 +5,7 @@ const metricName: string = 'cf_fee_deficit';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
     help: 'The fee deficit, (witheld fee - fee actually spent)',
-    labelNames: ['chain'],
+    labelNames: ['tracked_chain'],
     registers: [],
 });
 
@@ -28,7 +28,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
             totalSpent += Number(element.toHuman().replace(/,/g, ''));
         });
         const deficitEth = (feeWitheldEth - totalSpent) / 1e18;
-        metric.labels('Ethereum').set(deficitEth);
+        metric.labels('ethereum').set(deficitEth);
 
         // DOT fees balance
         const feeWitheldDot = Number(
@@ -42,7 +42,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
             totalSpent += Number(element.toHuman().replace(/,/g, ''));
         });
         const deficitDot = (feeWitheldDot - totalSpent) / 1e10;
-        metric.labels('Polkadot').set(deficitDot);
+        metric.labels('polkadot').set(deficitDot);
     } catch (err) {
         logger.error(err);
         metricFailure.labels({ metric: metricName }).set(1);
