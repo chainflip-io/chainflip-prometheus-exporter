@@ -1,21 +1,21 @@
 version: "3"
 
 services:
-  exporter:
-    container_name: network-exporter
-    build:
-      context: .
-    restart: always
-    volumes:
-      - ./config/localnet.json:/app/config/localnet.json
-    environment:
-      - CONFIG_PATH=/app/config/localnet.json
-      - ETH_WS_ENDPOINT=ws://geth:8546
-      - CF_WS_ENDPOINT=ws://node:9944
-      - DOT_WS_ENDPOINT=ws://dot:9945
-      - BTC_WS_ENDPOINT=ws://btc:8332
-    ports:
-      - "9000:9000"
+#  exporter:
+#    container_name: network-exporter
+#    build:
+#      context: .
+#    restart: always
+#    volumes:
+#      - ./config/localnet.json:/app/config/localnet.json
+#    environment:
+#      - CONFIG_PATH=/app/config/localnet.json
+#      - ETH_WS_ENDPOINT=ws://geth:8546
+#      - CF_WS_ENDPOINT=ws://node:9944
+#      - DOT_WS_ENDPOINT=ws://dot:9945
+#      - BTC_WS_ENDPOINT=ws://btc:8332
+#    ports:
+#      - "9000:9000"
   prometheus:
     image: prom/prometheus
     ports:
