@@ -68,6 +68,12 @@ docker-compose up -d
 
 You can now access Prometheus at http://localhost:9090.
 
+To add new alerts to Prometheus, add them to the `alerts.yaml` file. Then restart Prometheus:
+
+```shell
+docker-compose restart prometheus
+```
+
 
 
 ### Custom config file
