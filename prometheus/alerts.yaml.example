@@ -1,0 +1,12 @@
+# Here you can add new alerts for Prometheus to test locally.
+groups:
+  - name: test_alert
+    rules:
+    - alert: Exporter DOWN
+      expr: up{job="chainflip-prometheus-exporter"} == 0
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Exporter down"
+        description: "Exporter down"
