@@ -29,6 +29,7 @@ import {
     gaugeEpoch,
     gaugeWitnessChainTracking,
     gaugeWitnessCount,
+    gaugeExternalChainsBlockHeight,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -97,6 +98,7 @@ async function startWatcher(context: Context) {
             gaugeEpoch(context);
             gaugeWitnessChainTracking(context);
             gaugeWitnessCount(context);
+            gaugeExternalChainsBlockHeight(context);
             gaugeBitcoinBalance(context);
             gaugeBlockHeight({ ...context, header });
             gaugeAuthorities(context);
