@@ -6,3 +6,4 @@ dist
 .env.berghain
 config/ignore.json
 config/perseverance.json
+alerts.yaml

@@ -27,3 +27,4 @@ export * from './gaugeEpoch';
 export * from './gaugeWitnessChainTracking';
 export * from './gaugeWitnessCount';
 export * from './gaugeFeeDeficit';
+export * from './guageExternalChainsBlockHeight';
