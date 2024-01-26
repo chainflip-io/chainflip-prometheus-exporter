@@ -29,6 +29,7 @@ import {
     gaugeEpoch,
     gaugeWitnessChainTracking,
     gaugeWitnessCount,
+    gaugeFeeDeficit,
     gaugeExternalChainsBlockHeight,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -123,6 +124,7 @@ async function startWatcher(context: Context) {
             gaugePendingBroadcast(context);
             gaugeTssRetryQueues(context);
             // gaugeSwappingQueue(context);
+            gaugeFeeDeficit(context);
 
             metric.set(0);
         });
