@@ -38,7 +38,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                             // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                             if (number < 150) {
                                 logger.info(
-                                    `${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
+                                    `Block ${elem[0]}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
                                 );
                             }
                         }
@@ -61,7 +61,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                             // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                             if (number < 150) {
                                 logger.info(
-                                    `${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
+                                    `Block ${elem[0]}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
                                 );
                             }
                         }
