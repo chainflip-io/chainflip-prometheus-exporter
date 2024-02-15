@@ -24,7 +24,8 @@ export const gaugeDotBalance = async (context: Context) => {
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-    if (registry.getSingleMetric(metricNameAggKeyBalance) === undefined) registry.registerMetric(metricAggKeyBalance);
+    if (registry.getSingleMetric(metricNameAggKeyBalance) === undefined)
+        registry.registerMetric(metricAggKeyBalance);
 
     metricFailure.labels({ metric: metricName }).set(0);
 
@@ -37,7 +38,7 @@ export const gaugeDotBalance = async (context: Context) => {
         if (global.dotAggKeyAddress) {
             const dotAccount: any = await api.query.system.account(global.dotAggKeyAddress);
             const metricValue = Number(dotAccount.data.free) / 10000000000;
-            metricAggKeyBalance.set(metricValue)
+            metricAggKeyBalance.set(metricValue);
         }
     } catch (err) {
         logger.error(err);

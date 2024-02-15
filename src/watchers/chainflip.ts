@@ -54,7 +54,6 @@ export default async (context: Context): Promise<void> => {
 declare global {
     var rotationInProgress: boolean;
     var epochIndex: number;
-    var dotVaultEpochIndex: number;
     var dotAggKeyAddress: string;
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
