@@ -26,7 +26,7 @@ import {
     gaugeSwappingQueue,
     gaugeBtcUtxos,
     gaugePendingBroadcast,
-    gaugeEpoch,
+    gatherGlobalValues,
     gaugeWitnessChainTracking,
     gaugeWitnessCount,
     gaugeFeeDeficit,
@@ -54,6 +54,7 @@ export default async (context: Context): Promise<void> => {
 declare global {
     var rotationInProgress: boolean;
     var epochIndex: number;
+    var dotAggKeyAddress: string;
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
             cf: {
@@ -96,7 +97,7 @@ async function startWatcher(context: Context) {
 
         context.api = api;
         await api.rpc.chain.subscribeNewHeads(async (header) => {
-            gaugeEpoch(context);
+            gatherGlobalValues(context);
             gaugeWitnessChainTracking(context);
             gaugeWitnessCount(context);
             gaugeExternalChainsBlockHeight(context);
