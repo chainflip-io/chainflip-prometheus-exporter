@@ -31,7 +31,7 @@ export const gaugePendingRedemptions = async (context: Context): Promise<void> =
         const pendingRedemptions = await api.query.funding.pendingRedemptions.entries();
         let totalRedemptionBalance: number = 0;
         pendingRedemptions.forEach(([key, element]: [any, any]) => {
-            totalRedemptionBalance += parseFloat(element.toHuman()[0].replace(/,/g, '')) / 1e18;
+            totalRedemptionBalance += parseFloat(element.toHuman().total.replace(/,/g, '')) / 1e18;
         });
 
         metricPendingRedemptionBalance.set(totalRedemptionBalance);
