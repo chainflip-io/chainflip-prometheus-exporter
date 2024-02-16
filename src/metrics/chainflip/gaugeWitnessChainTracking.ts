@@ -23,50 +23,58 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
         metricFailure.labels({ metric: metricName }).set(0);
         try {
             const signedBlock = await api.rpc.chain.getBlock();
-            for (const elem of witnessHash10) {
-                if (signedBlock.block.header.number - elem[0] > 10) {
-                    for (const hash of elem[1]) {
+            let currentBlockNumber = Number(signedBlock.block.header.number.toHuman().replace(/,/g, ''));
+            global.currentBlock = currentBlockNumber;
+            for (const [blockNumber, set] of witnessHash10) {
+                if (currentBlockNumber - blockNumber > 10) {
+                    let tmpSet = new Set(set);
+                    witnessHash10.delete(blockNumber);
+                    for (const hash of tmpSet) {
                         const parsedObj = JSON.parse(hash);
-                        const votes: string = (
-                            await api.query.witnesser.votes(global.epochIndex, parsedObj.hash)
-                        ).toHuman();
-                        if (votes) {
-                            const binary = hex2bin(votes);
-                            const number = binary.match(/1/g)?.length || 0;
-
-                            metric.labels(parsedObj.type, '10').set(number);
-                            // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                            if (number < 150) {
-                                logger.info(
-                                    `Block ${elem[0]}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
-                                );
+                        api.query.witnesser.votes(global.epochIndex, parsedObj.hash).then((votes) =>{
+                            if(global.currentBlock === currentBlockNumber) {
+                                const vote = votes.toHuman();
+                                if (vote) {
+                                    const binary = hex2bin(vote);
+                                    const number = binary.match(/1/g)?.length || 0;
+        
+                                    metric.labels(parsedObj.type, '10').set(number);
+                                    // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                                    if (number < 150) {
+                                        logger.info(
+                                            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
+                                        );
+                                    }
+                                }
                             }
-                        }
+                        });
                     }
-                    witnessHash10.delete(elem[0]);
                 }
             }
-            for (const elem of witnessHash50) {
-                if (signedBlock.block.header.number - elem[0] > 50) {
-                    for (const hash of elem[1]) {
+            for (const [blockNumber, set] of witnessHash50) {
+                if (currentBlockNumber - blockNumber > 50) {
+                    let tmpSet = new Set(set);
+                    witnessHash50.delete(blockNumber);
+                    for (const hash of tmpSet) {
                         const parsedObj = JSON.parse(hash);
-                        const votes: string = (
-                            await api.query.witnesser.votes(global.epochIndex, parsedObj.hash)
-                        ).toHuman();
-                        if (votes) {
-                            const binary = hex2bin(votes);
-                            const number = binary.match(/1/g)?.length || 0;
-
-                            metric.labels(parsedObj.type, '50').set(number);
-                            // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                            if (number < 150) {
-                                logger.info(
-                                    `Block ${elem[0]}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
-                                );
+                        api.query.witnesser.votes(global.epochIndex, parsedObj.hash).then((votes) =>{
+                            if(global.currentBlock === currentBlockNumber) {
+                                const vote = votes.toHuman();
+                                if (vote) {
+                                    const binary = hex2bin(vote);
+                                    const number = binary.match(/1/g)?.length || 0;
+        
+                                    metric.labels(parsedObj.type, '50').set(number);
+                                    // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                                    if (number < 150) {
+                                        logger.info(
+                                            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
+                                        );
+                                    }
+                                }
                             }
-                        }
+                        });
                     }
-                    witnessHash50.delete(elem[0]);
                 }
             }
             let btcBlock = 0;
@@ -95,7 +103,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (blockHeight > ethBlock) {
+                        if (Number(blockHeight) > ethBlock) {
                             insertOrReplace(
                                 witnessHash10,
                                 JSON.stringify({
@@ -114,7 +122,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                                 blockNumber,
                                 `${callData.section}:${callData.method}`,
                             );
-                            ethBlock = blockHeight;
+                            ethBlock = Number(blockHeight);
                         }
                     }
                     if (callData && callData.section === 'bitcoinChainTracking') {
@@ -138,7 +146,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (blockHeight > btcBlock) {
+                        if (Number(blockHeight) > ethBlock) {
                             insertOrReplace(
                                 witnessHash10,
                                 JSON.stringify({
@@ -157,7 +165,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                                 blockNumber,
                                 `${callData.section}:${callData.method}`,
                             );
-                            btcBlock = blockHeight;
+                            btcBlock = Number(blockHeight);
                         }
                     }
                     if (callData && callData.section === 'polkadotChainTracking') {
@@ -180,7 +188,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (blockHeight > dotBlock) {
+                        if (Number(blockHeight) > ethBlock) {
                             insertOrReplace(
                                 witnessHash10,
                                 JSON.stringify({
@@ -199,7 +207,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                                 blockNumber,
                                 `${callData.section}:${callData.method}`,
                             );
-                            dotBlock = blockHeight;
+                            dotBlock = Number(blockHeight);
                         }
                     }
                 }

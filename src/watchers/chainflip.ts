@@ -55,6 +55,7 @@ declare global {
     var rotationInProgress: boolean;
     var epochIndex: number;
     var dotAggKeyAddress: string;
+    var currentBlock: number;
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
             cf: {
@@ -81,7 +82,7 @@ async function startWatcher(context: Context) {
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
     if (registry.getSingleMetric(metricFailureName) === undefined)
         registry.registerMetric(metricFailure);
-
+    global.currentBlock = 0;
     try {
         const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
         provider.on('disconnected', async (err) => {
