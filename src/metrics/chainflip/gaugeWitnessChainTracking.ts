@@ -23,57 +23,63 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
         metricFailure.labels({ metric: metricName }).set(0);
         try {
             const signedBlock = await api.rpc.chain.getBlock();
-            let currentBlockNumber = Number(signedBlock.block.header.number.toHuman().replace(/,/g, ''));
+            const currentBlockNumber = Number(
+                signedBlock.block.header.number.toHuman().replace(/,/g, ''),
+            );
             global.currentBlock = currentBlockNumber;
             for (const [blockNumber, set] of witnessHash10) {
                 if (currentBlockNumber - blockNumber > 10) {
-                    let tmpSet = new Set(set);
+                    const tmpSet = new Set(set);
                     witnessHash10.delete(blockNumber);
                     for (const hash of tmpSet) {
                         const parsedObj = JSON.parse(hash);
-                        api.query.witnesser.votes(global.epochIndex, parsedObj.hash).then((votes) =>{
-                            if(global.currentBlock === currentBlockNumber) {
-                                const vote = votes.toHuman();
-                                if (vote) {
-                                    const binary = hex2bin(vote);
-                                    const number = binary.match(/1/g)?.length || 0;
-        
-                                    metric.labels(parsedObj.type, '10').set(number);
-                                    // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                    if (number < 150) {
-                                        logger.info(
-                                            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
-                                        );
+                        api.query.witnesser
+                            .votes(global.epochIndex, parsedObj.hash)
+                            .then((votes) => {
+                                if (global.currentBlock === currentBlockNumber) {
+                                    const vote = votes.toHuman();
+                                    if (vote) {
+                                        const binary = hex2bin(vote);
+                                        const number = binary.match(/1/g)?.length || 0;
+
+                                        metric.labels(parsedObj.type, '10').set(number);
+                                        // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                                        if (number < 150) {
+                                            logger.info(
+                                                `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
+                                            );
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
                     }
                 }
             }
             for (const [blockNumber, set] of witnessHash50) {
                 if (currentBlockNumber - blockNumber > 50) {
-                    let tmpSet = new Set(set);
+                    const tmpSet = new Set(set);
                     witnessHash50.delete(blockNumber);
                     for (const hash of tmpSet) {
                         const parsedObj = JSON.parse(hash);
-                        api.query.witnesser.votes(global.epochIndex, parsedObj.hash).then((votes) =>{
-                            if(global.currentBlock === currentBlockNumber) {
-                                const vote = votes.toHuman();
-                                if (vote) {
-                                    const binary = hex2bin(vote);
-                                    const number = binary.match(/1/g)?.length || 0;
-        
-                                    metric.labels(parsedObj.type, '50').set(number);
-                                    // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                    if (number < 150) {
-                                        logger.info(
-                                            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
-                                        );
+                        api.query.witnesser
+                            .votes(global.epochIndex, parsedObj.hash)
+                            .then((votes) => {
+                                if (global.currentBlock === currentBlockNumber) {
+                                    const vote = votes.toHuman();
+                                    if (vote) {
+                                        const binary = hex2bin(vote);
+                                        const number = binary.match(/1/g)?.length || 0;
+
+                                        metric.labels(parsedObj.type, '50').set(number);
+                                        // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                                        if (number < 150) {
+                                            logger.info(
+                                                `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
+                                            );
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
                     }
                 }
             }
