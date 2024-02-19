@@ -56,6 +56,7 @@ declare global {
     var epochIndex: number;
     var dotAggKeyAddress: string;
     var currentBlock: number;
+    var currentAuthorities: number;
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
             cf: {

@@ -33,7 +33,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes) => {
+                            .then((votes: { toHuman: () => any; }) => {
                                 const vote = votes.toHuman();
                                 if (vote) {
                                     const binary = hex2bin(vote);
@@ -41,7 +41,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
 
                                     metric.labels(parsedObj.type, '10').set(number);
                                     // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                    if (number < 150) {
+                                    if (number < global.currentAuthorities) {
                                         logger.info(
                                             `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
                                         );
@@ -59,7 +59,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes) => {
+                            .then((votes: { toHuman: () => any; }) => {
                                 const vote = votes.toHuman();
                                 if (vote) {
                                     const binary = hex2bin(vote);
@@ -67,7 +67,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
 
                                     metric.labels(parsedObj.type, '50').set(number);
                                     // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                    if (number < 150) {
+                                    if (number < global.currentAuthorities) {
                                         logger.info(
                                             `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
                                         );

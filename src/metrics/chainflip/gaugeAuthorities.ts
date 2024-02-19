@@ -32,7 +32,8 @@ export const gaugeAuthorities = async (context: Context): Promise<void> => {
 
         currentAuthorities = await api.query.validator.currentAuthorities();
         metric.set(currentAuthorities.toJSON().length);
-
+        global.currentAuthorities = currentAuthorities.toJSON().length;
+        console.log(global.currentAuthorities)
         for (const idSs58 of currentAuthorities.toJSON()) {
             const result = await makeRpcRequest(api, 'account_info_v2', idSs58);
             if (result.is_online) {
