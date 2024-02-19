@@ -35,7 +35,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes: { toHuman: () => any; }) => {
+                            .then((votes: { toHuman: () => any }) => {
                                 if (global.currentBlock === currentBlockNumber) {
                                     const vote = votes.toHuman();
                                     if (vote) {
@@ -63,7 +63,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes: { toHuman: () => any; }) => {
+                            .then((votes: { toHuman: () => any }) => {
                                 if (global.currentBlock === currentBlockNumber) {
                                     const vote = votes.toHuman();
                                     if (vote) {
