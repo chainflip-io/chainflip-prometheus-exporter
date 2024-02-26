@@ -140,9 +140,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
                         // set the default value for the fees (we use these values to witness)
                         finalData.new_chain_state.trackedData.btcFeeInfo = {
-                            feePerInputUtxo: '7500',
-                            feePerOutputUtxo: '4300',
-                            minFeeRequiredPerTx: '1200',
+                            satsPerKilobyte: '100000',
                         };
 
                         // create the extrinsic we need to witness (ETH chain tracking in this case)
@@ -152,7 +150,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (Number(blockHeight) > ethBlock) {
+                        if (Number(blockHeight) > btcBlock) {
                             insertOrReplace(
                                 witnessHash10,
                                 JSON.stringify({
@@ -194,7 +192,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         );
                         // obtain the hash of the extrinsic call
                         const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-                        if (Number(blockHeight) > ethBlock) {
+                        if (Number(blockHeight) > dotBlock) {
                             insertOrReplace(
                                 witnessHash10,
                                 JSON.stringify({
