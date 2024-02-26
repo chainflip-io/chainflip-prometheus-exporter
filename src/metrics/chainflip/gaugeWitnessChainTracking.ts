@@ -140,7 +140,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
 
                         // set the default value for the fees (we use these values to witness)
                         finalData.new_chain_state.trackedData.btcFeeInfo = {
-                            satsPerKilobyte: '100000'
+                            satsPerKilobyte: '100000',
                         };
 
                         // create the extrinsic we need to witness (ETH chain tracking in this case)
