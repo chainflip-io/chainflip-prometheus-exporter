@@ -15,6 +15,7 @@ import {
     gaugeTokenBalance,
     gaugeBlockTime,
     gaugeReorgSize,
+    gaugeFlipBalance,
 } from '../metrics/eth';
 
 const metricName: string = 'eth_watcher_failure';
@@ -115,11 +116,12 @@ async function startWatcher(context: Context) {
         context.provider = wsProvider;
 
         wsProvider.on('block', async (blockNumber: number) => {
-            await gaugeEthBalance(context);
-            await gaugeTokenBalance({ ...context, contract: flipContract }, 'FLIP');
-            await gaugeTokenBalance({ ...context, contract: usdcContract }, 'USDC');
-            await gaugeBlockHeight({ ...context, blockNumber });
-            await gaugeBlockTime({ ...context, blockNumber });
+            gaugeEthBalance(context);
+            gaugeTokenBalance({ ...context, contract: flipContract }, 'FLIP');
+            gaugeTokenBalance({ ...context, contract: usdcContract }, 'USDC');
+            gaugeBlockHeight({ ...context, blockNumber });
+            gaugeBlockTime({ ...context, blockNumber });
+            gaugeFlipBalance({ ...context, contract: flipContract });
             // await gaugeReorgSize({...context, blockNumber}); //TODO fix metric
         });
 
