@@ -43,9 +43,10 @@ const USDCPriceId = 'evm-10xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const DOTPriceId = 'dot0x0000000000000000000000000000000000000000';
 
 const prices = new Map();
-let ingressFees;
-let egressFees;
-const decimals = {
+let ingressFees: any;
+let egressFees: any;
+type tokenDecimals = { BTC: number; ETH: number; FLIP: number; USDC: number; DOT: number };
+const decimals: tokenDecimals = {
     BTC: 1e8,
     ETH: 1e18,
     FLIP: 1e18,
@@ -54,10 +55,10 @@ const decimals = {
 };
 
 type asset = {
-    asset: string;
+    asset: keyof tokenDecimals;
     priceId: string;
     chain: string;
-    chainAsset: string;
+    chainAsset: keyof tokenDecimals;
     chainAssetPriceId: string;
 };
 const BTC: asset = {
@@ -117,7 +118,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
             '{"query":"\\nquery GetTokenPrices($tokens: [PriceQueryInput\u0021]\u0021) {\\n  tokenPrices: getTokenPrices(input: $tokens) {\\n    chainId\\n    address\\n    usdPrice\\n    }\\n}","variables":{"tokens":[{"chainId":"btc","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}, {"chainId":"evm-1","address":"0x826180541412D574cf1336d22c0C0a287822678A"}, {"chainId":"dot","address":"0x0000000000000000000000000000000000000000"}]}}',
         );
         const formattedData = JSON.parse(data.data).data.tokenPrices;
-        formattedData.forEach((element) => {
+        formattedData.forEach((element: any) => {
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
         });
 
@@ -161,7 +162,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
 
         // simulate the swap
         api.rpc('cf_swap_rate', from.asset, 'USDC', netImputAmount.toString(16)).then(
-            (output) => {
+            (output: any) => {
                 const amount = output.output;
                 // we need to "simulate" the amount of fees we are paying in USDC, because it is given back in ETH
                 const usdcFeeInEth = parseInt(egressFees.Ethereum.USDC);
@@ -197,7 +198,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
 
         // simulate the swap
         api.rpc('cf_swap_rate', 'USDC', to.asset, netImputAmount.toString(16)).then(
-            (output) => {
+            (output: any) => {
                 const amount = output.output;
                 const egressFee =
                     ((parseInt(egressFees[to.chain][to.chainAsset]) / decimals[to.chainAsset]) *
