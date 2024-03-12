@@ -199,10 +199,6 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         api.rpc('cf_swap_rate', 'USDC', to.asset, netImputAmount.toString(16)).then(
             (output) => {
                 const amount = output.output;
-                // we need to calculate the ingress fee we are paying
-                // let usdcFeeInEth = parseInt(egressFees.Ethereum.USDC);
-                // let usdcFee = (usdcFeeInEth / 1e18) * prices.get(ETHPriceId);
-                // let netEgressAmount = parseInt(amount) / 1e6 - usdcFee;
                 const egressFee =
                     ((parseInt(egressFees[to.chain][to.chainAsset]) / decimals[to.chainAsset]) *
                         prices.get(to.chainAssetPriceId)) /
@@ -219,9 +215,9 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
             },
             () => {
                 logger.info(
-                    `Failed to query cf_swap_rate: USDC(${
-                        intialAmount / decimals[from.asset]
-                    }) -> ${to.asset}`,
+                    `Failed to query cf_swap_rate: USDC(${intialAmount / decimals.USDC}) -> ${
+                        to.asset
+                    }`,
                 );
                 metricPriceDeltaNotWorking.labels('USDC', to.asset, labelAmount).set(1);
             },
