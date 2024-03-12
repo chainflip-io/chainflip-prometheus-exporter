@@ -31,6 +31,7 @@ import {
     gaugeWitnessCount,
     gaugeFeeDeficit,
     gaugeExternalChainsBlockHeight,
+    gaugePriceDelta,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -128,7 +129,7 @@ async function startWatcher(context: Context) {
             gaugeTssRetryQueues(context);
             // gaugeSwappingQueue(context);
             gaugeFeeDeficit(context);
-
+            gaugePriceDelta(context);
             metric.set(0);
         });
         await api.query.system.events(async (events: any) => {
