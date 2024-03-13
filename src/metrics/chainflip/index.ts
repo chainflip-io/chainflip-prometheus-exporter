@@ -28,3 +28,4 @@ export * from './gaugeWitnessChainTracking';
 export * from './gaugeWitnessCount';
 export * from './gaugeFeeDeficit';
 export * from './guageExternalChainsBlockHeight';
+export * from './gaugePriceDelta';
