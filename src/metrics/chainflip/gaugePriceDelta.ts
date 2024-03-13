@@ -147,6 +147,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         calculateRateFromUsdc(BTC, fiftyKUsdc);
         calculateRateFromUsdc(ETH, fiftyKUsdc);
         calculateRateFromUsdc(FLIP, fiftyKUsdc);
+        calculateRateFromUsdc(DOT, tenKUsdc);
     } catch (e: any) {
         logger.error(e);
     }
