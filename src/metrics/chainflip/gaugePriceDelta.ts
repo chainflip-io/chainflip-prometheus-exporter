@@ -153,7 +153,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
     }
 
     function calculateRateToUsdc(from: asset, intialAmount: number) {
-        const labelAmount = Math.round(intialAmount / decimals[from.asset]).toString();
+        const labelAmount = (intialAmount / decimals[from.asset]).toString();
         // we need to subtract ingress fee before calculating the swap rate
         let netImputAmount =
             intialAmount / decimals[from.asset] -
