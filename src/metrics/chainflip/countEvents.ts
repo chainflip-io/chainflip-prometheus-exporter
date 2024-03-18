@@ -61,9 +61,9 @@ export const countEvents = async (context: Context): Promise<void> => {
 
         if (config.eventLog) {
             if (event.data.dispatchError) {
-                const metadata = errorMap.get(event.data.dispatchError.toString())
-                    ? errorMap.get(event.data.dispatchError.toString())
-                    : 'Error mapping not defined';
+                const metadata = errorMap.has(event.data.dispatchError.toString())
+                    ? { error: errorMap.get(event.data.dispatchError.toString()) }
+                    : { error: 'Error mapping not defined' };
                 logger.info('event_log', {
                     metadata,
                     event: `${event.section}:${event.method}`,
