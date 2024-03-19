@@ -27,6 +27,12 @@ const metricSlash: Counter = new promClient.Counter({
     registers: [],
 });
 
+const errorMap = new Map();
+errorMap.set(
+    `{"module":{"index":35,"error":"0x03000000"}}`,
+    'liquidityPools.UnspecifiedOrderPrice',
+);
+
 export const countEvents = async (context: Context): Promise<void> => {
     const { logger, registry, events, api } = context;
     const config = context.config as FlipConfig;
@@ -54,10 +60,21 @@ export const countEvents = async (context: Context): Promise<void> => {
         metric.labels(`${event.section}:${event.method}`).inc(1);
 
         if (config.eventLog) {
-            logger.info('event_log', {
-                event: `${event.section}:${event.method}`,
-                data: event.data.toHuman(),
-            });
+            if (event.data.dispatchError) {
+                const metadata = errorMap.has(event.data.dispatchError.toString())
+                    ? { error: errorMap.get(event.data.dispatchError.toString()) }
+                    : { error: 'Error mapping not defined' };
+                logger.info('event_log', {
+                    metadata,
+                    event: `${event.section}:${event.method}`,
+                    data: event.data.toHuman(),
+                });
+            } else {
+                logger.info('event_log', {
+                    event: `${event.section}:${event.method}`,
+                    data: event.data.toHuman(),
+                });
+            }
         }
 
         // Set extra labels for specific events
