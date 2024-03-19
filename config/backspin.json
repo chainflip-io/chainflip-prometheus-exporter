@@ -1,0 +1,91 @@
+{
+  "dot": {
+    "enabled": false,
+    "network": "pdot",
+    "defaultMetrics": [],
+    "accounts": []
+  },
+  "flip": {
+    "enabled": true,
+    "network": "backspin",
+    "defaultMetrics": [],
+    "accounts": [],
+    "skipEvents": [
+      {
+        "section": "transactionPayment",
+        "method": "TransactionFeePaid"
+      },
+      {
+        "section": "system",
+        "method": "ExtrinsicSuccess"
+      }
+    ]
+  },
+  "btc": {
+    "enabled": false,
+    "network": "mainnet",
+    "defaultMetrics": [],
+    "wallets": []
+  },
+  "eth": {
+    "enabled": false,
+    "networkId": 5,
+    "network": "goerli",
+    "defaultMetrics": [
+      {
+        "name": "cf_majority_threshold",
+        "value": 145
+      }
+    ],
+    "contracts": [
+      {
+        "alias": "state-chain-gateway",
+        "address": "0x6995Ab7c4D7F4B03f467Cf4c8E920427d9621DBd"
+      },
+      {
+        "alias": "key-manager",
+        "address": "0xcd351d3626Dc244730796A3168D315168eBf08Be"
+      },
+      {
+        "alias": "vault",
+        "address": "0xF5e10380213880111522dd0efD3dbb45b9f62Bcc"
+      },
+      {
+        "alias": "flip",
+        "address": "0x826180541412D574cf1336d22c0C0a287822678A"
+      },
+      {
+        "alias": "usdc",
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      }
+    ],
+    "wallets": [
+      {
+        "alias": "bashful",
+        "address": "0x9c1bc912afa4eb8a516ed50378e6163360264e84"
+      },
+      {
+        "alias": "doc",
+        "address": "0x0cb6f56ccefd56fbefca4146ca1dd9949100eb62"
+      },
+      {
+        "alias": "dopey",
+        "address": "0xd0b108995911377d8d32b652c5dd1c233a6afc87"
+      },
+      {
+        "alias": "vault",
+        "address": "0xF5e10380213880111522dd0efD3dbb45b9f62Bcc"
+      }
+    ],
+    "tokens": [
+      {
+        "address": "0x826180541412D574cf1336d22c0C0a287822678A",
+        "symbol": "FLIP"
+      },
+      {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "symbol": "USDC"
+      }
+    ]
+  }
+}
