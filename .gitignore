@@ -1,6 +1,6 @@
 .idea
 node_modules
-.env
+.env*
 dist
 .env.perseverance
 .env.berghain

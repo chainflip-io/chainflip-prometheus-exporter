@@ -155,26 +155,18 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
     function calculateRateToUsdc(from: asset, intialAmount: number) {
         const labelAmount = (intialAmount / decimals[from.asset]).toString();
         // we need to subtract ingress fee before calculating the swap rate
-        let netImputAmount =
-            intialAmount / decimals[from.asset] -
-            ((parseInt(ingressFees[from.chain][from.asset]) / decimals[from.chainAsset]) *
-                prices.get(from.chainAssetPriceId)) /
-                prices.get(from.priceId);
-        netImputAmount = Math.round(netImputAmount * decimals[from.asset]);
+        let netImputAmount = intialAmount - parseInt(ingressFees[from.chain][from.asset]);
+
+        netImputAmount = Math.round(netImputAmount);
         // simulate the swap
         api.rpc('cf_swap_rate', from.asset, 'USDC', netImputAmount.toString(16)).then(
             (output: any) => {
                 const amount = output.output;
-                // we need to "simulate" the amount of fees we are paying in USDC, because it is given back in ETH
-                const usdcFeeInEth = parseInt(egressFees.Ethereum.USDC);
-                const usdcFee = (usdcFeeInEth / 1e18) * prices.get(ETHPriceId);
-                // we need to subtract the egress fee to get the final egress amount
-                const netEgressAmount = parseInt(amount) / 1e6 - usdcFee;
+                const netEgressAmount = (parseInt(amount) - egressFees.Ethereum.USDC) / 1e6;
 
                 const delta =
-                    ((netEgressAmount * prices.get(USDCPriceId) -
-                        prices.get(from.priceId) * (intialAmount / decimals[from.asset])) /
-                        (prices.get(from.priceId) * (intialAmount / decimals[from.asset]))) *
+                    (netEgressAmount * prices.get(USDCPriceId) * 100) /
+                        (prices.get(from.priceId) * (intialAmount / decimals[from.asset])) -
                     100;
                 metricToUsdc.labels(from.asset, labelAmount).set(delta);
                 metricPriceDeltaNotWorking.labels(from.asset, 'USDC', labelAmount).set(0);
@@ -189,27 +181,19 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
     function calculateRateFromUsdc(to: asset, intialAmount: number) {
         const labelAmount = Math.round(intialAmount / decimals.USDC).toString();
         // we need to subtract ingress fee before calculating the swap rate
-        let netImputAmount =
-            intialAmount / decimals.USDC -
-            ((parseInt(ingressFees.Ethereum.USDC) / decimals.ETH) * prices.get(ETHPriceId)) /
-                prices.get(USDCPriceId);
-        netImputAmount = Math.round(netImputAmount * decimals.USDC);
+        let netImputAmount = intialAmount - parseInt(ingressFees.Ethereum.USDC);
+        netImputAmount = Math.round(netImputAmount);
 
         // simulate the swap
         api.rpc('cf_swap_rate', 'USDC', to.asset, netImputAmount.toString(16)).then(
             (output: any) => {
                 const amount = output.output;
-                const egressFee =
-                    ((parseInt(egressFees[to.chain][to.chainAsset]) / decimals[to.chainAsset]) *
-                        prices.get(to.chainAssetPriceId)) /
-                    prices.get(to.priceId);
-                // we need to subtract the egress fee to get the final egress amount
-                const netEgressAmount = parseInt(amount) / decimals[to.asset] - egressFee;
+                const netEgressAmount =
+                    (parseInt(amount) - egressFees[to.chain][to.asset]) / decimals[to.asset];
 
                 const delta =
-                    ((netEgressAmount * prices.get(to.priceId) -
-                        prices.get(USDCPriceId) * (intialAmount / decimals.USDC)) /
-                        (prices.get(USDCPriceId) * (intialAmount / decimals.USDC))) *
+                    (netEgressAmount * prices.get(to.priceId) * 100) /
+                        (prices.get(USDCPriceId) * (intialAmount / decimals.USDC)) -
                     100;
                 metricFromUsdc.labels(to.asset, labelAmount).set(delta);
                 metricPriceDeltaNotWorking.labels('USDC', to.asset, labelAmount).set(0);

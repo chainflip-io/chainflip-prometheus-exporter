@@ -7,11 +7,10 @@ export const gatherGlobalValues = async (context: Context): Promise<void> => {
         const epoch: any = await api.query.validator.currentEpoch();
         global.epochIndex = Number(epoch);
 
-        const dotVaultEpoch: any = await api.query.polkadotVault.currentVaultEpoch();
-
-        const dotAggKeyAddress = await api.query.polkadotVault.vaults(Number(dotVaultEpoch));
+        const dotAggKeyAddress = await api.query.environment.polkadotVaultAccountId();
+        console.log(dotAggKeyAddress.toHuman());
         if (dotAggKeyAddress) {
-            global.dotAggKeyAddress = dotAggKeyAddress.toHuman().publicKey;
+            global.dotAggKeyAddress = dotAggKeyAddress.toHuman();
         }
     } catch (err) {
         logger.error(err);
