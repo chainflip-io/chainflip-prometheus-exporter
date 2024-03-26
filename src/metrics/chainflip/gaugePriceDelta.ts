@@ -1,6 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { Axios } from 'axios';
+import { env } from '../../config/getConfig';
 
 const metricToUsdcName: string = 'cf_price_delta_to_usdc';
 const metricToUsdc: Gauge = new promClient.Gauge({
@@ -27,7 +28,7 @@ const metricPriceDeltaNotWorking: Gauge = new promClient.Gauge({
 });
 
 const axios = new Axios({
-    baseURL: 'https://cache-service.chainflip.io/graphql',
+    baseURL: env.CACHE_ENDPOINT,
     timeout: 6000,
     headers: {
         accept: 'application/json',
@@ -114,7 +115,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
 
         // query all index prices
         const data = await axios.post(
-            'https://cache-service.chainflip.io/graphql',
+            env.CACHE_ENDPOINT,
             '{"query":"\\nquery GetTokenPrices($tokens: [PriceQueryInput\u0021]\u0021) {\\n  tokenPrices: getTokenPrices(input: $tokens) {\\n    chainId\\n    address\\n    usdPrice\\n    }\\n}","variables":{"tokens":[{"chainId":"btc","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}, {"chainId":"evm-1","address":"0x826180541412D574cf1336d22c0C0a287822678A"}, {"chainId":"dot","address":"0x0000000000000000000000000000000000000000"}]}}',
         );
         const formattedData = JSON.parse(data.data).data.tokenPrices;

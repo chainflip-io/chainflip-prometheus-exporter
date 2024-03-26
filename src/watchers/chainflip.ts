@@ -32,6 +32,7 @@ import {
     gaugeFeeDeficit,
     gaugeExternalChainsBlockHeight,
     gaugePriceDelta,
+    gaugeDepositChannels,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -58,6 +59,10 @@ declare global {
     var dotAggKeyAddress: string;
     var currentBlock: number;
     var currentAuthorities: number;
+    var btcHeight: number;
+    var ethHeight: number;
+    var dotHeight: number;
+
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
             cf: {
@@ -130,6 +135,7 @@ async function startWatcher(context: Context) {
             // gaugeSwappingQueue(context);
             gaugeFeeDeficit(context);
             gaugePriceDelta(context);
+            gaugeDepositChannels(context);
             metric.set(0);
         });
         await api.query.system.events(async (events: any) => {
