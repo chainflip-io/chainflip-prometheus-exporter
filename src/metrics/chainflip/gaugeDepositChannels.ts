@@ -42,7 +42,7 @@ export const gaugeDepositChannels = async (context: Context): Promise<void> => {
         let ethChannels = 0;
         let btcChannels = 0;
         let dotChannels = 0;
-        channels.forEach((channel) => {
+        channels.forEach((channel: any) => {
             switch (channel.sourceChain) {
                 case 'Ethereum':
                     ethChannels++;
