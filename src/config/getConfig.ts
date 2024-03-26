@@ -24,6 +24,8 @@ const DOT_WS_ENDPOINT: string = process.env.DOT_WS_ENDPOINT || 'ws://localhost:9
 
 const ETH_WS_ENDPOINT: string = process.env.ETH_WS_ENDPOINT || 'ws://localhost:8546';
 
+const CACHE_ENDPOINT: string = process.env.CACHE_ENDPOINT || '';
+
 export interface Env {
     CONFIG_PATH: string;
     BTC_HTTP_ENDPOINT: string;
@@ -37,6 +39,7 @@ export interface Env {
     CF_WS_ENDPOINT: string;
     DOT_WS_ENDPOINT: string;
     ETH_WS_ENDPOINT: string;
+    CACHE_ENDPOINT: string;
 }
 
 export const env: Env = {
@@ -52,6 +55,7 @@ export const env: Env = {
     CF_WS_ENDPOINT,
     DOT_WS_ENDPOINT,
     ETH_WS_ENDPOINT,
+    CACHE_ENDPOINT,
 };
 
 export default function getConfig(logger: Logger): any {
