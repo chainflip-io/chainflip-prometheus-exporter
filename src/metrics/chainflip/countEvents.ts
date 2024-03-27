@@ -32,6 +32,10 @@ errorMap.set(
     `{"module":{"index":35,"error":"0x03000000"}}`,
     'liquidityPools.UnspecifiedOrderPrice',
 );
+errorMap.set(
+    `{"module":{"index":31,"error":"0x00000000"}}`,
+    `liquidityProvider.InsufficientBalance`,
+);
 
 export const countEvents = async (context: Context): Promise<void> => {
     const { logger, registry, events, api } = context;
