@@ -52,25 +52,6 @@
         "networkId": {
           "type": "number"
         },
-        "tokens": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "address": {
-                "type": "string"
-              },
-              "symbol": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "symbol",
-              "address"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        },
         "wallets": {
           "items": {
             "additionalProperties": false,
@@ -97,7 +78,6 @@
         "enabled",
         "network",
         "networkId",
-        "tokens",
         "wallets"
       ],
       "type": "object"

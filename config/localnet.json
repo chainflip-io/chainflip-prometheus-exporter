@@ -134,24 +134,12 @@
 		"defaultMetrics": [],
 		"contracts": [
 		  {
-			  "alias": "state-chain-gateway",
-			  "address": "0xeebe00ac0756308ac4aabfd76c05c4f3088b8883"
-		  },
-		  {
 			  "alias": "key-manager",
 			  "address": "0xa16e02e87b7454126e5e10d957a927a7f5b5d2be"
 		  },
 		  {
 			  "alias": "vault",
 			  "address": "0xb7a5bd0345ef1cc5e66bf61bdec17d2461fbd968"
-		  },
-		  {
-			  "alias": "flip",
-			  "address": "0x10C6E9530F1C1AF873a391030a1D9E8ed0630D26"
-		  },
-		  {
-			  "alias": "usdc",
-			  "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 		  }
 		],
 		"wallets": [
@@ -174,16 +162,6 @@
 		  {
 			  "alias": "vault",
 			  "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
-		  }
-		],
-		"tokens": [
-		  {
-			  "address": "0x8e71CEe1679bceFE1D426C7f23EAdE9d68e62650",
-			  "symbol": "FLIP"
-		  },
-		  {
-			  "address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
-			  "symbol": "USDC"
 		  }
 		]
 	  }

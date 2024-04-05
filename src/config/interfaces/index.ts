@@ -43,7 +43,6 @@ export interface ArbConfig extends ConfigBase {
     networkId: number;
     contracts: EthConfigContract[];
     wallets: ConfigWallet[];
-    tokens: ConfigToken[];
 }
 
 export interface BtcConfig extends ConfigBase {
