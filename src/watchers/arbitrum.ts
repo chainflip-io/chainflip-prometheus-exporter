@@ -30,7 +30,7 @@ let isWatcherRunning: boolean = false;
 
 export default async function startArbitrumService(context: Context) {
     const { logger, registry } = context;
-    logger.info('Starting Ethereum listeners');
+    logger.info('Starting Arbitrum listeners');
     loggerCopy = logger;
     mainRegistry = registry;
     mainContext = context;
