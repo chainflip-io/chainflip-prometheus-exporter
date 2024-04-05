@@ -2,6 +2,106 @@
   "$id": "ConfigSchema",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "ArbConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "contracts": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "defaultMetrics": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "network": {
+          "type": "string"
+        },
+        "networkId": {
+          "type": "number"
+        },
+        "tokens": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "symbol",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "wallets": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "contracts",
+        "defaultMetrics",
+        "enabled",
+        "network",
+        "networkId",
+        "tokens",
+        "wallets"
+      ],
+      "type": "object"
+    },
     "BtcConfig": {
       "additionalProperties": false,
       "properties": {
@@ -61,6 +161,9 @@
     "Config": {
       "additionalProperties": false,
       "properties": {
+        "arb": {
+          "$ref": "#/definitions/ArbConfig"
+        },
         "btc": {
           "$ref": "#/definitions/BtcConfig"
         },
@@ -72,9 +175,6 @@
         },
         "flip": {
           "$ref": "#/definitions/FlipConfig"
-        },
-        "github": {
-          "$ref": "#/definitions/GithubConfig"
         }
       },
       "required": [
@@ -82,7 +182,7 @@
         "btc",
         "dot",
         "flip",
-        "github"
+        "arb"
       ],
       "type": "object"
     },
@@ -317,38 +417,6 @@
         "eventLog",
         "network",
         "skipEvents"
-      ],
-      "type": "object"
-    },
-    "GithubConfig": {
-      "additionalProperties": false,
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "repositories": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "owner": {
-                "type": "string"
-              },
-              "repo": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "owner",
-              "repo"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "enabled",
-        "repositories"
       ],
       "type": "object"
     },
