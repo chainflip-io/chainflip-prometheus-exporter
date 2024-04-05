@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { Context } from '../../lib/interfaces';
 import { ArbConfig } from '../../config/interfaces';
 
-const metricName: string = 'arb_balance';
+const metricName: string = 'arb_eth_balance';
 const metric = new promClient.Gauge({
     name: metricName,
     help: 'The current balance of ETH in the wallet',

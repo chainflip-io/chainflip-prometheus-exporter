@@ -119,13 +119,13 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
             chain: 'arbitrum',
             network: config.arb.network,
         });
-        const bitcoinContext: Context = createContext(
+        const arbitrumContrext: Context = createContext(
             arbitrumLogger,
             arbitrumRegistry,
             env,
             config.arb,
         );
-        startArbitrumService(bitcoinContext);
+        startArbitrumService(arbitrumContrext);
     }
 });
 
