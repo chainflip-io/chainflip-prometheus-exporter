@@ -11,9 +11,6 @@ import {
     gaugeRotating,
     gaugeRotationDuration,
     gaugeSuspendedValidator,
-    gaugeDotBlockTime,
-    gaugeEthBlockTime,
-    gaugeBtcBlockTime,
     gaugeBackupValidator,
     gaugeReputation,
     gaugeBuildVersion,
@@ -117,9 +114,6 @@ async function startWatcher(context: Context) {
             gaugeSuspendedValidator(context);
             gaugeFlipTotalSupply(context);
             gaugeRotationDuration(context);
-            gaugeDotBlockTime(context);
-            gaugeEthBlockTime(context);
-            gaugeBtcBlockTime(context);
             gaugeBackupValidator(context);
             gaugeReputation(context);
             gaugeBuildVersion(context);
@@ -128,11 +122,9 @@ async function startWatcher(context: Context) {
             gaugeBtcUtxos(context);
             // gaugeBlockWeight(context);
             gaugePendingRedemptions(context);
-            // The metrics below have been disabled(or partially disabled) due to an error in the decoding of the values returned
-            // which polkadot API is not able to interpret and cause all the other metrics to fail
             gaugePendingBroadcast(context);
             gaugeTssRetryQueues(context);
-            // gaugeSwappingQueue(context);
+            gaugeSwappingQueue(context);
             gaugeFeeDeficit(context);
             gaugePriceDelta(context);
             gaugeDepositChannels(context);

@@ -13,8 +13,6 @@ import {
     gaugeBlockHeight,
     gaugeEthBalance,
     gaugeTokenBalance,
-    gaugeBlockTime,
-    gaugeReorgSize,
     gaugeFlipBalance,
 } from '../metrics/eth';
 
@@ -120,9 +118,7 @@ async function startWatcher(context: Context) {
             gaugeTokenBalance({ ...context, contract: flipContract }, 'FLIP');
             gaugeTokenBalance({ ...context, contract: usdcContract }, 'USDC');
             gaugeBlockHeight({ ...context, blockNumber });
-            gaugeBlockTime({ ...context, blockNumber });
             gaugeFlipBalance({ ...context, contract: flipContract });
-            // await gaugeReorgSize({...context, blockNumber}); //TODO fix metric
         });
 
         flipContract.deployed().then(() => logger.info('Flip contract added'));

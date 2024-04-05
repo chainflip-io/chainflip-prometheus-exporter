@@ -16,7 +16,7 @@ let currentPhase: rotationPhase = rotationPhase.idle;
 const metricName: string = 'cf_rotation_phase_duration';
 const metricRotationPhase: Counter = new promClient.Counter({
     name: metricName,
-    help: 'Is the Network in a rotation',
+    help: 'The duration of a rotation phase in blocks',
     labelNames: ['rotationPhase'],
     registers: [],
 });

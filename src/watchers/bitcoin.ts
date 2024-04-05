@@ -1,6 +1,6 @@
 import { Context } from '../lib/interfaces';
 import Client from 'bitcoin-core';
-import { gaugeBlockHeight, gaugeBlockTime } from '../metrics/btc';
+import { gaugeBlockHeight } from '../metrics/btc';
 import promClient from 'prom-client';
 import { BtcConfig } from '../config/interfaces';
 
@@ -44,7 +44,6 @@ async function startWatcher(context: Context) {
     });
 
     pollEndpoint(gaugeBlockHeight, { ...context, bitcoinClient }, 5);
-    pollEndpoint(gaugeBlockTime, { ...context, bitcoinClient }, 5);
 }
 
 export default startBitcoinService;
