@@ -19,9 +19,7 @@ const metricPendingCeremonyRetryQueue: Gauge = new promClient.Gauge({
 
 export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
     const { logger, api, registry, metricFailure } = context;
-    logger.debug(
-        `Scraping ${metricNameRequestRetryQueue}, ${metricNameCeremonyRetryQueue}`,
-    );
+    logger.debug(`Scraping ${metricNameRequestRetryQueue}, ${metricNameCeremonyRetryQueue}`);
 
     if (registry.getSingleMetric(metricNameRequestRetryQueue) === undefined)
         registry.registerMetric(metricRequestRetryQueue);
@@ -31,7 +29,6 @@ export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricNameCeremonyRetryQueue }).set(0);
 
     try {
-
         // requestRetryQueue
         const dotRequestRetryQueue: any =
             await api.query.polkadotThresholdSigner.requestRetryQueue.entries();
