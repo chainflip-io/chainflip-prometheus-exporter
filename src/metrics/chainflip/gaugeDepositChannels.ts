@@ -42,6 +42,7 @@ export const gaugeDepositChannels = async (context: Context): Promise<void> => {
         let ethChannels = 0;
         let btcChannels = 0;
         let dotChannels = 0;
+        let arbChannels = 0;
         channels.forEach((channel: any) => {
             switch (channel.sourceChain) {
                 case 'Ethereum':
@@ -53,6 +54,8 @@ export const gaugeDepositChannels = async (context: Context): Promise<void> => {
                 case 'Polkadot':
                     dotChannels++;
                     break;
+                case 'Arbitrum':
+                    arbChannels++;
             }
         });
         metric.labels('bitcoin').set(btcChannels);
@@ -60,6 +63,8 @@ export const gaugeDepositChannels = async (context: Context): Promise<void> => {
         metric.labels('polkadot').set(dotChannels);
 
         metric.labels('ethereum').set(ethChannels);
+
+        metric.labels('arbitrum').set(arbChannels);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricName }).set(1);

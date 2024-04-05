@@ -1,18 +1,11 @@
 import { ethers } from 'ethers';
-import StateChainGatewayABI from '../abi/StateChainGateway.json';
 import VaultABI from '../abi/Vault.json';
 import KeyManagerABI from '../abi/KeyManager.json';
-import USDCABI from '../abi/MockUSDC.json';
 import { Logger } from 'winston';
 import { ArbConfig } from '../config/interfaces';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
-import {
-    countContractEvents,
-    gaugeBlockHeight,
-    gaugeEthBalance,
-    gaugeTokenBalance,
-} from '../metrics/arb';
+import { countContractEvents, gaugeBlockHeight, gaugeEthBalance } from '../metrics/arb';
 
 const metricName: string = 'arb_watcher_failure';
 const metric: promClient.Gauge = new promClient.Gauge({
@@ -70,6 +63,7 @@ async function startWatcher(context: Context) {
 
         wsProvider = new ethers.providers.WebSocketProvider(env.ARB_WS_ENDPOINT);
         await wsProvider.ready;
+
         isWatcherRunning = true;
         metric.set(0);
 
@@ -97,8 +91,10 @@ async function startWatcher(context: Context) {
         context.provider = wsProvider;
 
         wsProvider.on('block', async (blockNumber: number) => {
-            gaugeEthBalance(context);
-            gaugeBlockHeight({ ...context, blockNumber });
+            if (blockNumber % 20 === 0) {
+                gaugeEthBalance(context);
+                gaugeBlockHeight({ ...context, blockNumber });
+            }
         });
 
         keyManagerContract.deployed().then(() => logger.info('Key Manager contract added'));

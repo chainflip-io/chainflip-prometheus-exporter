@@ -13,7 +13,7 @@
     "flip": {
 	  "enabled": true,
 	  "network": "perseverance",
-	  "eventLog": true,
+	  "eventLog": false,
 	  "defaultMetrics": [
 		{
 		    "name": "cf_authorities_warning_threshold_count",
@@ -129,17 +129,17 @@
     },
 	"arb": {
 		"enabled": true,
-		"networkId": 5,
+		"networkId": 412346,
 		"network": "sepolia",
 		"defaultMetrics": [],
 		"contracts": [
 		  {
 			  "alias": "key-manager",
-			  "address": "0xa16e02e87b7454126e5e10d957a927a7f5b5d2be"
+			  "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3"
 		  },
 		  {
 			  "alias": "vault",
-			  "address": "0xb7a5bd0345ef1cc5e66bf61bdec17d2461fbd968"
+			  "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
 		  }
 		],
 		"wallets": [

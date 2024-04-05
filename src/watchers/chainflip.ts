@@ -59,6 +59,7 @@ declare global {
     var btcHeight: number;
     var ethHeight: number;
     var dotHeight: number;
+    var arbHeight: number;
 
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {

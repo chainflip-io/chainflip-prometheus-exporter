@@ -28,6 +28,10 @@ export const gaugePendingBroadcast = async (context: Context): Promise<void> => 
         const ethQueue: any = await api.query.ethereumBroadcaster.pendingBroadcasts();
         const ethQueueLenght: number = ethQueue.size;
         metric.labels('ethereum').set(ethQueueLenght);
+
+        const arbQueue: any = await api.query.arbitrumBroadcaster.pendingBroadcasts();
+        const arbQueueLenght: number = arbQueue.size;
+        metric.labels('arbitrum').set(arbQueueLenght);
     } catch (err) {
         logger.error(err);
         metricFailure.labels({ metric: metricName }).set(1);
