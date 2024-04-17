@@ -7,7 +7,8 @@ export const gatherGlobalValues = async (context: Context): Promise<void> => {
         const epoch: any = await api.query.validator.currentEpoch();
         global.epochIndex = Number(epoch);
 
-        const dotAggKeyAddress = await api.query.environment.polkadotVaultAccountId();
+        const epochKey = await api.query.polkadotThresholdSigner.currentKeyEpoch();
+        const dotAggKeyAddress = await api.query.polkadotThresholdSigner.keys(epochKey.toHuman());
 
         if (dotAggKeyAddress) {
             global.dotAggKeyAddress = dotAggKeyAddress.toHuman();
