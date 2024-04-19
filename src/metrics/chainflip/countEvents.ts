@@ -66,9 +66,12 @@ export const countEvents = async (context: Context): Promise<void> => {
 
         if (config.eventLog) {
             if (event.data.dispatchError) {
-                let error = await getStateChainError(api, event.data.toHuman().dispatchError.Module);
+                const error = await getStateChainError(
+                    api,
+                    event.data.toHuman().dispatchError.Module,
+                );
 
-                const metadata = { error: error };
+                const metadata = { error };
                 logger.info('event_log', {
                     metadata,
                     event: `${event.section}:${event.method}`,
