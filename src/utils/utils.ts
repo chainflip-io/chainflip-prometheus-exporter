@@ -92,7 +92,7 @@ const getMetadata = async (api: ApiPromise) => {
     return metadataString;
 };
 
-let metadata: Metadata;
+let metadata: any;
 export const getStateChainError = async (
     api: ApiPromise,
     value: { error: `0x${string}`; index: number },
