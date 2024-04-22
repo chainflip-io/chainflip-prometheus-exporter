@@ -1,3 +1,7 @@
+import { ApiPromise } from '@polkadot/api';
+import { Metadata, TypeRegistry } from '@polkadot/types';
+import { BN } from '@polkadot/util';
+
 export function insertOrReplace(
     map: Map<number, Set<string>>,
     elem: string,
@@ -82,3 +86,38 @@ export function hex2bin(hex: string) {
 
     return out;
 }
+
+const getMetadata = async (api: ApiPromise) => {
+    const metadataString = await api.rpc.state.getMetadata();
+    return metadataString;
+};
+
+let metadata: any;
+export const getStateChainError = async (
+    api: ApiPromise,
+    value: { error: `0x${string}`; index: number },
+) => {
+    // convert LE hex encoded number (e.g. "0x06000000") to BN (6)
+    const error = new BN(value.error.slice(2), 'hex', 'le');
+    const errorIndex = error.toNumber();
+    // const specVersion = parseSpecNumber(block.specId);
+    const palletIndex = value.index;
+
+    if (!metadata) {
+        metadata = await getMetadata(api);
+    }
+
+    const registryError = metadata.registry.findMetaError({
+        index: new BN(palletIndex),
+        error,
+    });
+
+    return {
+        data: {
+            palletIndex,
+            errorIndex,
+            name: `${registryError.section}.${registryError.name}`,
+            docs: registryError.docs.join('\n').trim(),
+        },
+    };
+};

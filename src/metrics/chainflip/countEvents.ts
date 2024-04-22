@@ -2,6 +2,7 @@ import promClient, { Counter, Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
+import { getStateChainError } from '../../utils/utils';
 
 const metricName: string = 'cf_events_count_total';
 const metric: Counter = new promClient.Counter({
@@ -65,9 +66,12 @@ export const countEvents = async (context: Context): Promise<void> => {
 
         if (config.eventLog) {
             if (event.data.dispatchError) {
-                const metadata = errorMap.has(event.data.dispatchError.toString())
-                    ? { error: errorMap.get(event.data.dispatchError.toString()) }
-                    : { error: 'Error mapping not defined' };
+                const error = await getStateChainError(
+                    api,
+                    event.data.toHuman().dispatchError.Module,
+                );
+
+                const metadata = { error };
                 logger.info('event_log', {
                     metadata,
                     event: `${event.section}:${event.method}`,
@@ -80,7 +84,6 @@ export const countEvents = async (context: Context): Promise<void> => {
                 });
             }
         }
-
         // Set extra labels for specific events
         if (event.method === 'BroadcastAttemptTimeout') {
             metricBroadcast
