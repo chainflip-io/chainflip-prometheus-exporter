@@ -57,8 +57,8 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then(async (votes: { toHuman: () => any }) => {
-                                const vote = votes.toHuman();
+                            .then(async (votes: { toJSON: () => any }) => {
+                                const vote = votes.toJSON();
                                 if (vote) {
                                     const binary = hex2bin(vote);
                                     const total = binary.match(/1/g)?.length || 0;
@@ -118,8 +118,8 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes: { toHuman: () => any }) => {
-                                const vote = votes.toHuman();
+                            .then((votes: { toJSON: () => any }) => {
+                                const vote = votes.toJSON();
                                 if (vote) {
                                     const binary = hex2bin(vote);
                                     const number = binary.match(/1/g)?.length || 0;

@@ -58,9 +58,9 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then(async (votes: { toHuman: () => any }) => {
+                            .then(async (votes: { toJSON: () => any }) => {
                                 if (global.currentBlock === currentBlockNumber) {
-                                    const vote = votes.toHuman();
+                                    const vote = votes.toJSON();
                                     if (vote) {
                                         const binary = hex2bin(vote);
                                         let total = binary.match(/1/g)?.length || 0;
@@ -71,7 +71,7 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                                                     global.epochIndex - 1,
                                                     parsedObj.hash,
                                                 )
-                                            ).toHuman();
+                                            ).toJSON();
                                             total +=
                                                 hex2bin(previousEpochVote).match(/1/g)?.length || 0;
                                         }
@@ -133,9 +133,9 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes: { toHuman: () => any }) => {
+                            .then((votes: { toJSON: () => any }) => {
                                 if (global.currentBlock === currentBlockNumber) {
-                                    const vote = votes.toHuman();
+                                    const vote = votes.toJSON();
                                     if (vote) {
                                         const binary = hex2bin(vote);
                                         const number = binary.match(/1/g)?.length || 0;
