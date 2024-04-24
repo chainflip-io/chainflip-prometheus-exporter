@@ -12,11 +12,11 @@ const metric: Counter = new promClient.Counter({
     registers: [],
 });
 
-const metricNameBroadcast: string = 'cf_broadcast_timeout_count';
-const metricBroadcast: Gauge = new promClient.Gauge({
-    name: metricNameBroadcast,
-    help: 'Count of the broadcastTimeout events, grouped by broadcastId',
-    labelNames: ['event', 'broadcastId'],
+const metricExtrinsicFailedName: string = 'cf_event_extrinsic_failed';
+const metricExtrinsicFailed: Counter = new promClient.Counter({
+    name: metricExtrinsicFailedName,
+    help: 'Count of failed extrinsics on chain',
+    labelNames: ['pallet', 'error'],
     registers: [],
 });
 
@@ -28,16 +28,6 @@ const metricSlash: Counter = new promClient.Counter({
     registers: [],
 });
 
-const errorMap = new Map();
-errorMap.set(
-    `{"module":{"index":35,"error":"0x03000000"}}`,
-    'liquidityPools.UnspecifiedOrderPrice',
-);
-errorMap.set(
-    `{"module":{"index":31,"error":"0x00000000"}}`,
-    `liquidityProvider.InsufficientBalance`,
-);
-
 export const countEvents = async (context: Context): Promise<void> => {
     const { logger, registry, events, api } = context;
     const config = context.config as FlipConfig;
@@ -46,8 +36,8 @@ export const countEvents = async (context: Context): Promise<void> => {
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-    if (registry.getSingleMetric(metricNameBroadcast) === undefined)
-        registry.registerMetric(metricBroadcast);
+    if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
+        registry.registerMetric(metricExtrinsicFailed);
     if (registry.getSingleMetric(metricNameSlashing) === undefined)
         registry.registerMetric(metricSlash);
 
@@ -64,16 +54,20 @@ export const countEvents = async (context: Context): Promise<void> => {
         }
         metric.labels(`${event.section}:${event.method}`).inc(1);
 
+        let error;
+        if (event.method == 'ExtrinsicFailed') {
+            error = await getStateChainError(
+                api,
+                event.data.toHuman().dispatchError.Module,
+            );
+            let parsedError = error.data.name.split(":");  
+            metricExtrinsicFailed.labels(`${parsedError[0]}`, `${parsedError[1]}`).inc();
+        }
+
         if (config.eventLog) {
             if (event.data.dispatchError) {
-                const error = await getStateChainError(
-                    api,
-                    event.data.toHuman().dispatchError.Module,
-                );
-
-                const metadata = { error };
                 logger.info('event_log', {
-                    metadata,
+                    error,
                     event: `${event.section}:${event.method}`,
                     data: event.data.toHuman(),
                 });
@@ -83,12 +77,6 @@ export const countEvents = async (context: Context): Promise<void> => {
                     data: event.data.toHuman(),
                 });
             }
-        }
-        // Set extra labels for specific events
-        if (event.method === 'BroadcastAttemptTimeout') {
-            metricBroadcast
-                .labels(`${event.section}:${event.method}`, event.data.broadcastId)
-                .set(event.data.attemptCount);
         }
         if (event.method === 'SlashingPerformed') {
             for (const { ss58Address, alias } of accounts) {
