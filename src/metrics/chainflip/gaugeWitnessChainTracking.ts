@@ -2,6 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { hex2bin, insertOrReplace } from '../../utils/utils';
+import { customRpc } from '../../utils/makeRpcRequest';
 
 const witnessHash10 = new Map<number, Set<string>>();
 const witnessHash50 = new Map<number, Set<string>>();
@@ -35,19 +36,51 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
                         const parsedObj = JSON.parse(hash);
                         api.query.witnesser
                             .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes: { toHuman: () => any }) => {
+                            .then(async (votes: { toHuman: () => any }) => {
                                 if (global.currentBlock === currentBlockNumber) {
                                     const vote = votes.toHuman();
                                     if (vote) {
                                         const binary = hex2bin(vote);
-                                        const number = binary.match(/1/g)?.length || 0;
+                                        let total = binary.match(/1/g)?.length || 0;
+                                        // check the previous epoch as well! could be a false positive after rotation!
+                                        if (total < global.currentAuthorities * 0.1) {
+                                            const previousEpochVote = (
+                                                await api.query.witnesser.votes(
+                                                    global.epochIndex - 1,
+                                                    parsedObj.hash,
+                                                )
+                                            ).toHuman();
+                                            total +=
+                                                hex2bin(previousEpochVote).match(/1/g)?.length || 0;
+                                        }
+                                        metric.labels(parsedObj.type, '10').set(total);
 
-                                        metric.labels(parsedObj.type, '10').set(number);
                                         // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                        if (number < global.currentAuthorities) {
-                                            logger.info(
-                                                `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 10 blocks!`,
-                                            );
+                                        if (total < global.currentAuthorities) {
+                                            // log the list of validators if the total is below 85%
+                                            if (total < global.currentAuthorities * 0.85) {
+                                                const votes = await customRpc(
+                                                    api,
+                                                    'witness_count',
+                                                    parsedObj.hash,
+                                                );
+                                                const validators: string[] = [];
+                                                votes.validators.forEach(
+                                                    ([ss58address, vanity, witness]) => {
+                                                        if (!witness) {
+                                                            validators.push(ss58address);
+                                                        }
+                                                    },
+                                                );
+                                                logger.info(
+                                                    `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!
+                                                    Validators: [${validators}]`,
+                                                );
+                                            } else {
+                                                logger.info(
+                                                    `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!`,
+                                                );
+                                            }
                                         }
                                     }
                                 }

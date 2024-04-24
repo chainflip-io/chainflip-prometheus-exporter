@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import stateChainTypes from './chainTypes';
 import { customRpcs } from './customRpcSpecification';
+import axios from 'axios';
+import { env } from '../config/getConfig';
 
 const boolean = z.boolean();
 const string = z.string();
@@ -76,6 +78,10 @@ const validators = {
     penalties: z.array(z.tuple([Offence, RpcPenalty])),
     suspensions: z.array(RpcSuspension),
     tx_fee_multiplier: Amount,
+    witness_count: z.object({
+        failing_count: U32,
+        validators: z.array(z.tuple([string, string, boolean])),
+    }),
 } as const;
 
 type RpcParamsMap = {
@@ -90,6 +96,7 @@ type RpcParamsMap = {
     eth_key_manager_address: [];
     eth_state_chain_gateway_address: [];
     flip_supply: [];
+    witness_count: [hash: string];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof validators & keyof typeof customRpcs.cf;
@@ -107,6 +114,25 @@ export default async function makeRpcRequest<M extends RpcCall>(
 
     const parsed = validators[method].parse(result.toJSON());
     // console.log(method, result.toJSON(), parsed);
+
+    return parsed as RpcReturnValue[M];
+}
+
+export async function customRpc<M extends RpcCall>(
+    apiPromise: CustomApiPromise,
+    method: M,
+    ...args: RpcParamsMap[M]
+): Promise<RpcReturnValue[M]> {
+    const url = env.CF_WS_ENDPOINT.split('wss');
+
+    const { data } = await axios.post(`https${url[1]}`, {
+        id: 1,
+        jsonrpc: '2.0',
+        method: `cf_${method}`,
+        params: args,
+    });
+
+    const parsed = validators[method].parse(data.result);
 
     return parsed as RpcReturnValue[M];
 }

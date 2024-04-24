@@ -113,5 +113,15 @@ export const customRpcs = {
             type: 'RpcAuctionState',
             description: '',
         },
+        witness_count: {
+            params: [
+                {
+                    name: 'hash',
+                    type: 'String',
+                },
+            ],
+            type: 'RpcFailingWitnessValidators',
+            description: '',
+        },
     },
 };
