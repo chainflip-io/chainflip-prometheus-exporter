@@ -116,7 +116,7 @@ export const getStateChainError = async (
         data: {
             palletIndex,
             errorIndex,
-            name: `${registryError.section}.${registryError.name}`,
+            name: `${registryError.section}:${registryError.name}`,
             docs: registryError.docs.join('\n').trim(),
         },
     };

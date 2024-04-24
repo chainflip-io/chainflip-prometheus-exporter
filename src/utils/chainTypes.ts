@@ -299,6 +299,10 @@ const stateChainTypes = {
     },
     Version: 'SemVer',
     VoteCount: 'u32',
+    RpcFailingWitnessValidators: {
+        failing_count: 'u32',
+        validators: 'Vec<(ValidatorId, Vec<u8>, bool)>',
+    },
 } as const;
 
 export default stateChainTypes;
