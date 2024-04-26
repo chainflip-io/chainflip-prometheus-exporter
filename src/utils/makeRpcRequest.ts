@@ -110,29 +110,26 @@ export default async function makeRpcRequest<M extends RpcCall>(
     method: M,
     ...args: RpcParamsMap[M]
 ): Promise<RpcReturnValue[M]> {
-    const result = await apiPromise.rpc.cf[method](...args);
-
-    const parsed = validators[method].parse(result.toJSON());
-    // console.log(method, result.toJSON(), parsed);
-
-    return parsed as RpcReturnValue[M];
+    const result: any = await apiPromise.rpc(`cf_${method}`,...args);
+    // const parsed = validators[method].parse(result.toJSON());
+    return result as RpcReturnValue[M];
 }
 
-export async function customRpc<M extends RpcCall>(
-    apiPromise: CustomApiPromise,
-    method: M,
-    ...args: RpcParamsMap[M]
-): Promise<RpcReturnValue[M]> {
-    const url = env.CF_WS_ENDPOINT.split('wss');
+// export async function customRpc<M extends RpcCall>(
+//     apiPromise: CustomApiPromise,
+//     method: M,
+//     ...args: RpcParamsMap[M]
+// ): Promise<RpcReturnValue[M]> {
+//     const url = env.CF_WS_ENDPOINT.split('wss');
 
-    const { data } = await axios.post(`https${url[1]}`, {
-        id: 1,
-        jsonrpc: '2.0',
-        method: `cf_${method}`,
-        params: args,
-    });
+//     const { data } = await axios.post(`https${url[1]}`, {
+//         id: 1,
+//         jsonrpc: '2.0',
+//         method: `cf_${method}`,
+//         params: args,
+//     });
 
-    const parsed = validators[method].parse(data.result);
+//     const parsed = validators[method].parse(data.result);
 
-    return parsed as RpcReturnValue[M];
-}
+//     return parsed as RpcReturnValue[M];
+// }
