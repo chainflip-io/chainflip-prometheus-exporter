@@ -2,7 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { hex2bin, insertOrReplace } from '../../utils/utils';
-import makeRpcRequest, { customRpc } from '../../utils/makeRpcRequest';
+import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const witnessHash10 = new Map<number, Set<string>>();
 const witnessHash50 = new Map<number, Set<string>>();

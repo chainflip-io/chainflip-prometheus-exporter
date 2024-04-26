@@ -1,7 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { hex2bin, insertOrReplace } from '../../utils/utils';
-import makeRpcRequest, { customRpc } from '../../utils/makeRpcRequest';
+import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const witnessExtrinsicHash10 = new Map<number, Set<string>>();
 const witnessExtrinsicHash50 = new Map<number, Set<string>>();
