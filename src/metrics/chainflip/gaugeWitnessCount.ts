@@ -1,7 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { hex2bin, insertOrReplace } from '../../utils/utils';
-import { customRpc } from '../../utils/makeRpcRequest';
+import makeRpcRequest, { customRpc } from '../../utils/makeRpcRequest';
 
 const witnessExtrinsicHash10 = new Map<number, Set<string>>();
 const witnessExtrinsicHash50 = new Map<number, Set<string>>();
@@ -55,35 +55,32 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                     witnessExtrinsicHash10.delete(blockNumber);
                     for (const hash of tmpSet) {
                         const parsedObj = JSON.parse(hash);
-                        api.query.witnesser
-                            .votes(global.epochIndex, parsedObj.hash)
-                            .then(async (votes: { toJSON: () => any }) => {
-                                const vote = votes.toJSON();
-                                if (vote) {
-                                    const binary = hex2bin(vote);
-                                    const total = binary.match(/1/g)?.length || 0;
-
+                        makeRpcRequest(api, 'witness_count', parsedObj.hash).then(
+                            async (result: any) => {
+                                if (global.currentBlock === currentBlockNumber && result) {
+                                    const total = global.currentAuthorities - result.failing_count;
                                     metric.labels(parsedObj.type, '10').set(total);
+                                    // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                                     if (total < global.currentAuthorities) {
-                                        // log the list of validators if the total is below 90%
+                                        const validators: string[] = [];
+                                        result.validators.forEach(
+                                            ([ss58address, vanity, witness]: [
+                                                string,
+                                                string,
+                                                boolean,
+                                            ]) => {
+                                                if (!witness) {
+                                                    validators.push(ss58address);
+                                                }
+                                            },
+                                        );
+                                        logger.info(
+                                            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!
+                                        Validators: [${validators}]`,
+                                        );
+                                        // in case less than 90% witnessed it
+                                        // create a temporary metric so that we can fetch the list of validators in our alerting system
                                         if (total <= global.currentAuthorities * 0.67) {
-                                            const votes = await customRpc(
-                                                api,
-                                                'witness_count',
-                                                parsedObj.hash,
-                                            );
-                                            const validators: string[] = [];
-                                            votes.validators.forEach(
-                                                ([ss58address, vanity, witness]) => {
-                                                    if (!witness) {
-                                                        validators.push(ss58address);
-                                                    }
-                                                },
-                                            );
-                                            logger.info(
-                                                `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!
-                                                Validators: [${validators}]`,
-                                            );
                                             metricWitnessFailure
                                                 .labels(
                                                     `${parsedObj.type}`,
@@ -97,16 +94,13 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                                                     validators: `${validators}`,
                                                     witnessedBy: `${total}`,
                                                 }),
-                                                currentBlockNumber + 20,
-                                            );
-                                        } else {
-                                            logger.info(
-                                                `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!`,
+                                                currentBlockNumber + 10,
                                             );
                                         }
                                     }
                                 }
-                            });
+                            },
+                        );
                     }
                 }
             }
