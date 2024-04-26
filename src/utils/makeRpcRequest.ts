@@ -110,7 +110,7 @@ export default async function makeRpcRequest<M extends RpcCall>(
     method: M,
     ...args: RpcParamsMap[M]
 ): Promise<RpcReturnValue[M]> {
-    const result: any = await apiPromise.rpc(`cf_${method}`,...args);
+    const result: any = await apiPromise.rpc(`cf_${method}`, ...args);
     // const parsed = validators[method].parse(result.toJSON());
     return result as RpcReturnValue[M];
 }
