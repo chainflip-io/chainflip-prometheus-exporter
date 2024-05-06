@@ -56,7 +56,7 @@ export const countEvents = async (context: Context): Promise<void> => {
 
         let error;
         if (event.method === 'ExtrinsicFailed') {
-            error = await getStateChainError(api, event.data.toHuman().dispatchError.Module);
+            error = await getStateChainError(api, event.data.toJSON()[0].module);
             const parsedError = error.data.name.split(':');
             metricExtrinsicFailed.labels(`${parsedError[0]}`, `${parsedError[1]}`).inc();
         }

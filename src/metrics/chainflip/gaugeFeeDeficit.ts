@@ -18,28 +18,24 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
     try {
         // ETH fees balance
         const feeWitheldEth = Number(
-            (await api.query.ethereumIngressEgress.withheldTransactionFees('Eth'))
-                .toHuman()
-                .replace(/,/g, ''),
+            (await api.query.ethereumIngressEgress.withheldTransactionFees('Eth')).toJSON(),
         );
         const feeSpentEth = await api.query.ethereumBroadcaster.transactionFeeDeficit.entries();
         let totalSpent = 0;
         feeSpentEth.forEach(([key, element]: [any, any]) => {
-            totalSpent += Number(element.toHuman().replace(/,/g, ''));
+            totalSpent += Number(element.toJSON());
         });
         const deficitEth = (feeWitheldEth - totalSpent) / 1e18;
         metric.labels('ethereum').set(deficitEth);
 
         // DOT fees balance
         const feeWitheldDot = Number(
-            (await api.query.polkadotIngressEgress.withheldTransactionFees('Dot'))
-                .toHuman()
-                .replace(/,/g, ''),
+            (await api.query.polkadotIngressEgress.withheldTransactionFees('Dot')).toJSON(),
         );
         const feeSpentDot = await api.query.polkadotBroadcaster.transactionFeeDeficit.entries();
         totalSpent = 0;
         feeSpentDot.forEach(([key, element]: [any, any]) => {
-            totalSpent += Number(element.toHuman().replace(/,/g, ''));
+            totalSpent += Number(element.toJSON());
         });
         const deficitDot = (feeWitheldDot - totalSpent) / 1e10;
         metric.labels('polkadot').set(deficitDot);
