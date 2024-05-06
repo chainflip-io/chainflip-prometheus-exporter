@@ -18,8 +18,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
     try {
         // ETH fees balance
         const feeWitheldEth = Number(
-            (await api.query.ethereumIngressEgress.withheldTransactionFees('Eth'))
-                .toJSON()
+            (await api.query.ethereumIngressEgress.withheldTransactionFees('Eth')).toJSON(),
         );
         const feeSpentEth = await api.query.ethereumBroadcaster.transactionFeeDeficit.entries();
         let totalSpent = 0;
@@ -31,8 +30,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
 
         // DOT fees balance
         const feeWitheldDot = Number(
-            (await api.query.polkadotIngressEgress.withheldTransactionFees('Dot'))
-                .toJSON()
+            (await api.query.polkadotIngressEgress.withheldTransactionFees('Dot')).toJSON(),
         );
         const feeSpentDot = await api.query.polkadotBroadcaster.transactionFeeDeficit.entries();
         totalSpent = 0;

@@ -33,8 +33,9 @@ export const gaugeEthBlockTime = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricNameError }).set(0);
     try {
         const timestamp: number = Number(await api.query.timestamp.now());
-        const currentEthBlock: number = (await api.query.ethereumChainTracking.currentChainState())
-            .toJSON();
+        const currentEthBlock: number = (
+            await api.query.ethereumChainTracking.currentChainState()
+        ).toJSON();
         if (previousTimestamp === 0) {
             previousTimestamp = Number(timestamp);
         }
