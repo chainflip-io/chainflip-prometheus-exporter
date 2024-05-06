@@ -35,9 +35,9 @@ export const gaugeBtcBlockTime = async (context: Context): Promise<void> => {
         const timestamp: number = Number(await api.query.timestamp.now());
         const currentChainState: any = (
             await api.query.bitcoinChainTracking.currentChainState()
-        ).toHuman();
+        ).toJSON();
         if (currentChainState) {
-            const currentBtcBlock: number = currentChainState.blockHeight.replace(/,/g, '');
+            const currentBtcBlock: number = currentChainState.blockHeight;
             if (previousTimestamp === 0) {
                 previousTimestamp = Number(timestamp);
             }

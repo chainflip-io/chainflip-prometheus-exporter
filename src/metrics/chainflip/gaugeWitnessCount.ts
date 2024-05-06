@@ -35,9 +35,8 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
         metricFailure.labels({ metric: metricName }).set(0);
         try {
             const signedBlock = await api.rpc.chain.getBlock();
-            const currentBlockNumber = Number(
-                signedBlock.block.header.number.toHuman().replace(/,/g, ''),
-            );
+            const currentBlockNumber = Number(signedBlock.toJSON().block.header.number);
+
             toDelete.forEach((block, labels) => {
                 if (block <= currentBlockNumber) {
                     const values = JSON.parse(labels);

@@ -32,9 +32,9 @@ export const gaugeDotBlockTime = async (context: Context): Promise<void> => {
         const timestamp: number = Number(await api.query.timestamp.now());
         const currentChainState: any = (
             await api.query.polkadotChainTracking.currentChainState()
-        ).toHuman();
+        ).toJSON();
         if (currentChainState) {
-            const currentDotBlock: number = currentChainState.blockHeight.replace(/,/g, '');
+            const currentDotBlock: number = currentChainState.blockHeight;
             if (previousTimestamp === 0) {
                 previousTimestamp = Number(timestamp);
             }
