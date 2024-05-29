@@ -39,7 +39,7 @@ export default async function startArbitrumService(context: Context) {
 }
 
 process.on('uncaughtException', async (err) => {
-    if(!isExceptionCaught && !isWatcherRunning) {
+    if (!isExceptionCaught && !isWatcherRunning) {
         loggerCopy.error(`Error opening ARB ws connection: ${err}`);
         loggerCopy.info(`ARB retrying in 15s`);
         await wsProvider.destroy();
@@ -47,9 +47,9 @@ process.on('uncaughtException', async (err) => {
             isExceptionCaught = false;
             startWatcher(mainContext); // Retry after a delay
         }, 15000); // 15s
+        metric.set(1);
     }
     isExceptionCaught = true;
-    metric.set(1);
 });
 
 async function startWatcher(context: Context) {
