@@ -30,14 +30,12 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
 
         // ARB fees balance
         const feeWitheldArb = Number(
-            (await api.query.arbitrumIngressEgress.withheldTransactionFees('ArbEth'))
-                .toHuman()
-                .replace(/,/g, ''),
+            (await api.query.arbitrumIngressEgress.withheldTransactionFees('ArbEth')).toJSON(),
         );
         const feeSpentArb = await api.query.arbitrumBroadcaster.transactionFeeDeficit.entries();
         totalSpent = 0;
         feeSpentArb.forEach(([key, element]: [any, any]) => {
-            totalSpent += Number(element.toHuman().replace(/,/g, ''));
+            totalSpent += Number(element.toJSON());
         });
         const deficitArb = (feeWitheldArb - totalSpent) / 1e18;
         metric.labels('arbitrum').set(deficitArb);

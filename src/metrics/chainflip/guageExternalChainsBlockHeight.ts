@@ -40,9 +40,7 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
 
         // Arbitrum
         const arbBlockHeight = Number(
-            (await api.query.arbitrumChainTracking.currentChainState())
-                .toHuman()
-                .blockHeight.replace(/,/g, ''),
+            (await api.query.arbitrumChainTracking.currentChainState()).toJSON().blockHeight,
         );
         global.arbHeight = arbBlockHeight;
         metric.labels('arbitrum').set(arbBlockHeight);
