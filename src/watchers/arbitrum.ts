@@ -27,6 +27,7 @@ let mainRegistry: promClient.Registry;
 let wsProvider: ethers.providers.WebSocketProvider;
 let mainContext: Context;
 let isWatcherRunning: boolean = false;
+let isExceptionCaught: boolean = false;
 
 export default async function startArbitrumService(context: Context) {
     const { logger, registry } = context;
@@ -38,11 +39,16 @@ export default async function startArbitrumService(context: Context) {
 }
 
 process.on('uncaughtException', async (err) => {
-    loggerCopy.error(`Error opening ARB ws connection: ${err}`);
-    loggerCopy.info(`retrying in 15s`);
-    setTimeout(() => {
-        startWatcher(mainContext); // Retry after a delay
-    }, 15000); // 15s
+    if(!isExceptionCaught && !isWatcherRunning) {
+        loggerCopy.error(`Error opening ARB ws connection: ${err}`);
+        loggerCopy.info(`ARB retrying in 15s`);
+        await wsProvider.destroy();
+        setTimeout(() => {
+            isExceptionCaught = false;
+            startWatcher(mainContext); // Retry after a delay
+        }, 15000); // 15s
+    }
+    isExceptionCaught = true;
     metric.set(1);
 });
 
