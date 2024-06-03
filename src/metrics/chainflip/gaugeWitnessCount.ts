@@ -37,98 +37,9 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
             const signedBlock = await api.rpc.chain.getBlock();
             const currentBlockNumber = Number(signedBlock.toJSON().block.header.number);
 
-            toDelete.forEach((block, labels) => {
-                if (block <= currentBlockNumber) {
-                    const values = JSON.parse(labels);
-                    metricWitnessFailure.remove(
-                        values.extrinsic,
-                        values.validators,
-                        values.witnessedBy,
-                    );
-                    toDelete.delete(labels);
-                }
-            });
-            for (const [blockNumber, set] of witnessExtrinsicHash10) {
-                if (currentBlockNumber - blockNumber > 10) {
-                    const tmpSet = new Set(set);
-                    witnessExtrinsicHash10.delete(blockNumber);
-                    for (const hash of tmpSet) {
-                        const parsedObj = JSON.parse(hash);
-                        makeRpcRequest(api, 'witness_count', parsedObj.hash).then(
-                            async (result: any) => {
-                                if (global.currentBlock === currentBlockNumber && result) {
-                                    const total = global.currentAuthorities - result.failing_count;
-                                    metric.labels(parsedObj.type, '10').set(total);
-                                    // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                    if (total < global.currentAuthorities) {
-                                        const validators: string[] = [];
-                                        result.validators.forEach(
-                                            ([ss58address, vanity, witness]: [
-                                                string,
-                                                string,
-                                                boolean,
-                                            ]) => {
-                                                if (!witness) {
-                                                    validators.push(ss58address);
-                                                }
-                                            },
-                                        );
-                                        logger.info(
-                                            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!
-                                        Validators: [${validators}]`,
-                                        );
-                                        // in case less than 90% witnessed it
-                                        // create a temporary metric so that we can fetch the list of validators in our alerting system
-                                        if (total <= global.currentAuthorities * 0.67) {
-                                            metricWitnessFailure
-                                                .labels(
-                                                    `${parsedObj.type}`,
-                                                    `${validators}`,
-                                                    `${total}`,
-                                                )
-                                                .set(1);
-                                            toDelete.set(
-                                                JSON.stringify({
-                                                    extrinsic: `${parsedObj.type}`,
-                                                    validators: `${validators}`,
-                                                    witnessedBy: `${total}`,
-                                                }),
-                                                currentBlockNumber + 10,
-                                            );
-                                        }
-                                    }
-                                }
-                            },
-                        );
-                    }
-                }
-            }
-            for (const [blockNumber, set] of witnessExtrinsicHash50) {
-                if (currentBlockNumber - blockNumber > 50) {
-                    const tmpSet = new Set(set);
-                    witnessExtrinsicHash50.delete(blockNumber);
-                    for (const hash of tmpSet) {
-                        const parsedObj = JSON.parse(hash);
-                        api.query.witnesser
-                            .votes(global.epochIndex, parsedObj.hash)
-                            .then((votes: { toJSON: () => any }) => {
-                                const vote = votes.toJSON();
-                                if (vote) {
-                                    const binary = hex2bin(vote);
-                                    const number = binary.match(/1/g)?.length || 0;
-
-                                    metric.labels(parsedObj.type, '50').set(number);
-                                    // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                    if (number < global.currentAuthorities) {
-                                        logger.info(
-                                            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
-                                        );
-                                    }
-                                }
-                            });
-                    }
-                }
-            }
+            deleteOldHashes(currentBlockNumber);
+            processHash10(currentBlockNumber, api, logger);
+            processHash50(currentBlockNumber, api, logger);
             // chech the witnessAtEpoch extrinsics in a block and save the encoded callHash to check later
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
                 const blockNumber: number = Number(signedBlock.block.header.number);
@@ -163,3 +74,113 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
         }
     }
 };
+
+function deleteOldHashes(currentBlockNumber: number) {
+    toDelete.forEach((block, labels) => {
+        if (block <= currentBlockNumber) {
+            const values = JSON.parse(labels);
+            metricWitnessFailure.remove(values.extrinsic, values.validators, values.witnessedBy);
+            toDelete.delete(labels);
+        }
+    });
+}
+
+async function processHash10(currentBlockNumber: number, api: any, logger: any) {
+    for (const [blockNumber, set] of witnessExtrinsicHash10) {
+        if (currentBlockNumber - blockNumber > 10) {
+            const tmpSet = new Set(set);
+            witnessExtrinsicHash10.delete(blockNumber);
+            for (const hash of tmpSet) {
+                const parsedObj = JSON.parse(hash);
+                const [result, total] = await countWitnesses(parsedObj, currentBlockNumber, api);
+                metric.labels(parsedObj.type, '10').set(total);
+                // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
+            }
+        }
+    }
+}
+
+async function countWitnesses(parsedObj: any, currentBlockNumber: number, api: any) {
+    const result: any = await makeRpcRequest(api, 'witness_count', parsedObj.hash);
+    let total = global.currentAuthorities;
+    if (global.currentBlock === currentBlockNumber && result) {
+        total = global.currentAuthorities - result.failing_count;
+        // check the previous epoch as well! could be a false positive after rotation!
+        if (total < global.currentAuthorities * 0.1) {
+            const previousEpochVote = (
+                await api.query.witnesser.votes(global.epochIndex - 1, parsedObj.hash)
+            )?.toJSON();
+            if (previousEpochVote) {
+                total += hex2bin(previousEpochVote).match(/1/g)?.length || 0;
+            }
+        }
+    }
+    return [result, total];
+}
+
+function log(
+    total: number,
+    result: any,
+    currentBlockNumber: number,
+    blockNumber: number,
+    parsedObj: any,
+    logger: any,
+) {
+    if (total < global.currentAuthorities) {
+        const validators: string[] = [];
+        result.validators.forEach(([ss58address, vanity, witness]: [string, string, boolean]) => {
+            if (!witness) {
+                validators.push(ss58address);
+            }
+        });
+        logger.info(
+            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!
+        Validators: [${validators}]`,
+        );
+        // in case less than 90% witnessed it
+        // create a temporary metric so that we can fetch the list of validators in our alerting system
+        if (total <= global.currentAuthorities * 0.9) {
+            metricWitnessFailure.labels(`${parsedObj.type}`, `${validators}`, `${total}`).set(1);
+            toDelete.set(
+                JSON.stringify({
+                    extrinsic: `${parsedObj.type}`,
+                    validators: `${validators}`,
+                    witnessedBy: `${total}`,
+                }),
+                currentBlockNumber + 40,
+            );
+        }
+    }
+}
+
+async function processHash50(currentBlockNumber: number, api: any, logger: any) {
+    for (const [blockNumber, set] of witnessExtrinsicHash50) {
+        if (currentBlockNumber - blockNumber > 50) {
+            const tmpSet = new Set(set);
+            witnessExtrinsicHash50.delete(blockNumber);
+            for (const hash of tmpSet) {
+                const parsedObj = JSON.parse(hash);
+                api.query.witnesser
+                    .votes(global.epochIndex, parsedObj.hash)
+                    .then((votes: { toJSON: () => any }) => {
+                        if (global.currentBlock === currentBlockNumber) {
+                            const vote = votes.toJSON();
+                            if (vote) {
+                                const binary = hex2bin(vote);
+                                const number = binary.match(/1/g)?.length || 0;
+
+                                metric.labels(parsedObj.type, '50').set(number);
+                                // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                                if (number < global.currentAuthorities) {
+                                    logger.info(
+                                        `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
+                                    );
+                                }
+                            }
+                        }
+                    });
+            }
+        }
+    }
+}

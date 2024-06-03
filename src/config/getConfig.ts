@@ -10,11 +10,6 @@ const BTC_HTTP_ENDPOINT: string =
 
 const CF_NETWORK: string = process.env.CF_NETWORK || 'localnet';
 const NETWORK_EXPORTER_PORT: number = Number(process.env.NETWORK_EXPORTER_PORT) || 9000;
-const CF_WATCHER_PORT: number = Number(process.env.CF_WATCHER_PORT) || 9001;
-const DOT_WATCHER_PORT: number = Number(process.env.DOT_WATCHER_PORT) || 9002;
-const ETH_WATCHER_PORT: number = Number(process.env.ETH_WATCHER_PORT) || 9003;
-const BTC_WATCHER_PORT: number = Number(process.env.BTC_WATCHER_PORT) || 9004;
-const MAX_REORG_SIZE: number = Number(process.env.MAX_REORG_SIZE) || 5;
 
 const CF_WS_ENDPOINT: string = process.env.CF_WS_ENDPOINT || 'ws://localhost:9944';
 
@@ -24,24 +19,23 @@ const DOT_WS_ENDPOINT: string = process.env.DOT_WS_ENDPOINT || 'ws://localhost:9
 
 const ETH_WS_ENDPOINT: string = process.env.ETH_WS_ENDPOINT || 'ws://localhost:8546';
 
+const ARB_WS_ENDPOINT: string = process.env.ARB_WS_ENDPOINT || 'ws://localhost:8548';
+
 const CACHE_ENDPOINT: string = process.env.CACHE_ENDPOINT || '';
 
 const PROCESSOR_ENDPOINT: string = process.env.PROCESSOR_ENDPOINT || '';
+
 export interface Env {
     CONFIG_PATH: string;
     BTC_HTTP_ENDPOINT: string;
     CF_NETWORK: string;
     NETWORK_EXPORTER_PORT: number;
-    CF_WATCHER_PORT: number;
-    DOT_WATCHER_PORT: number;
-    ETH_WATCHER_PORT: number;
-    BTC_WATCHER_PORT: number;
-    MAX_REORG_SIZE: number;
     CF_WS_ENDPOINT: string;
     DOT_WS_ENDPOINT: string;
     ETH_WS_ENDPOINT: string;
     CACHE_ENDPOINT: string;
     PROCESSOR_ENDPOINT: string;
+    ARB_WS_ENDPOINT: string;
 }
 
 export const env: Env = {
@@ -49,16 +43,12 @@ export const env: Env = {
     BTC_HTTP_ENDPOINT,
     CF_NETWORK,
     NETWORK_EXPORTER_PORT,
-    CF_WATCHER_PORT,
-    DOT_WATCHER_PORT,
-    ETH_WATCHER_PORT,
-    BTC_WATCHER_PORT,
-    MAX_REORG_SIZE,
     CF_WS_ENDPOINT,
     DOT_WS_ENDPOINT,
     ETH_WS_ENDPOINT,
     CACHE_ENDPOINT,
     PROCESSOR_ENDPOINT,
+    ARB_WS_ENDPOINT,
 };
 
 export default function getConfig(logger: Logger): any {

@@ -1,14 +1,14 @@
 import { Logger } from 'winston';
 import { Registry } from 'prom-client';
 import { Context } from './interfaces';
-import { BtcConfig, DotConfig, EthConfig, FlipConfig, GithubConfig } from '../config/interfaces';
+import { ArbConfig, BtcConfig, DotConfig, EthConfig, FlipConfig } from '../config/interfaces';
 import { Env } from '../config/getConfig';
 
 const createContext = (
     logger: Logger,
     registry: Registry,
     env: Env,
-    config: FlipConfig | BtcConfig | EthConfig | DotConfig | GithubConfig,
+    config: FlipConfig | BtcConfig | EthConfig | DotConfig | ArbConfig,
 ): Context => {
     return {
         logger,

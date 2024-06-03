@@ -10,6 +10,7 @@ import { Context } from './lib/interfaces';
 import createContext from './lib/createContext';
 import loadDefaultMetrics from './lib/loadDefaultMetrics';
 import startBitcoinService from './watchers/bitcoin';
+import startArbitrumService from './watchers/arbitrum';
 
 const logger: Logger = winston.createLogger();
 logger.add(
@@ -44,6 +45,12 @@ const bitcoinRegistry = new promClient.Registry();
 bitcoinRegistry.setDefaultLabels({
     chain: 'bitcoin',
     network: config.btc.network,
+});
+
+const arbitrumRegistry = new promClient.Registry();
+arbitrumRegistry.setDefaultLabels({
+    chain: 'arbitrum',
+    network: config.arb.network,
 });
 
 app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
@@ -106,6 +113,20 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
         );
         startBitcoinService(bitcoinContext);
     }
+
+    if (config.arb.enabled) {
+        const arbitrumLogger: Logger = logger.child({
+            chain: 'arbitrum',
+            network: config.arb.network,
+        });
+        const arbitrumContext: Context = createContext(
+            arbitrumLogger,
+            arbitrumRegistry,
+            env,
+            config.arb,
+        );
+        startArbitrumService(arbitrumContext);
+    }
 });
 
 app.get('/metrics', async (req, res) => {
@@ -114,6 +135,7 @@ app.get('/metrics', async (req, res) => {
         (await chainflipRegistry.metrics()) +
             (await ethereumRegistry.metrics()) +
             (await polkadotRegistry.metrics()) +
-            (await bitcoinRegistry.metrics()),
+            (await bitcoinRegistry.metrics()) +
+            (await arbitrumRegistry.metrics()),
     );
 });

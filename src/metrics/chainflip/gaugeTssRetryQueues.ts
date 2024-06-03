@@ -1,14 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 
-const metricNamePendingCeremonies: string = 'cf_tss_pending_ceremonies';
-const metricPendingCeremonies: Gauge = new promClient.Gauge({
-    name: metricNamePendingCeremonies,
-    help: 'Size of the TSS pending ceremonies queue, it contains an entry for every ceremony of TSS we are performing',
-    labelNames: ['tss'],
-    registers: [],
-});
-
 const metricNameRequestRetryQueue: string = 'cf_tss_request_retry_queue';
 const metricRequestRetryQueue: Gauge = new promClient.Gauge({
     name: metricNameRequestRetryQueue,
@@ -27,34 +19,16 @@ const metricPendingCeremonyRetryQueue: Gauge = new promClient.Gauge({
 
 export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
     const { logger, api, registry, metricFailure } = context;
-    logger.debug(
-        `Scraping ${metricNameRequestRetryQueue}, ${metricNameCeremonyRetryQueue}, ${metricNamePendingCeremonies}`,
-    );
+    logger.debug(`Scraping ${metricNameRequestRetryQueue}, ${metricNameCeremonyRetryQueue}`);
 
     if (registry.getSingleMetric(metricNameRequestRetryQueue) === undefined)
         registry.registerMetric(metricRequestRetryQueue);
     if (registry.getSingleMetric(metricNameCeremonyRetryQueue) === undefined)
         registry.registerMetric(metricPendingCeremonyRetryQueue);
-    if (registry.getSingleMetric(metricNamePendingCeremonies) === undefined)
-        registry.registerMetric(metricPendingCeremonies);
     metricFailure.labels({ metric: metricNameRequestRetryQueue }).set(0);
     metricFailure.labels({ metric: metricNameCeremonyRetryQueue }).set(0);
-    metricFailure.labels({ metric: metricNamePendingCeremonies }).set(0);
 
     try {
-        // pendingCeremonies
-        // const dotPendingCeremonies: any = await api.query.polkadotThresholdSigner.requestRetryQueue.entries();
-        // const dotPendingCeremoniesLenght: number = dotPendingCeremonies.length;
-        // metricPendingCeremonies.labels("polkadot").set(dotPendingCeremoniesLenght)
-
-        // const btcPendingCeremonies: any = await api.query.bitcoinThresholdSigner.requestRetryQueue.entries();
-        // const btcPendingCeremoniesLenght: number = btcPendingCeremonies.length;
-        // metricPendingCeremonies.labels("polkadot").set(btcPendingCeremoniesLenght)
-
-        // const ethPendingCeremonies: any = await api.query.ethereumThresholdSigner.requestRetryQueue.entries();
-        // const ethPendingCeremoniesLenght: number = ethPendingCeremonies.length;
-        // metricPendingCeremonies.labels("polkadot").set(ethPendingCeremoniesLenght)
-
         // requestRetryQueue
         const dotRequestRetryQueue: any =
             await api.query.polkadotThresholdSigner.requestRetryQueue.entries();
@@ -73,12 +47,12 @@ export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
         metricRequestRetryQueue.labels('bitcoin').set(btcRequestRetryQueueLength);
 
         const ethRequestRetryQueue: any =
-            await api.query.ethereumThresholdSigner.requestRetryQueue.entries();
+            await api.query.evmThresholdSigner.requestRetryQueue.entries();
         let ethRequestRetryQueueLength: number = 0;
         ethRequestRetryQueue.forEach(([key, element]: [any, any]) => {
             ethRequestRetryQueueLength += Number(element.toHuman().length);
         });
-        metricRequestRetryQueue.labels('ethereum').set(ethRequestRetryQueueLength);
+        metricRequestRetryQueue.labels('evm').set(ethRequestRetryQueueLength);
 
         // ceremonyRetryQueues
         const dotCeremonyRetryQueue: any =
@@ -98,15 +72,14 @@ export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
         metricPendingCeremonyRetryQueue.labels('bitcoin').set(btcCeremonyRetryQueueLength);
 
         const ethCeremonyRetryQueue: any =
-            await api.query.ethereumThresholdSigner.ceremonyRetryQueues.entries();
+            await api.query.evmThresholdSigner.ceremonyRetryQueues.entries();
         let ethCeremonyRetryQueueLength: number = 0;
         ethCeremonyRetryQueue.forEach(([key, element]: [any, any]) => {
             ethCeremonyRetryQueueLength += Number(element.toHuman().length);
         });
-        metricPendingCeremonyRetryQueue.labels('ethereum').set(ethCeremonyRetryQueueLength);
+        metricPendingCeremonyRetryQueue.labels('evm').set(ethCeremonyRetryQueueLength);
     } catch (err) {
         logger.error(err);
-        metricFailure.labels({ metric: metricNamePendingCeremonies }).set(1);
         metricFailure.labels({ metric: metricNameRequestRetryQueue }).set(1);
         metricFailure.labels({ metric: metricNameCeremonyRetryQueue }).set(1);
     }

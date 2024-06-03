@@ -3,16 +3,6 @@ interface ConfigBase {
     network: string;
 }
 
-export interface GithubConfig {
-    enabled: boolean;
-    repositories: GitHubRepo[];
-}
-
-interface GitHubRepo {
-    owner: string;
-    repo: string;
-}
-
 interface FlipConfigAccount {
     alias: string;
     ss58Address: string;
@@ -47,6 +37,14 @@ export interface EthConfig extends ConfigBase {
     tokens: ConfigToken[];
 }
 
+export interface ArbConfig extends ConfigBase {
+    defaultMetrics: DefaultMetrics[];
+    network: string;
+    networkId: number;
+    contracts: EthConfigContract[];
+    wallets: ConfigWallet[];
+}
+
 export interface BtcConfig extends ConfigBase {
     wallets: ConfigWallet[];
     defaultMetrics: DefaultMetrics[];
@@ -79,7 +77,7 @@ export interface Config {
     btc: BtcConfig;
     dot: DotConfig;
     flip: FlipConfig;
-    github: GithubConfig;
+    arb: ArbConfig;
 }
 
 export enum Network {

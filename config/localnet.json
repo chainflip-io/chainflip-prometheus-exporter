@@ -1,130 +1,168 @@
 {
-    "dot": {
-	  "enabled": true,
-	  "network": "pdot",
-	  "defaultMetrics": [],
-	  "accounts": [
-		{
-		    "alias": "vault",
-		    "publicKey": "0x9deb6fe44723040e8bac68dbff3cede4777ecdbd733a95a5f9ecf09efe848c1f"
-		}
-	  ]
-    },
-    "flip": {
-	  "enabled": true,
-	  "network": "perseverance",
-	  "eventLog": true,
-	  "defaultMetrics": [
-		{
-		    "name": "cf_authorities_warning_threshold_count",
-		    "value": 140
-		},
-		{
-		    "name": "cf_authorities_critical_threshold_count",
-		    "value": 120
-		},
-		{
-		    "name": "cf_backup_authorities_warning_threshold_count",
-		    "value": 40
-		},
-		{
-		    "name": "cf_backup_authorities_critical_threshold_count",
-		    "value": 25
-		},
-		{
-		    "name": "cf_expected_rotation_duration_blocks",
-		    "value": 2400
-		}
-	  ],
-	  "accounts": [
-		{
-		    "alias": "Bashful",
-		    "ss58Address": "cFLbassb4hwQ9iA7dzdVdyumRqkaXnkdYECrThhmrqjFukdVo"
-		},
-		{
-		    "alias": "Doc",
-		    "ss58Address": "cFLdocJo3bjT7JbT7R46cA89QfvoitrKr9P3TsMcdkVWeeVLa"
-		},
-		{
-		    "alias": "Dopey",
-		    "ss58Address": "cFLdopvNB7LaiBbJoNdNC26e9Gc1FNJKFtvNZjAmXAAVnzCk4"
-		}
-	  ],
-	  "skipEvents": [
-		{
-		    "section": "transactionPayment",
-		    "method": "TransactionFeePaid"
-		},
-		{
-		    "section": "system",
-		    "method": "ExtrinsicSuccess"
-		}
-	  ]
-    },
-    "btc": {
-	  "enabled": false,
-	  "network": "testnet",
-	  "defaultMetrics": [],
-	  "wallets": []
-    },
-    "eth": {
-	  "enabled": true,
-	  "networkId": 5,
-	  "network": "gorli",
-	  "defaultMetrics": [],
-	  "contracts": [
-		{
-		    "alias": "state-chain-gateway",
-		    "address": "0xeebe00ac0756308ac4aabfd76c05c4f3088b8883"
-		},
-		{
-		    "alias": "key-manager",
-		    "address": "0xa16e02e87b7454126e5e10d957a927a7f5b5d2be"
-		},
-		{
-		    "alias": "vault",
-		    "address": "0xb7a5bd0345ef1cc5e66bf61bdec17d2461fbd968"
-		},
-		{
-		    "alias": "flip",
-		    "address": "0x10C6E9530F1C1AF873a391030a1D9E8ed0630D26"
-		},
-		{
-		    "alias": "usdc",
-		    "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-		}
-	  ],
-	  "wallets": [
-		{
-		    "alias": "deployer",
-		    "address": "0xa56A6be23b6Cf39D9448FF6e897C29c41c8fbDFF"
-		},
-		{
-		    "alias": "bashful",
-		    "address": "0x58f63aa23974665ecf2b08b7c0b72e4286aa822b"
-		},
-		{
-		    "alias": "doc",
-		    "address": "0x93bba670696Ad5412c9d40d0326b1Fa608FE02B3"
-		},
-		{
-		    "alias": "dopey",
-		    "address": "0x8A64ac13B9C271CDe34fA1a540CeF0a12Ed340f2"
-		},
-		{
-		    "alias": "vault",
-		    "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
-		}
-	  ],
-	  "tokens": [
-		{
-		    "address": "0x8e71CEe1679bceFE1D426C7f23EAdE9d68e62650",
-		    "symbol": "FLIP"
-		},
-		{
-		    "address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
-		    "symbol": "USDC"
-		}
-	  ]
-    }
+	"dot": {
+		"enabled": true,
+		"network": "pdot",
+		"defaultMetrics": [],
+		"accounts": [
+			{
+				"alias": "vault",
+				"publicKey": "0x9deb6fe44723040e8bac68dbff3cede4777ecdbd733a95a5f9ecf09efe848c1f"
+			}
+		]
+	},
+	"flip": {
+		"enabled": true,
+		"network": "perseverance",
+		"eventLog": false,
+		"defaultMetrics": [
+			{
+				"name": "cf_authorities_warning_threshold_count",
+				"value": 140
+			},
+			{
+				"name": "cf_authorities_critical_threshold_count",
+				"value": 120
+			},
+			{
+				"name": "cf_backup_authorities_warning_threshold_count",
+				"value": 40
+			},
+			{
+				"name": "cf_backup_authorities_critical_threshold_count",
+				"value": 25
+			},
+			{
+				"name": "cf_expected_rotation_duration_blocks",
+				"value": 2400
+			}
+		],
+		"accounts": [
+			{
+				"alias": "Bashful",
+				"ss58Address": "cFLbassb4hwQ9iA7dzdVdyumRqkaXnkdYECrThhmrqjFukdVo"
+			},
+			{
+				"alias": "Doc",
+				"ss58Address": "cFLdocJo3bjT7JbT7R46cA89QfvoitrKr9P3TsMcdkVWeeVLa"
+			},
+			{
+				"alias": "Dopey",
+				"ss58Address": "cFLdopvNB7LaiBbJoNdNC26e9Gc1FNJKFtvNZjAmXAAVnzCk4"
+			}
+		],
+		"skipEvents": [
+			{
+				"section": "transactionPayment",
+				"method": "TransactionFeePaid"
+			},
+			{
+				"section": "system",
+				"method": "ExtrinsicSuccess"
+			}
+		]
+	},
+	"btc": {
+		"enabled": false,
+		"network": "testnet",
+		"defaultMetrics": [],
+		"wallets": []
+	},
+	"eth": {
+		"enabled": true,
+		"networkId": 5,
+		"network": "gorli",
+		"defaultMetrics": [],
+		"contracts": [
+			{
+				"alias": "state-chain-gateway",
+				"address": "0xeebe00ac0756308ac4aabfd76c05c4f3088b8883"
+			},
+			{
+				"alias": "key-manager",
+				"address": "0xa16e02e87b7454126e5e10d957a927a7f5b5d2be"
+			},
+			{
+				"alias": "vault",
+				"address": "0xb7a5bd0345ef1cc5e66bf61bdec17d2461fbd968"
+			},
+			{
+				"alias": "flip",
+				"address": "0x10C6E9530F1C1AF873a391030a1D9E8ed0630D26"
+			},
+			{
+				"alias": "usdc",
+				"address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+			}
+		],
+		"wallets": [
+			{
+				"alias": "deployer",
+				"address": "0xa56A6be23b6Cf39D9448FF6e897C29c41c8fbDFF"
+			},
+			{
+				"alias": "bashful",
+				"address": "0x58f63aa23974665ecf2b08b7c0b72e4286aa822b"
+			},
+			{
+				"alias": "doc",
+				"address": "0x93bba670696Ad5412c9d40d0326b1Fa608FE02B3"
+			},
+			{
+				"alias": "dopey",
+				"address": "0x8A64ac13B9C271CDe34fA1a540CeF0a12Ed340f2"
+			},
+			{
+				"alias": "vault",
+				"address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+			}
+		],
+		"tokens": [
+			{
+				"address": "0x8e71CEe1679bceFE1D426C7f23EAdE9d68e62650",
+				"symbol": "FLIP"
+			},
+			{
+				"address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
+				"symbol": "USDC"
+			}
+		]
+	},
+	"arb": {
+		"enabled": true,
+		"networkId": 412346,
+		"network": "sepolia",
+		"defaultMetrics": [],
+		"contracts": [
+			{
+				"alias": "key-manager",
+				"address": "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+			},
+			{
+				"alias": "vault",
+				"address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
+			}
+		],
+		"wallets": [
+			{
+				"alias": "deployer",
+				"address": "0xa56A6be23b6Cf39D9448FF6e897C29c41c8fbDFF"
+			},
+			{
+				"alias": "bashful",
+				"address": "0x58f63aa23974665ecf2b08b7c0b72e4286aa822b"
+			},
+			{
+				"alias": "doc",
+				"address": "0x93bba670696Ad5412c9d40d0326b1Fa608FE02B3"
+			},
+			{
+				"alias": "dopey",
+				"address": "0x8A64ac13B9C271CDe34fA1a540CeF0a12Ed340f2"
+			},
+			{
+				"alias": "vault",
+				"address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+			}
+		]
+	}
 }

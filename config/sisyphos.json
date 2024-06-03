@@ -22,13 +22,13 @@
     ]
   },
   "btc": {
-    "enabled": false,
+    "enabled": true,
     "network": "mainnet",
     "defaultMetrics": [],
     "wallets": []
   },
   "eth": {
-    "enabled": false,
+    "enabled": true,
     "networkId": 5,
     "network": "goerli",
     "defaultMetrics": [
@@ -40,51 +40,72 @@
     "contracts": [
       {
         "alias": "state-chain-gateway",
-        "address": "0x6995Ab7c4D7F4B03f467Cf4c8E920427d9621DBd"
+        "address": "0x1f7fe41c798cc7b1d34bdc8de2ddda4a4be744d9"
       },
       {
         "alias": "key-manager",
-        "address": "0xcd351d3626Dc244730796A3168D315168eBf08Be"
+        "address": "0x22f5562e6859924db082b8b248ea0c974f148a17"
       },
       {
         "alias": "vault",
-        "address": "0xF5e10380213880111522dd0efD3dbb45b9f62Bcc"
+        "address": "0xa94d6b1853f3cb611ed3ccb701b4fda5a9dace85"
       },
       {
         "alias": "flip",
-        "address": "0x826180541412D574cf1336d22c0C0a287822678A"
+        "address": "0xcD079EAB6B5443b545788Fd210C8800FEADd87fa"
       },
       {
         "alias": "usdc",
-        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+      }
+    ],
+    "wallets": [],
+    "tokens": [
+      {
+        "address": "0xcD079EAB6B5443b545788Fd210C8800FEADd87fa",
+        "symbol": "FLIP"
+      },
+      {
+        "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "symbol": "USDC"
+      }
+    ]
+  },
+  "arb": {
+    "enabled": true,
+    "networkId": 412346,
+    "network": "sepolia",
+    "defaultMetrics": [],
+    "contracts": [
+      {
+        "alias": "key-manager",
+        "address": "0x7ea74208e2954a7294097c731434cad29c5094d8"
+      },
+      {
+        "alias": "vault",
+        "address": "0x8155bdd48cd011e1118b51a1c82be020a3e5c2f2"
       }
     ],
     "wallets": [
       {
+        "alias": "deployer",
+        "address": "0xa56A6be23b6Cf39D9448FF6e897C29c41c8fbDFF"
+      },
+      {
         "alias": "bashful",
-        "address": "0x9c1bc912afa4eb8a516ed50378e6163360264e84"
+        "address": "0x58f63aa23974665ecf2b08b7c0b72e4286aa822b"
       },
       {
         "alias": "doc",
-        "address": "0x0cb6f56ccefd56fbefca4146ca1dd9949100eb62"
+        "address": "0x93bba670696Ad5412c9d40d0326b1Fa608FE02B3"
       },
       {
         "alias": "dopey",
-        "address": "0xd0b108995911377d8d32b652c5dd1c233a6afc87"
+        "address": "0x8A64ac13B9C271CDe34fA1a540CeF0a12Ed340f2"
       },
       {
         "alias": "vault",
-        "address": "0xF5e10380213880111522dd0efD3dbb45b9f62Bcc"
-      }
-    ],
-    "tokens": [
-      {
-        "address": "0x826180541412D574cf1336d22c0C0a287822678A",
-        "symbol": "FLIP"
-      },
-      {
-        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        "symbol": "USDC"
+        "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
       }
     ]
   }

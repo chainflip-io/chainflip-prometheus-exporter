@@ -37,6 +37,13 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
         );
         global.dotHeight = dotBlockHeight;
         metric.labels('polkadot').set(dotBlockHeight);
+
+        // Arbitrum
+        const arbBlockHeight = Number(
+            (await api.query.arbitrumChainTracking.currentChainState()).toJSON().blockHeight,
+        );
+        global.arbHeight = arbBlockHeight;
+        metric.labels('arbitrum').set(arbBlockHeight);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricName }).set(1);
