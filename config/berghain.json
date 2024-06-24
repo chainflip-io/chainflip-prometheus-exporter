@@ -1,14 +1,36 @@
 {
   "dot": {
     "enabled": true,
-    "network": "pdot",
+    "network": "polkadot",
     "defaultMetrics": [],
     "accounts": []
   },
   "flip": {
     "enabled": true,
     "network": "berghain",
-    "defaultMetrics": [],
+    "eventLog": true,
+    "defaultMetrics": [
+      {
+        "name": "cf_authorities_warning_threshold_count",
+        "value": 140
+      },
+      {
+        "name": "cf_authorities_critical_threshold_count",
+        "value": 130
+      },
+      {
+        "name": "cf_backup_authorities_warning_threshold_count",
+        "value": 20
+      },
+      {
+        "name": "cf_backup_authorities_critical_threshold_count",
+        "value": 10
+      },
+      {
+        "name": "cf_expected_rotation_duration_blocks",
+        "value": 1000
+      }
+    ],
     "accounts": [
       {
         "alias": "bashful",
@@ -21,6 +43,10 @@
       {
         "alias": "dopey",
         "ss58Address": "cFKzr7DwLCRtSkou5H5moKri7g9WwJ4tAbVJv6dZGhLb811Tc"
+      },
+      {
+        "alias": "broker-api",
+        "ss58Address": "cFLRQDfEdmnv6d2XfHJNRBQHi4fruPMReLSfvB8WWD2ENbqj7"
       }
     ],
     "skipEvents": [
@@ -44,7 +70,24 @@
     "enabled": true,
     "networkId": 1,
     "network": "mainnet",
-    "defaultMetrics": [],
+    "defaultMetrics": [
+      {
+        "name": "eth_validator_balance_warning_threshold",
+        "value": 0.15
+      },
+      {
+        "name": "eth_validator_balance_critical_threshold",
+        "value": 0.1
+      },
+      {
+        "name": "eth_vault_balance_warning_threshold",
+        "value": 0
+      },
+      {
+        "name": "eth_vault_balance_critical_threshold",
+        "value": 0
+      }
+    ],
     "contracts": [
       {
         "alias": "state-chain-gateway",
@@ -102,39 +145,35 @@
   },
   "arb": {
     "enabled": true,
-    "networkId": 412346,
-    "network": "sepolia",
+    "networkId": 42161,
+    "network": "mainnet",
     "defaultMetrics": [],
     "contracts": [
       {
         "alias": "key-manager",
-        "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+        "address": "0xbfe612c77c2807ac5a6a41f84436287578000275"
       },
       {
         "alias": "vault",
-        "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
+        "address": "0x79001a5e762f3befc8e5871b42f6734e00498920"
       }
     ],
     "wallets": [
       {
-        "alias": "deployer",
-        "address": "0xa56A6be23b6Cf39D9448FF6e897C29c41c8fbDFF"
-      },
-      {
         "alias": "bashful",
-        "address": "0x58f63aa23974665ecf2b08b7c0b72e4286aa822b"
+        "address": "0x9c1bc912afa4eb8a516ed50378e6163360264e84"
       },
       {
         "alias": "doc",
-        "address": "0x93bba670696Ad5412c9d40d0326b1Fa608FE02B3"
+        "address": "0x0cb6f56ccefd56fbefca4146ca1dd9949100eb62"
       },
       {
         "alias": "dopey",
-        "address": "0x8A64ac13B9C271CDe34fA1a540CeF0a12Ed340f2"
+        "address": "0xd0b108995911377d8d32b652c5dd1c233a6afc87"
       },
       {
         "alias": "vault",
-        "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+        "address": "0x79001a5e762f3befc8e5871b42f6734e00498920"
       }
     ]
   }

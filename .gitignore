@@ -4,6 +4,7 @@ node_modules
 dist
 .env.perseverance
 .env.berghain
+.env.sisyphos
 config/ignore.json
 config/perseverance.json
 alerts.yaml
