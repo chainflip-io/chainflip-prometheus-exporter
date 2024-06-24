@@ -25,6 +25,10 @@ const metricWitnessFailure: Gauge = new promClient.Gauge({
 });
 
 export const gaugeWitnessChainTracking = async (context: Context): Promise<void> => {
+    console.log(witnessHash10);
+    console.log(witnessHash50);
+    console.log(toDelete);
+    console.log('\n');
     if (global.epochIndex) {
         const { logger, api, registry, metricFailure } = context;
         logger.debug(`Scraping ${metricName}`);
@@ -40,26 +44,26 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
             deleteOldHashes(currentBlockNumber);
             await processHash10(currentBlockNumber, api, logger);
             await processHash50(currentBlockNumber, api, logger);
-            const btcBlock = 0;
-            const ethBlock = 0;
-            const dotBlock = 0;
-            const arbBlock = 0;
+            let btcBlock = 0;
+            let ethBlock = 0;
+            let dotBlock = 0;
+            let arbBlock = 0;
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
                 const blockNumber: number = Number(signedBlock.block.header.number);
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
                     const callData = ex.toHuman().method.args.call;
 
                     if (callData && callData.section === 'ethereumChainTracking') {
-                        ethereumChainTracking(callData, blockNumber, ethBlock, api);
+                        ethBlock = ethereumChainTracking(callData, blockNumber, ethBlock, api);
                     }
                     if (callData && callData.section === 'bitcoinChainTracking') {
-                        bitcoinChainTracking(callData, blockNumber, btcBlock, api);
+                        btcBlock = bitcoinChainTracking(callData, blockNumber, btcBlock, api);
                     }
                     if (callData && callData.section === 'polkadotChainTracking') {
-                        polkadotChainTracking(callData, blockNumber, dotBlock, api);
+                        dotBlock = polkadotChainTracking(callData, blockNumber, dotBlock, api);
                     }
                     if (callData && callData.section === 'arbitrumChainTracking') {
-                        arbitrumChainTracking(callData, blockNumber, arbBlock, api);
+                        arbBlock = arbitrumChainTracking(callData, blockNumber, arbBlock, api);
                     }
                 }
             });
@@ -80,7 +84,12 @@ function deleteOldHashes(currentBlockNumber: number) {
     });
 }
 
-function ethereumChainTracking(callData: any, blockNumber: number, ethBlock: number, api: any) {
+function ethereumChainTracking(
+    callData: any,
+    blockNumber: number,
+    ethBlock: number,
+    api: any,
+): number {
     const finalData = callData.args;
     // set priorityFee to 0, it is not kept into account for the chaintracking
     finalData.new_chain_state.trackedData.priorityFee = '0';
@@ -112,11 +121,17 @@ function ethereumChainTracking(callData: any, blockNumber: number, ethBlock: num
             blockNumber,
             `${callData.section}:${callData.method}`,
         );
-        ethBlock = Number(blockHeight);
+        return Number(blockHeight || 0);
     }
+    return ethBlock;
 }
 
-function polkadotChainTracking(callData: any, blockNumber: number, dotBlock: number, api: any) {
+function polkadotChainTracking(
+    callData: any,
+    blockNumber: number,
+    dotBlock: number,
+    api: any,
+): number {
     const finalData = callData.args;
     // set medianTip to 0, it is not kept into account for the chaintracking
     finalData.new_chain_state.trackedData.medianTip = '0';
@@ -151,11 +166,17 @@ function polkadotChainTracking(callData: any, blockNumber: number, dotBlock: num
             blockNumber,
             `${callData.section}:${callData.method}`,
         );
-        dotBlock = Number(blockHeight);
+        return Number(blockHeight || 0);
     }
+    return dotBlock;
 }
 
-function bitcoinChainTracking(callData: any, blockNumber: number, btcBlock: number, api: any) {
+function bitcoinChainTracking(
+    callData: any,
+    blockNumber: number,
+    btcBlock: number,
+    api: any,
+): number {
     const finalData = callData.args;
     const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
     // parse the data and removed useless comas (damn polkadot api)
@@ -190,11 +211,17 @@ function bitcoinChainTracking(callData: any, blockNumber: number, btcBlock: numb
             blockNumber,
             `${callData.section}:${callData.method}`,
         );
-        btcBlock = Number(blockHeight);
+        return Number(blockHeight || 0);
     }
+    return btcBlock;
 }
 
-function arbitrumChainTracking(callData: any, blockNumber: number, arbBlock: number, api: any) {
+function arbitrumChainTracking(
+    callData: any,
+    blockNumber: number,
+    arbBlock: number,
+    api: any,
+): number {
     const finalData = callData.args;
     // set priorityFee to 0, it is not kept into account for the chaintracking
     finalData.new_chain_state.trackedData.priorityFee = '0';
@@ -230,8 +257,9 @@ function arbitrumChainTracking(callData: any, blockNumber: number, arbBlock: num
             blockNumber,
             `${callData.section}:${callData.method}`,
         );
-        arbBlock = Number(blockHeight);
+        return Number(blockHeight || 0);
     }
+    return arbBlock;
 }
 
 async function processHash10(currentBlockNumber: number, api: any, logger: any) {
