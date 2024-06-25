@@ -42,21 +42,35 @@ const ETHPriceId = 'evm-10x0000000000000000000000000000000000000000';
 const FLIPPriceId = 'evm-10x826180541412D574cf1336d22c0C0a287822678A';
 const USDCPriceId = 'evm-10xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const DOTPriceId = 'dot0x0000000000000000000000000000000000000000';
+const USDTPriceId = 'evm-10xdAC17F958D2ee523a2206206994597C13D831ec7';
 
 const prices = new Map();
 let ingressFees: any;
 let egressFees: any;
-type tokenDecimals = { BTC: number; ETH: number; FLIP: number; USDC: number; DOT: number };
+type tokenDecimals = {
+    BTC: number;
+    ETH: number;
+    FLIP: number;
+    USDC: number;
+    DOT: number;
+    USDT: number;
+    ARBETH: number;
+    ARBUSDC: number;
+};
 const decimals: tokenDecimals = {
     BTC: 1e8,
     ETH: 1e18,
     FLIP: 1e18,
     USDC: 1e6,
     DOT: 1e10,
+    USDT: 1e6,
+    ARBETH: 1e18,
+    ARBUSDC: 1e6,
 };
 
 type asset = {
     asset: keyof tokenDecimals;
+    absoluteAsset: keyof tokenDecimals;
     priceId: string;
     chain: string;
     chainAsset: keyof tokenDecimals;
@@ -64,6 +78,7 @@ type asset = {
 };
 const BTC: asset = {
     asset: 'BTC',
+    absoluteAsset: 'BTC',
     priceId: BTCPriceId,
     chain: 'Bitcoin',
     chainAsset: 'BTC',
@@ -71,6 +86,7 @@ const BTC: asset = {
 };
 const ETH: asset = {
     asset: 'ETH',
+    absoluteAsset: 'ETH',
     priceId: ETHPriceId,
     chain: 'Ethereum',
     chainAsset: 'ETH',
@@ -78,17 +94,43 @@ const ETH: asset = {
 };
 const FLIP: asset = {
     asset: 'FLIP',
+    absoluteAsset: 'FLIP',
     priceId: FLIPPriceId,
+    chain: 'Ethereum',
+    chainAsset: 'ETH',
+    chainAssetPriceId: ETHPriceId,
+};
+const USDT: asset = {
+    asset: 'USDT',
+    absoluteAsset: 'USDT',
+    priceId: USDTPriceId,
     chain: 'Ethereum',
     chainAsset: 'ETH',
     chainAssetPriceId: ETHPriceId,
 };
 const DOT: asset = {
     asset: 'DOT',
+    absoluteAsset: 'DOT',
     priceId: DOTPriceId,
     chain: 'Polkadot',
     chainAsset: 'DOT',
     chainAssetPriceId: DOTPriceId,
+};
+const ARBETH: asset = {
+    asset: 'ETH',
+    absoluteAsset: 'ARBETH',
+    priceId: ETHPriceId,
+    chain: 'Arbitrum',
+    chainAsset: 'ETH',
+    chainAssetPriceId: ETHPriceId,
+};
+const ARBUSDC: asset = {
+    asset: 'USDC',
+    absoluteAsset: 'ARBUSDC',
+    priceId: USDCPriceId,
+    chain: 'Arbitrum',
+    chainAsset: 'ETH',
+    chainAssetPriceId: ETHPriceId,
 };
 export const gaugePriceDelta = async (context: Context): Promise<void> => {
     const { logger, api, registry } = context;
@@ -116,7 +158,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         // query all index prices
         const data = await axios.post(
             env.CACHE_ENDPOINT,
-            '{"query":"\\nquery GetTokenPrices($tokens: [PriceQueryInput\u0021]\u0021) {\\n  tokenPrices: getTokenPrices(input: $tokens) {\\n    chainId\\n    address\\n    usdPrice\\n    }\\n}","variables":{"tokens":[{"chainId":"btc","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}, {"chainId":"evm-1","address":"0x826180541412D574cf1336d22c0C0a287822678A"}, {"chainId":"dot","address":"0x0000000000000000000000000000000000000000"}]}}',
+            '{"query":"\\nquery GetTokenPrices($tokens: [PriceQueryInput\u0021]\u0021) {\\n  tokenPrices: getTokenPrices(input: $tokens) {\\n    chainId\\n    address\\n    usdPrice\\n    }\\n}","variables":{"tokens":[{"chainId":"btc","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0xdAC17F958D2ee523a2206206994597C13D831ec7"},{"chainId":"evm-1","address":"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}, {"chainId":"evm-1","address":"0x826180541412D574cf1336d22c0C0a287822678A"}, {"chainId":"dot","address":"0x0000000000000000000000000000000000000000"}]}}',
         );
         const formattedData = JSON.parse(data.data).data.tokenPrices;
         formattedData.forEach((element: any) => {
@@ -132,14 +174,17 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         calculateRateToUsdc(BTC, pointOneBtc);
         calculateRateToUsdc(BTC, pointFiveBtc);
         calculateRateToUsdc(BTC, oneBtc);
-
         calculateRateToUsdc(ETH, fiveEth);
         calculateRateToUsdc(ETH, twentyEth);
-
         calculateRateToUsdc(DOT, oneKDot);
-
         calculateRateToUsdc(FLIP, fiveKFlip);
         calculateRateToUsdc(FLIP, tenKFlip);
+        calculateRateToUsdc(ARBETH, fiveEth);
+        calculateRateToUsdc(ARBETH, twentyEth);
+        calculateRateToUsdc(ARBUSDC, tenKUsdc);
+        calculateRateToUsdc(ARBUSDC, fiftyKUsdc);
+        calculateRateToUsdc(USDT, tenKUsdc);
+        calculateRateToUsdc(USDT, fiftyKUsdc);
 
         /// USDC -> ...
         calculateRateFromUsdc(BTC, tenKUsdc);
@@ -149,6 +194,12 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         calculateRateFromUsdc(ETH, fiftyKUsdc);
         calculateRateFromUsdc(FLIP, fiftyKUsdc);
         calculateRateFromUsdc(DOT, tenKUsdc);
+        calculateRateFromUsdc(ARBETH, tenKUsdc);
+        calculateRateFromUsdc(ARBETH, fiftyKUsdc);
+        calculateRateFromUsdc(ARBUSDC, tenKUsdc);
+        calculateRateFromUsdc(ARBUSDC, fiftyKUsdc);
+        calculateRateFromUsdc(USDT, tenKUsdc);
+        calculateRateFromUsdc(USDT, fiftyKUsdc);
     } catch (e: any) {
         logger.error(e);
     }
@@ -157,10 +208,14 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         const labelAmount = (intialAmount / decimals[from.asset]).toString();
         // we need to subtract ingress fee before calculating the swap rate
         let netImputAmount = intialAmount - parseInt(ingressFees[from.chain][from.asset]);
-
         netImputAmount = Math.round(netImputAmount);
         // simulate the swap
-        api.rpc('cf_swap_rate', from.asset, 'USDC', netImputAmount.toString(16)).then(
+        api.rpc(
+            'cf_swap_rate',
+            { chain: from.chain, asset: from.asset },
+            { chain: 'Ethereum', asset: 'USDC' },
+            netImputAmount.toString(16),
+        ).then(
             (output: any) => {
                 const amount = output.output;
                 const netEgressAmount = (parseInt(amount) - egressFees.Ethereum.USDC) / 1e6;
@@ -169,12 +224,14 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
                     (netEgressAmount * prices.get(USDCPriceId) * 100) /
                         (prices.get(from.priceId) * (intialAmount / decimals[from.asset])) -
                     100;
-                metricToUsdc.labels(from.asset, labelAmount).set(delta);
-                metricPriceDeltaNotWorking.labels(from.asset, 'USDC', labelAmount).set(0);
+                metricToUsdc.labels(from.absoluteAsset, labelAmount).set(delta);
+                metricPriceDeltaNotWorking.labels(from.absoluteAsset, 'USDC', labelAmount).set(0);
             },
             () => {
-                logger.info(`Failed to query cf_swap_rate: ${from.asset}(${labelAmount}) -> USDC`);
-                metricPriceDeltaNotWorking.labels(from.asset, 'USDC', labelAmount).set(1);
+                logger.info(
+                    `Failed to query cf_swap_rate: ${from.absoluteAsset}(${labelAmount}) -> USDC`,
+                );
+                metricPriceDeltaNotWorking.labels(from.absoluteAsset, 'USDC', labelAmount).set(1);
             },
         );
     }
@@ -186,7 +243,12 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         netImputAmount = Math.round(netImputAmount);
 
         // simulate the swap
-        api.rpc('cf_swap_rate', 'USDC', to.asset, netImputAmount.toString(16)).then(
+        api.rpc(
+            'cf_swap_rate',
+            { chain: 'Ethereum', asset: 'USDC' },
+            { chain: to.chain, asset: to.asset },
+            netImputAmount.toString(16),
+        ).then(
             (output: any) => {
                 const amount = output.output;
                 const netEgressAmount =
@@ -196,12 +258,14 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
                     (netEgressAmount * prices.get(to.priceId) * 100) /
                         (prices.get(USDCPriceId) * (intialAmount / decimals.USDC)) -
                     100;
-                metricFromUsdc.labels(to.asset, labelAmount).set(delta);
-                metricPriceDeltaNotWorking.labels('USDC', to.asset, labelAmount).set(0);
+                metricFromUsdc.labels(to.absoluteAsset, labelAmount).set(delta);
+                metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(0);
             },
             () => {
-                logger.info(`Failed to query cf_swap_rate: USDC(${labelAmount}) -> ${to.asset}`);
-                metricPriceDeltaNotWorking.labels('USDC', to.asset, labelAmount).set(1);
+                logger.info(
+                    `Failed to query cf_swap_rate: USDC(${labelAmount}) -> ${to.absoluteAsset}`,
+                );
+                metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(1);
             },
         );
     }
