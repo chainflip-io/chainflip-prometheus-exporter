@@ -54,6 +54,8 @@ type tokenDecimals = {
     USDC: number;
     DOT: number;
     USDT: number;
+    ARBETH: number;
+    ARBUSDC: number;
 };
 const decimals: tokenDecimals = {
     BTC: 1e8,
@@ -62,6 +64,8 @@ const decimals: tokenDecimals = {
     USDC: 1e6,
     DOT: 1e10,
     USDT: 1e6,
+    ARBETH: 1e18,
+    ARBUSDC: 1e6,
 };
 
 type asset = {
