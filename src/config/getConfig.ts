@@ -58,35 +58,27 @@ export default function getConfig(logger: Logger): any {
     try {
         const networkExporterConfig: any = fs.readFileSync(CONFIG_PATH);
         const config: Config = JSON.parse(networkExporterConfig.toString());
-        let result = jsonvalidator.validate(config.flip, schema.definitions.FlipConfig, {});
+        let result = jsonvalidator.validate(config.flip, schema.definitions.FlipConfig);
         if (!result.valid) {
             logger.error(`Invalid Flip config: ${result.errors}`);
             process.exit(1);
         }
-        result = jsonvalidator.validate(config.arb, schema.definitions.ArbConfig, {
-            throwAll: true,
-        });
+        result = jsonvalidator.validate(config.arb, schema.definitions.ArbConfig);
         if (!result.valid) {
             logger.error(`Invalid Arb config: ${result.errors}`);
             process.exit(1);
         }
-        result = jsonvalidator.validate(config.eth, schema.definitions.EthConfig, {
-            throwAll: true,
-        });
+        result = jsonvalidator.validate(config.eth, schema.definitions.EthConfig);
         if (!result.valid) {
             logger.error(`Invalid Eth config: ${result.errors}`);
             process.exit(1);
         }
-        result = jsonvalidator.validate(config.btc, schema.definitions.BtcConfig, {
-            throwAll: true,
-        });
+        result = jsonvalidator.validate(config.btc, schema.definitions.BtcConfig);
         if (!result.valid) {
             logger.error(`Invalid Btc config: ${result.errors}`);
             process.exit(1);
         }
-        result = jsonvalidator.validate(config.dot, schema.definitions.DotConfig, {
-            throwAll: true,
-        });
+        result = jsonvalidator.validate(config.dot, schema.definitions.DotConfig);
         if (!result.valid) {
             logger.error(`Invalid Dot config: ${result.errors}`);
             process.exit(1);
