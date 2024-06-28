@@ -13,30 +13,9 @@
 	},
 	"flip": {
 		"enabled": true,
-		"network": "perseverance",
+		"network": "localnet",
 		"eventLog": false,
-		"defaultMetrics": [
-			{
-				"name": "cf_authorities_warning_threshold_count",
-				"value": 140
-			},
-			{
-				"name": "cf_authorities_critical_threshold_count",
-				"value": 120
-			},
-			{
-				"name": "cf_backup_authorities_warning_threshold_count",
-				"value": 40
-			},
-			{
-				"name": "cf_backup_authorities_critical_threshold_count",
-				"value": 25
-			},
-			{
-				"name": "cf_expected_rotation_duration_blocks",
-				"value": 2400
-			}
-		],
+		"defaultMetrics": [],
 		"accounts": [
 			{
 				"alias": "Bashful",
