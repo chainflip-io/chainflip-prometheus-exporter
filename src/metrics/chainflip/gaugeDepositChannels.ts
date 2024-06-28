@@ -23,6 +23,9 @@ const axios = new Axios({
 });
 
 export const gaugeDepositChannels = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_open_deposit_channels')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricName}`);
     const config = context.config as FlipConfig;

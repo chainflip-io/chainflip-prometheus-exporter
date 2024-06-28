@@ -18,6 +18,9 @@ const metricPendingCeremonyRetryQueue: Gauge = new promClient.Gauge({
 });
 
 export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_tss')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricNameRequestRetryQueue}, ${metricNameCeremonyRetryQueue}`);
 

@@ -47,6 +47,9 @@ const metricBalance: Gauge = new promClient.Gauge({
 });
 
 export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_validator')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     const config = context.config as FlipConfig;
     if (config.accounts.length === 0) {

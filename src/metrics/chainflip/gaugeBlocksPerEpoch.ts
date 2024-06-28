@@ -9,6 +9,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeBlocksPerEpoch = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_block_per_epoch')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricName}`);
 

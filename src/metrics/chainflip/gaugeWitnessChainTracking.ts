@@ -25,6 +25,9 @@ const metricWitnessFailure: Gauge = new promClient.Gauge({
 });
 
 export const gaugeWitnessChainTracking = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_chain_tracking_witness_count')) {
+        return;
+    }
     if (global.epochIndex) {
         const { logger, api, registry, metricFailure } = context;
         logger.debug(`Scraping ${metricName}`);

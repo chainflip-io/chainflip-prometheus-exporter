@@ -10,6 +10,9 @@ const metric = new promClient.Counter({
 });
 
 export const countContractEvents = async (context: Context) => {
+    if (context.config.skipMetrics.includes('arb_contract_events_count')) {
+        return;
+    }
     const { logger, registry, event, contractAlias } = context;
 
     logger.debug(`Scraping ${metricName}`);

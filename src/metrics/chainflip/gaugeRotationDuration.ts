@@ -30,6 +30,9 @@ const metricRotationDuration: Counter = new promClient.Counter({
 });
 
 export const gaugeRotationDuration = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_rotation_duration')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
 
     logger.debug(`Scraping ${metricNameRotation}, ${metricName}`);

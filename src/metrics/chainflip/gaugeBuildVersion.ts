@@ -11,6 +11,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeBuildVersion = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_build_version')) {
+        return;
+    }
     const { logger, api, registry } = context;
 
     logger.debug(`Scraping ${metricName}`);

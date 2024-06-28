@@ -10,6 +10,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugePendingBroadcast = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_pending_broadcast')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricName}`);
 

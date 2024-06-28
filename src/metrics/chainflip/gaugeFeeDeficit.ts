@@ -10,6 +10,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_fee_deficit')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
 
     logger.debug(`Scraping ${metricName}`);
