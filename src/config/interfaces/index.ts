@@ -1,6 +1,7 @@
 interface ConfigBase {
     enabled: boolean;
     network: string;
+    skipMetrics: string[];
 }
 
 interface FlipConfigAccount {

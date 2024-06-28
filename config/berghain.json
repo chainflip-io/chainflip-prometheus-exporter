@@ -3,7 +3,8 @@
     "enabled": true,
     "network": "polkadot",
     "defaultMetrics": [],
-    "accounts": []
+    "accounts": [],
+    "skipMetrics": []
   },
   "flip": {
     "enabled": true,
@@ -58,13 +59,15 @@
         "section": "system",
         "method": "ExtrinsicSuccess"
       }
-    ]
+    ],
+    "skipMetrics": []
   },
   "btc": {
     "enabled": true,
     "network": "mainnet",
     "defaultMetrics": [],
-    "wallets": []
+    "wallets": [],
+    "skipMetrics": []
   },
   "eth": {
     "enabled": true,
@@ -141,7 +144,8 @@
         "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
         "symbol": "USDC"
       }
-    ]
+    ],
+    "skipMetrics": []
   },
   "arb": {
     "enabled": true,
@@ -175,6 +179,7 @@
         "alias": "vault",
         "address": "0x79001a5e762f3befc8e5871b42f6734e00498920"
       }
-    ]
+    ],
+    "skipMetrics": []
   }
 }

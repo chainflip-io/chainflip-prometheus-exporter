@@ -8,7 +8,8 @@
 				"alias": "vault",
 				"publicKey": "0x9deb6fe44723040e8bac68dbff3cede4777ecdbd733a95a5f9ecf09efe848c1f"
 			}
-		]
+		],
+		"skipMetrics": []
 	},
 	"flip": {
 		"enabled": true,
@@ -59,13 +60,15 @@
 				"section": "system",
 				"method": "ExtrinsicSuccess"
 			}
-		]
+		],
+		"skipMetrics": []
 	},
 	"btc": {
 		"enabled": false,
 		"network": "testnet",
 		"defaultMetrics": [],
-		"wallets": []
+		"wallets": [],
+		"skipMetrics": []
 	},
 	"eth": {
 		"enabled": true,
@@ -125,7 +128,8 @@
 				"address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
 				"symbol": "USDC"
 			}
-		]
+		],
+		"skipMetrics": []
 	},
 	"arb": {
 		"enabled": true,
@@ -163,6 +167,7 @@
 				"alias": "vault",
 				"address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
 			}
-		]
+		],
+		"skipMetrics": []
 	}
 }
