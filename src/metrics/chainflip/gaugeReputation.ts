@@ -11,6 +11,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeReputation = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_reputation')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricName}`);
     const config = context.config as FlipConfig;

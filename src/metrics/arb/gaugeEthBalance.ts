@@ -12,6 +12,9 @@ const metric = new promClient.Gauge({
 });
 
 export const gaugeEthBalance = async (context: Context) => {
+    if (context.config.skipMetrics.includes('arb_eth_balance')) {
+        return;
+    }
     const { logger, provider, registry, metricFailure } = context;
     const config = context.config as ArbConfig;
     const { wallets } = config;

@@ -133,6 +133,9 @@ const ARBUSDC: asset = {
     chainAssetPriceId: ETHPriceId,
 };
 export const gaugePriceDelta = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_price_delta')) {
+        return;
+    }
     const { logger, api, registry } = context;
     logger.debug(`Scraping ${metricToUsdcName}, ${metricFromUsdcName}`);
 

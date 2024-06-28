@@ -9,6 +9,9 @@ const metric = new promClient.Gauge({
 });
 
 export const gaugeBitcoinBalance = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_btc_utxo_balance')) {
+        return;
+    }
     const { logger, registry, api, metricFailure } = context;
 
     logger.debug(`Scraping ${metricName}`);

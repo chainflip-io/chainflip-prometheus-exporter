@@ -16,6 +16,9 @@ const metricPendingRedemptionBalance: Gauge = new promClient.Gauge({
 });
 
 export const gaugePendingRedemptions = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_pending_redemptions')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
 
     if (registry.getSingleMetric(metricNamePendingRedemption) === undefined)

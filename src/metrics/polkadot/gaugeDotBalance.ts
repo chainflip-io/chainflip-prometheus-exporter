@@ -17,6 +17,9 @@ const metricAggKeyBalance: Gauge = new promClient.Gauge({
 });
 
 export const gaugeDotBalance = async (context: Context) => {
+    if (context.config.skipMetrics.includes('dot_balance')) {
+        return;
+    }
     const { logger, registry, api, metricFailure, config } = context;
 
     const { accounts } = config as DotConfig;

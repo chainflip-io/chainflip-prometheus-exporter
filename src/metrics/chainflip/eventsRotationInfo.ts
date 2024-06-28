@@ -27,6 +27,9 @@ const metricBalanceBanned: Gauge = new promClient.Gauge({
 });
 
 export const eventsRotationInfo = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_rotation_phase_attempts')) {
+        return;
+    }
     const { logger, registry, events, api } = context;
     const config = context.config as FlipConfig;
     const { accounts, skipEvents } = config;

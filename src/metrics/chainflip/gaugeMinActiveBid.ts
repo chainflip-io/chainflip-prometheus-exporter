@@ -11,6 +11,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeMinActiveBid = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_min_active_bid')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricName}`);
 

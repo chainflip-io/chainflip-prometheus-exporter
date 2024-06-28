@@ -3,7 +3,8 @@
     "enabled": true,
     "network": "pdot",
     "defaultMetrics": [],
-    "accounts": []
+    "accounts": [],
+    "skipMetrics": []
   },
   "flip": {
     "enabled": true,
@@ -19,13 +20,18 @@
         "section": "system",
         "method": "ExtrinsicSuccess"
       }
+    ],
+    "skipMetrics": [
+      "cf_price_delta",
+      "cf_open_deposit_channels"
     ]
   },
   "btc": {
     "enabled": true,
     "network": "mainnet",
     "defaultMetrics": [],
-    "wallets": []
+    "wallets": [],
+    "skipMetrics": []
   },
   "eth": {
     "enabled": true,
@@ -69,7 +75,8 @@
         "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
         "symbol": "USDC"
       }
-    ]
+    ],
+    "skipMetrics": []
   },
   "arb": {
     "enabled": true,
@@ -107,6 +114,7 @@
         "alias": "vault",
         "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
       }
-    ]
+    ],
+    "skipMetrics": []
   }
 }

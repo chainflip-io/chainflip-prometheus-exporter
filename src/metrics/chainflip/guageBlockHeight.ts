@@ -9,6 +9,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeBlockHeight = async (context: Context) => {
+    if (context.config.skipMetrics.includes('cf_block_height')) {
+        return;
+    }
     const { logger, registry, header } = context;
     logger.debug(`Scraping ${metricName}`);
 

@@ -11,6 +11,9 @@ const metric = new promClient.Gauge({
 });
 
 export const gaugeFlipBalance = async (context: Context) => {
+    if (context.config.skipMetrics.includes('eth_flip_total_supply')) {
+        return;
+    }
     const { logger, registry, metricFailure } = context;
     const config = context.config as EthConfig;
     const contract = context.contract as Contract;

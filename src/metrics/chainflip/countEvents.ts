@@ -29,6 +29,9 @@ const metricSlash: Counter = new promClient.Counter({
 });
 
 export const countEvents = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_events_count_total')) {
+        return;
+    }
     const { logger, registry, events, api } = context;
     const config = context.config as FlipConfig;
     const { accounts, skipEvents } = config;

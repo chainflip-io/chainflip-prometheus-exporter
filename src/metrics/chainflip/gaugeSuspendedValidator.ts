@@ -10,6 +10,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeSuspendedValidator = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_suspended_validators')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricName}`);
 

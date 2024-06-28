@@ -8,34 +8,14 @@
 				"alias": "vault",
 				"publicKey": "0x9deb6fe44723040e8bac68dbff3cede4777ecdbd733a95a5f9ecf09efe848c1f"
 			}
-		]
+		],
+		"skipMetrics": []
 	},
 	"flip": {
 		"enabled": true,
-		"network": "perseverance",
+		"network": "localnet",
 		"eventLog": false,
-		"defaultMetrics": [
-			{
-				"name": "cf_authorities_warning_threshold_count",
-				"value": 140
-			},
-			{
-				"name": "cf_authorities_critical_threshold_count",
-				"value": 120
-			},
-			{
-				"name": "cf_backup_authorities_warning_threshold_count",
-				"value": 40
-			},
-			{
-				"name": "cf_backup_authorities_critical_threshold_count",
-				"value": 25
-			},
-			{
-				"name": "cf_expected_rotation_duration_blocks",
-				"value": 2400
-			}
-		],
+		"defaultMetrics": [],
 		"accounts": [
 			{
 				"alias": "Bashful",
@@ -59,13 +39,18 @@
 				"section": "system",
 				"method": "ExtrinsicSuccess"
 			}
+		],
+		"skipMetrics": [
+			"cf_price_delta",
+			"cf_open_deposit_channels"
 		]
 	},
 	"btc": {
 		"enabled": false,
 		"network": "testnet",
 		"defaultMetrics": [],
-		"wallets": []
+		"wallets": [],
+		"skipMetrics": []
 	},
 	"eth": {
 		"enabled": true,
@@ -125,7 +110,8 @@
 				"address": "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
 				"symbol": "USDC"
 			}
-		]
+		],
+		"skipMetrics": []
 	},
 	"arb": {
 		"enabled": true,
@@ -163,6 +149,7 @@
 				"alias": "vault",
 				"address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
 			}
-		]
+		],
+		"skipMetrics": []
 	}
 }

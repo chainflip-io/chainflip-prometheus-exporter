@@ -12,6 +12,9 @@ const metric = new promClient.Gauge({
 });
 
 export const gaugeTokenBalance = async (context: Context, symbol: string) => {
+    if (context.config.skipMetrics.includes('eth_token_balance')) {
+        return;
+    }
     const { logger, registry, metricFailure } = context;
     const config = context.config as EthConfig;
     const contract = context.contract as Contract;

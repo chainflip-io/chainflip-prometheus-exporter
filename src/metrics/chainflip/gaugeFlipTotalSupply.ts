@@ -9,6 +9,9 @@ const metric: Gauge = new promClient.Gauge({
 });
 
 export const gaugeFlipTotalSupply = async (context: Context): Promise<void> => {
+    if (context.config.skipMetrics.includes('cf_flip_total_supply')) {
+        return;
+    }
     const { logger, api, registry, metricFailure } = context;
 
     logger.debug(`Scraping ${metricName}`);
