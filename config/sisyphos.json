@@ -21,7 +21,10 @@
         "method": "ExtrinsicSuccess"
       }
     ],
-    "skipMetrics": []
+    "skipMetrics": [
+      "cf_price_delta",
+      "cf_open_deposit_channels"
+    ]
   },
   "btc": {
     "enabled": true,

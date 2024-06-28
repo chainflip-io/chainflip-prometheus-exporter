@@ -86,6 +86,7 @@ export default function getConfig(logger: Logger): any {
         return config;
     } catch (err) {
         logger.error('Error reading production config', err);
+        process.exit(1);
     }
     return;
 }
