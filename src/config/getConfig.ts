@@ -1,7 +1,9 @@
 import { Logger } from 'winston';
 import * as fs from 'fs';
 import { config } from 'dotenv';
-import { Network } from './interfaces';
+import { Config, Network } from './interfaces';
+import jsonvalidator from 'jsonschema';
+import schema from '../../config/schema.json';
 
 config();
 
@@ -55,7 +57,33 @@ export default function getConfig(logger: Logger): any {
     logger.info(`Loading production config at ${CONFIG_PATH}`);
     try {
         const networkExporterConfig: any = fs.readFileSync(CONFIG_PATH);
-        return JSON.parse(networkExporterConfig.toString());
+        const config: Config = JSON.parse(networkExporterConfig.toString());
+        let result = jsonvalidator.validate(config.flip, schema.definitions.FlipConfig,{});
+        if(!result.valid) {
+            logger.error(`Invalid Flip config: ${result.errors}`)
+            process.exit(1);
+        }
+        result = jsonvalidator.validate(config.arb, schema.definitions.ArbConfig, {throwAll: true});
+        if(!result.valid) {
+            logger.error(`Invalid Arb config: ${result.errors}`)
+            process.exit(1);
+        }
+        result = jsonvalidator.validate(config.eth, schema.definitions.EthConfig, {throwAll: true});
+        if(!result.valid) {
+            logger.error(`Invalid Eth config: ${result.errors}`)
+            process.exit(1);
+        }
+        result = jsonvalidator.validate(config.btc, schema.definitions.BtcConfig, {throwAll: true});
+        if(!result.valid) {
+            logger.error(`Invalid Btc config: ${result.errors}`)
+            process.exit(1);
+        }
+        result = jsonvalidator.validate(config.dot, schema.definitions.DotConfig, {throwAll: true});
+        if(!result.valid) {
+            logger.error(`Invalid Dot config: ${result.errors}`)
+            process.exit(1);
+        }
+        return config;
     } catch (err) {
         logger.error('Error reading production config', err);
     }
