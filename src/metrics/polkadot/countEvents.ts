@@ -20,7 +20,10 @@ export const countEvents = async (context: Context): Promise<void> => {
 
     logger.debug(`Scraping ${metricName}`);
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    if (registry.getSingleMetric(metricName) === undefined) {
+        registry.registerMetric(metric);
+        metric.labels("system:CodeUpdated").inc();
+    }
 
     for (const { event } of events) {
         metric.labels(`${event.section}:${event.method}`).inc(1);
