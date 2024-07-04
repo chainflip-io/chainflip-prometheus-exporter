@@ -139,3 +139,8 @@ app.get('/metrics', async (req, res) => {
             (await arbitrumRegistry.metrics()),
     );
 });
+
+app.get('/health', async (req, res) => {
+    res.set('Content-Type', chainflipRegistry.contentType); // It doesn't matter which registry we use here
+    res.end("Online");
+});
