@@ -40,27 +40,27 @@ export const countEvents = async (context: Context): Promise<void> => {
 
     if (registry.getSingleMetric(metricName) === undefined) {
         registry.registerMetric(metric);
-        metric.labels("governance:Approved").inc();
-        metric.labels("governance:Executed").inc();
-        metric.labels("governance:Proposed").inc();
-        metric.labels("ethereumBroadcaster:BroadcastAborted").inc();
-        metric.labels("polkadotBroadcaster:BroadcastAborted").inc();
-        metric.labels("arbitrumBroadcaster:BroadcastAborted").inc();
-        metric.labels("bitcoinBroadcaster:BroadcastAborted").inc();
-        metric.labels("solanaBroadcaster:BroadcastAborted").inc();
-        metric.labels("bitcoinBroadcaster:BroadcastAttemptTimeout").inc();
-        metric.labels("ethereumBroadcaster:BroadcastAttemptTimeout").inc();
-        metric.labels("polkadotBroadcaster:BroadcastAttemptTimeout").inc();
-        metric.labels("arbitrumBroadcaster:BroadcastAttemptTimeout").inc();
-        metric.labels("solanaBroadcaster:BroadcastAttemptTimeout").inc();
-        metric.labels("evmThresholdSigner:RetryRequested").inc();
-        metric.labels("bitcoinThresholdSigner:RetryRequested").inc();
-        metric.labels("polkadotThresholdSigner:RetryRequested").inc();
-        metric.labels("solanaThresholdSigner:RetryRequested").inc();
-        metric.labels("evmThresholdSigner:KeygenFailure").inc();
-        metric.labels("bitcoinThresholdSigner:KeygenFailure").inc();
-        metric.labels("polkadotThresholdSigner:KeygenFailure").inc();
-        metric.labels("solanaThresholdSigner:KeygenFailure").inc();
+        metric.labels('governance:Approved').inc();
+        metric.labels('governance:Executed').inc();
+        metric.labels('governance:Proposed').inc();
+        metric.labels('ethereumBroadcaster:BroadcastAborted').inc();
+        metric.labels('polkadotBroadcaster:BroadcastAborted').inc();
+        metric.labels('arbitrumBroadcaster:BroadcastAborted').inc();
+        metric.labels('bitcoinBroadcaster:BroadcastAborted').inc();
+        metric.labels('solanaBroadcaster:BroadcastAborted').inc();
+        metric.labels('bitcoinBroadcaster:BroadcastAttemptTimeout').inc();
+        metric.labels('ethereumBroadcaster:BroadcastAttemptTimeout').inc();
+        metric.labels('polkadotBroadcaster:BroadcastAttemptTimeout').inc();
+        metric.labels('arbitrumBroadcaster:BroadcastAttemptTimeout').inc();
+        metric.labels('solanaBroadcaster:BroadcastAttemptTimeout').inc();
+        metric.labels('evmThresholdSigner:RetryRequested').inc();
+        metric.labels('bitcoinThresholdSigner:RetryRequested').inc();
+        metric.labels('polkadotThresholdSigner:RetryRequested').inc();
+        metric.labels('solanaThresholdSigner:RetryRequested').inc();
+        metric.labels('evmThresholdSigner:KeygenFailure').inc();
+        metric.labels('bitcoinThresholdSigner:KeygenFailure').inc();
+        metric.labels('polkadotThresholdSigner:KeygenFailure').inc();
+        metric.labels('solanaThresholdSigner:KeygenFailure').inc();
     }
     if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
         registry.registerMetric(metricExtrinsicFailed);

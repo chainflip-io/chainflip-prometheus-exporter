@@ -141,6 +141,6 @@ app.get('/metrics', async (req, res) => {
 });
 
 app.get('/health', async (req, res) => {
-    res.set('Content-Type', chainflipRegistry.contentType);
-    res.end("Online");
+    res.set('Content-Type', 'application/json');
+    res.end('Online');
 });
