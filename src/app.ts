@@ -141,6 +141,6 @@ app.get('/metrics', async (req, res) => {
 });
 
 app.get('/health', async (req, res) => {
-    res.set('Content-Type', chainflipRegistry.contentType); // It doesn't matter which registry we use here
+    res.set('Content-Type', chainflipRegistry.contentType);
     res.end("Online");
 });
