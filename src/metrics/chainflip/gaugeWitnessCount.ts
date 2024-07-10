@@ -96,7 +96,9 @@ async function processHash10(currentBlockNumber: number, api: any, logger: any) 
             for (const hash of tmpSet) {
                 const parsedObj = JSON.parse(hash);
                 const [result, total] = await countWitnesses(parsedObj, currentBlockNumber, api);
-                metric.labels(parsedObj.type, '10').set(total);
+                if (total > 0) {
+                    metric.labels(parsedObj.type, '10').set(total);
+                }
                 // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                 log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
             }
@@ -118,6 +120,8 @@ async function countWitnesses(parsedObj: any, currentBlockNumber: number, api: a
                 total += hex2bin(previousEpochVote).match(/1/g)?.length || 0;
             }
         }
+    } else {
+        return [result, -1];
     }
     return [result, total];
 }
@@ -182,6 +186,9 @@ async function processHash50(currentBlockNumber: number, api: any, logger: any) 
                                 }
                             }
                         }
+                    })
+                    .catch((err: any) => {
+                        logger.warn(`Promise rejected ${err}`);
                     });
             }
         }
