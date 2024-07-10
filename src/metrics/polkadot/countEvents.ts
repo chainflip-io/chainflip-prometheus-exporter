@@ -22,7 +22,7 @@ export const countEvents = async (context: Context): Promise<void> => {
 
     if (registry.getSingleMetric(metricName) === undefined) {
         registry.registerMetric(metric);
-        metric.labels("system:CodeUpdated").inc();
+        metric.labels('system:CodeUpdated').inc();
     }
 
     for (const { event } of events) {

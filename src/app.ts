@@ -139,3 +139,8 @@ app.get('/metrics', async (req, res) => {
             (await arbitrumRegistry.metrics()),
     );
 });
+
+app.get('/health', async (req, res) => {
+    res.set('Content-Type', 'application/json');
+    res.end('Online');
+});
