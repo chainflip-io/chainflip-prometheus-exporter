@@ -155,7 +155,7 @@ function log(
                     validators: `${validators}`,
                     witnessedBy: `${total}`,
                 }),
-                currentBlockNumber + 40,
+                currentBlockNumber + 100,
             );
         }
     }
