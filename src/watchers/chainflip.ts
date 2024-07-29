@@ -104,12 +104,12 @@ async function startWatcher(context: Context) {
         context.api = api;
         await api.rpc.chain.subscribeNewHeads(async (header) => {
             gatherGlobalValues(context);
+            gaugeBlockHeight({ ...context, header });
+            gaugeAuthorities(context);
             gaugeWitnessChainTracking(context);
             gaugeWitnessCount(context);
             gaugeExternalChainsBlockHeight(context);
             gaugeBitcoinBalance(context);
-            gaugeBlockHeight({ ...context, header });
-            gaugeAuthorities(context);
             gaugeCurrentEpochDurationBlocks(context);
             gaugeBlocksPerEpoch(context);
             gaugeSuspendedValidator(context);

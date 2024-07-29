@@ -93,11 +93,13 @@ export const countEvents = async (context: Context): Promise<void> => {
                     error,
                     event: `${event.section}:${event.method}`,
                     data: event.data.toHuman(),
+                    block: global.currentBlock,
                 });
             } else {
                 logger.info('event_log', {
                     event: `${event.section}:${event.method}`,
                     data: event.data.toHuman(),
+                    block: global.currentBlock,
                 });
             }
         }
