@@ -14,7 +14,10 @@ const metricAggKeyBalance: Gauge = new promClient.Gauge({
     name: metricNameAggKeyBalance,
     help: 'aggKey balance in DOT',
     registers: [],
+    labelNames: ['aggKey'],
 });
+
+let lastAggKey: string;
 
 export const gaugeDotBalance = async (context: Context) => {
     if (context.config.skipMetrics.includes('dot_balance')) {
@@ -39,9 +42,16 @@ export const gaugeDotBalance = async (context: Context) => {
             metric.set(metricValue);
         }
         if (global.dotAggKeyAddress) {
+            if (!lastAggKey) {
+                lastAggKey = global.dotAggKeyAddress;
+            } else if (lastAggKey !== global.dotAggKeyAddress) {
+                metricAggKeyBalance.remove(lastAggKey);
+                lastAggKey = global.dotAggKeyAddress;
+            }
+
             const dotAccount: any = await api.query.system.account(global.dotAggKeyAddress);
             const metricValue = Number(dotAccount.data.free) / 10000000000;
-            metricAggKeyBalance.set(metricValue);
+            metricAggKeyBalance.labels(global.dotAggKeyAddress).set(metricValue);
         }
     } catch (err) {
         logger.error(err);
