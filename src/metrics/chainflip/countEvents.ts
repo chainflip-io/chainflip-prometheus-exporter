@@ -28,6 +28,22 @@ const metricSlash: Counter = new promClient.Counter({
     registers: [],
 });
 
+const metricNameCcmBroadcastAborted: string = 'cf_ccm_broadcast_aborted';
+const metricCcmBroadcastAborted: Counter = new promClient.Counter({
+    name: metricNameCcmBroadcastAborted,
+    help: 'Count of CCM broadcast aborted events',
+    registers: [],
+});
+
+const metricNameBroadcastAborted: string = 'cf_broadcast_aborted';
+const metricBroadcastAborted: Counter = new promClient.Counter({
+    name: metricNameBroadcastAborted,
+    help: 'Count of NON-CCM broadcast aborted events',
+    registers: [],
+});
+
+const ccmBroadcasts: Set<number> = new Set<number>();
+
 export const countEvents = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_events_count_total')) {
         return;
@@ -48,11 +64,11 @@ export const countEvents = async (context: Context): Promise<void> => {
         metric.labels('arbitrumBroadcaster:BroadcastAborted').inc();
         metric.labels('bitcoinBroadcaster:BroadcastAborted').inc();
         metric.labels('solanaBroadcaster:BroadcastAborted').inc();
-        metric.labels('bitcoinBroadcaster:BroadcastAttemptTimeout').inc();
-        metric.labels('ethereumBroadcaster:BroadcastAttemptTimeout').inc();
-        metric.labels('polkadotBroadcaster:BroadcastAttemptTimeout').inc();
-        metric.labels('arbitrumBroadcaster:BroadcastAttemptTimeout').inc();
-        metric.labels('solanaBroadcaster:BroadcastAttemptTimeout').inc();
+        metric.labels('bitcoinBroadcaster:BroadcastTimeout').inc();
+        metric.labels('ethereumBroadcaster:BroadcastTimeout').inc();
+        metric.labels('polkadotBroadcaster:BroadcastTimeout').inc();
+        metric.labels('arbitrumBroadcaster:BroadcastTimeout').inc();
+        metric.labels('solanaBroadcaster:BroadcastTimeout').inc();
         metric.labels('evmThresholdSigner:RetryRequested').inc();
         metric.labels('bitcoinThresholdSigner:RetryRequested').inc();
         metric.labels('polkadotThresholdSigner:RetryRequested').inc();
@@ -66,6 +82,14 @@ export const countEvents = async (context: Context): Promise<void> => {
         registry.registerMetric(metricExtrinsicFailed);
     if (registry.getSingleMetric(metricNameSlashing) === undefined)
         registry.registerMetric(metricSlash);
+    if (registry.getSingleMetric(metricNameCcmBroadcastAborted) === undefined) {
+        registry.registerMetric(metricCcmBroadcastAborted);
+        metricCcmBroadcastAborted.inc();
+    }
+    if (registry.getSingleMetric(metricNameBroadcastAborted) === undefined) {
+        registry.registerMetric(metricBroadcastAborted);
+        metricBroadcastAborted.inc();
+    }
 
     for (const { event } of events) {
         let skip = false;
@@ -79,6 +103,30 @@ export const countEvents = async (context: Context): Promise<void> => {
             continue;
         }
         metric.labels(`${event.section}:${event.method}`).inc(1);
+
+        // Save the list of broadcastId for CCM
+        if (event.method === 'CcmBroadcastRequested') {
+            const broacastId = event.data.toJSON()[0];
+            ccmBroadcasts.add(broacastId);
+        }
+
+        // Whenever a broadcast aborted is received we check if the broadcastId is in the list and if so we remove it
+        // and increase the metric ccmBroadcastAborted
+        if (event.method === 'BroadcastAborted') {
+            const broacastId = event.data.toJSON()[0];
+            if (ccmBroadcasts.delete(broacastId)) {
+                // this is a ccm broadcast aborted!
+                metricCcmBroadcastAborted.inc();
+            } else {
+                // this is a normal broadcast aborted!
+                metricBroadcastAborted.inc();
+            }
+        }
+        // Remove it on broadcast success to avoid saving the broadcast_id indefinitely
+        if (event.method === 'BroadcastSuccess') {
+            const broacastId = event.data.toJSON()[0];
+            ccmBroadcasts.delete(broacastId);
+        }
 
         let error;
         if (event.method === 'ExtrinsicFailed') {
