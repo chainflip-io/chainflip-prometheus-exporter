@@ -96,7 +96,7 @@ type RpcParamsMap = {
     eth_key_manager_address: [];
     eth_state_chain_gateway_address: [];
     flip_supply: [];
-    witness_count: [hash: string];
+    witness_count: [hash: string, epoch_index?: number];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof validators & keyof typeof customRpcs.cf;
