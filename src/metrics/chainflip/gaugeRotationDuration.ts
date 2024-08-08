@@ -44,46 +44,45 @@ export const gaugeRotationDuration = async (context: Context): Promise<void> => 
     metricFailure.labels({ metric: 'gaugeRotationDuration' }).set(0);
 
     try {
-        const currentRotationPhase: any = await api.query.validator.currentRotationPhase();
-        const keys: string = Object.keys(currentRotationPhase.toJSON())[0];
+        const currentRotationPhase: any = context.data.epoch.rotation_phase;
 
-        switch (keys) {
-            case 'idle':
+        switch (currentRotationPhase) {
+            case 'Idle':
                 if (currentPhase !== rotationPhase.idle) {
                     currentPhase = rotationPhase.idle;
                     metricRotationDuration.reset();
                     metricRotationPhase.reset();
                 }
                 break;
-            case 'keygensInProgress':
+            case 'KeygensInProgress':
                 if (currentPhase !== rotationPhase.keygensInProgress) {
                     currentPhase = rotationPhase.keygensInProgress;
                 }
                 metricRotationPhase.labels({ rotationPhase: 'keygensInProgress' }).inc();
                 metricRotationDuration.inc();
                 break;
-            case 'keyHandoversInProgress':
+            case 'KeyHandoversInProgress':
                 if (currentPhase !== rotationPhase.keyHandoversInProgress) {
                     currentPhase = rotationPhase.keyHandoversInProgress;
                 }
                 metricRotationPhase.labels({ rotationPhase: 'keyHandoversInProgress' }).inc();
                 metricRotationDuration.inc();
                 break;
-            case 'activatingKeys':
+            case 'ActivatingKeys':
                 if (currentPhase !== rotationPhase.activatingKeys) {
                     currentPhase = rotationPhase.activatingKeys;
                 }
                 metricRotationPhase.labels({ rotationPhase: 'activatingKeys' }).inc();
                 metricRotationDuration.inc();
                 break;
-            case 'newKeysActivated':
+            case 'NewKeysActivated':
                 if (currentPhase !== rotationPhase.newKeysActivated) {
                     currentPhase = rotationPhase.newKeysActivated;
                 }
                 metricRotationPhase.labels({ rotationPhase: 'newKeysActivated' }).inc();
                 metricRotationDuration.inc();
                 break;
-            case 'sessionRotating':
+            case 'SessionRotating':
                 if (currentPhase !== rotationPhase.sessionRotating) {
                     currentPhase = rotationPhase.sessionRotating;
                 }

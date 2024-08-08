@@ -82,6 +82,88 @@ const validators = {
         failing_count: U32,
         validators: z.array(z.tuple([string, string, boolean])),
     }),
+    monitoring_data: z.object({
+        external_chains_height: z.object({
+            bitcoin: U32,
+            ethereum: U32,
+            polkadot: U32,
+            arbitrum: U32,
+            solana: U32,
+        }),
+        btc_utxos: z.object({
+            total_balance: U128,
+            count: U32,
+        }),
+        epoch: z.object({
+            blocks_per_epoch: U32,
+            current_epoch_started_at: U32,
+            current_epoch_index: U32,
+            min_active_bid: z.optional(U128),
+            rotation_phase: string,
+        }),
+        pending_redemptions: z.object({
+            total_balance: U128, // maybe u128
+            count: U32,
+        }),
+        pending_broadcasts: z.object({
+            ethereum: U32,
+            bitcoin: U32,
+            polkadot: U32,
+            arbitrum: U32,
+            solana: U32,
+        }),
+        pending_tss: z.object({
+            evm: U32,
+            bitcoin: U32,
+            polkadot: U32,
+            solana: U32,
+        }),
+        open_deposit_channels: z.object({
+            ethereum: U32,
+            bitcoin: U32,
+            polkadot: U32,
+            arbitrum: U32,
+            solana: U32,
+        }),
+        fee_imbalance: z.object({
+            ethereum: U32,
+            bitcoin: U32,
+            polkadot: U32,
+            arbitrum: U32,
+            solana: U32,
+        }),
+        authorities: z.object({
+            authorities: U32,
+            online_authorities: U32,
+            backups: U32,
+            online_backups: U32,
+        }),
+        build_version: z.object({
+            spec_version: U32,
+            spec_name: string,
+        }),
+        suspended_validators: z.array(Offence, U32),
+        pending_swaps: U32,
+        dot_aggkey: string,
+        flip_supply: z.object({
+            total_supply: U128,
+            offchain_supply: U128,
+        }),
+    }),
+    monitoring_accounts_info: z.array(
+        z.object({
+            balance: U128,
+            bond: U128,
+            last_heartbeat: U32,
+            reputation_points: I32,
+            keyholder_epochs: z.array(U32),
+            is_current_authority: boolean,
+            is_current_backup: boolean,
+            is_qualified: boolean,
+            is_online: boolean,
+            is_bidding: boolean,
+        }),
+    ),
 } as const;
 
 type RpcParamsMap = {
@@ -96,7 +178,9 @@ type RpcParamsMap = {
     eth_key_manager_address: [];
     eth_state_chain_gateway_address: [];
     flip_supply: [];
-    witness_count: [hash: string];
+    witness_count: [hash: string, epoch_index?: number];
+    monitoring_data: [];
+    monitoring_accounts_info: [accounts: string[]];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof validators & keyof typeof customRpcs.cf;

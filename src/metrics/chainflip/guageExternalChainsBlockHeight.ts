@@ -21,31 +21,19 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
 
     try {
         // Ethereum
-        const ethBlockHeight = Number(
-            (await api.query.ethereumChainTracking.currentChainState()).toJSON().blockHeight,
-        );
-        global.ethHeight = ethBlockHeight;
-        metric.labels('ethereum').set(ethBlockHeight);
+        metric.labels('ethereum').set(context.data.external_chains_height.ethereum);
 
         // Bitcoin
-        const btcBlockHeight = Number(
-            (await api.query.bitcoinChainTracking.currentChainState()).toJSON().blockHeight,
-        );
-        global.btcHeight = btcBlockHeight;
-        metric.labels('bitcoin').set(btcBlockHeight);
+        metric.labels('bitcoin').set(context.data.external_chains_height.bitcoin);
 
         // Polkadot
-        const dotBlockHeight = Number(
-            (await api.query.polkadotChainTracking.currentChainState()).toJSON().blockHeight,
-        );
-        global.dotHeight = dotBlockHeight;
-        metric.labels('polkadot').set(dotBlockHeight);
+        metric.labels('polkadot').set(context.data.external_chains_height.polkadot);
 
         // Arbitrum
+        // TODO! change it to use the data coming from the RPC after release 1.5.1
         const arbBlockHeight = Number(
             (await api.query.arbitrumChainTracking.currentChainState()).toJSON().blockHeight,
         );
-        global.arbHeight = arbBlockHeight;
         metric.labels('arbitrum').set(arbBlockHeight);
     } catch (e) {
         logger.error(e);

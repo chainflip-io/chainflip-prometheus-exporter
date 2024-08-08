@@ -19,8 +19,7 @@ export const gaugeSwappingQueue = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricName }).set(0);
 
     try {
-        const swapQueue: any[] = await api.query.swapping.swapQueue.entries();
-        const swapQueueLenght: number = swapQueue.length;
+        const swapQueueLenght: number = context.data.pending_swaps;
         metric.set(swapQueueLenght);
     } catch (err) {
         logger.error(err);

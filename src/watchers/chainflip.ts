@@ -2,38 +2,37 @@ import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import {
     countEvents,
+    eventsRotationInfo,
+    gatherGlobalValues,
     gaugeAuthorities,
+    gaugeBackupValidator,
     gaugeBitcoinBalance,
     gaugeBlockHeight,
     gaugeBlocksPerEpoch,
+    gaugeBtcUtxos,
+    gaugeBuildVersion,
     gaugeCurrentEpochDurationBlocks,
+    gaugeDepositChannels,
+    gaugeExternalChainsBlockHeight,
+    gaugeFeeDeficit,
     gaugeFlipTotalSupply,
+    gaugeMinActiveBid,
+    gaugePendingBroadcast,
+    gaugePendingRedemptions,
+    gaugePriceDelta,
     gaugeRotating,
     gaugeRotationDuration,
     gaugeSuspendedValidator,
-    gaugeBackupValidator,
-    gaugeReputation,
-    gaugeBuildVersion,
-    gaugeBlockWeight,
-    gaugePendingRedemptions,
-    gaugeValidatorStatus,
-    gaugeMinActiveBid,
-    eventsRotationInfo,
-    gaugeTssRetryQueues,
     gaugeSwappingQueue,
-    gaugeBtcUtxos,
-    gaugePendingBroadcast,
-    gatherGlobalValues,
+    gaugeTssRetryQueues,
+    gaugeValidatorStatus,
     gaugeWitnessChainTracking,
     gaugeWitnessCount,
-    gaugeFeeDeficit,
-    gaugeExternalChainsBlockHeight,
-    gaugePriceDelta,
-    gaugeDepositChannels,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
 import stateChainTypes from '../utils/chainTypes';
+import makeRpcRequest from '../utils/makeRpcRequest';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -56,10 +55,6 @@ declare global {
     var dotAggKeyAddress: string;
     var currentBlock: number;
     var currentAuthorities: number;
-    var btcHeight: number;
-    var ethHeight: number;
-    var dotHeight: number;
-    var arbHeight: number;
 
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
@@ -94,7 +89,7 @@ async function startWatcher(context: Context) {
             logger.error(`ws connection closed ${err}`);
             metric.set(1);
         });
-        const api: ApiPromise = await ApiPromise.create({
+        const api: any = await ApiPromise.create({
             provider,
             noInitWarn: true,
             types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
@@ -102,7 +97,8 @@ async function startWatcher(context: Context) {
         });
 
         context.api = api;
-        await api.rpc.chain.subscribeNewHeads(async (header) => {
+        await api.rpc.chain.subscribeNewHeads(async (header: any) => {
+            context.data = await makeRpcRequest(api, 'monitoring_data');
             gatherGlobalValues(context);
             gaugeBlockHeight({ ...context, header });
             gaugeAuthorities(context);
@@ -110,13 +106,12 @@ async function startWatcher(context: Context) {
             gaugeWitnessCount(context);
             gaugeExternalChainsBlockHeight(context);
             gaugeBitcoinBalance(context);
-            gaugeCurrentEpochDurationBlocks(context);
+            gaugeCurrentEpochDurationBlocks({ ...context, header });
             gaugeBlocksPerEpoch(context);
             gaugeSuspendedValidator(context);
             gaugeFlipTotalSupply(context);
             gaugeRotationDuration(context);
             gaugeBackupValidator(context);
-            gaugeReputation(context);
             gaugeBuildVersion(context);
             gaugeValidatorStatus(context);
             gaugeMinActiveBid(context);

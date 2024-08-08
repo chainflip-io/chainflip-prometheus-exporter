@@ -119,8 +119,28 @@ export const customRpcs = {
                     name: 'hash',
                     type: 'String',
                 },
+                {
+                    name: 'epoch_index',
+                    type: 'Option<u32>',
+                    isOptional: true,
+                },
             ],
             type: 'RpcFailingWitnessValidators',
+            description: '',
+        },
+        monitoring_data: {
+            params: [],
+            type: 'RpcMonitoringData',
+            description: '',
+        },
+        monitoring_accounts_info: {
+            params: [
+                {
+                    name: 'accounts',
+                    type: 'Vec<ValidatorId>',
+                },
+            ],
+            type: 'RpcMonitoringAccountInfo',
             description: '',
         },
     },

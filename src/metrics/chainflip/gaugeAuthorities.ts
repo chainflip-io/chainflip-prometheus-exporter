@@ -29,20 +29,10 @@ export const gaugeAuthorities = async (context: Context): Promise<void> => {
 
     metricFailure.labels({ metric: metricName }).set(0);
 
-    let currentAuthorities: any;
     try {
-        let onlineCounter = 0;
-
-        currentAuthorities = await api.query.validator.currentAuthorities();
-        metric.set(currentAuthorities.toJSON().length);
-        global.currentAuthorities = currentAuthorities.toJSON().length;
-        for (const idSs58 of currentAuthorities.toJSON()) {
-            const result = await makeRpcRequest(api, 'account_info_v2', idSs58);
-            if (result.is_online) {
-                onlineCounter++;
-            }
-        }
-        metricOnline.set(onlineCounter);
+        metric.set(context.data.authorities.authorities);
+        global.currentAuthorities = context.data.authorities.authorities;
+        metricOnline.set(context.data.authorities.online_authorities);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricName }).set(1);

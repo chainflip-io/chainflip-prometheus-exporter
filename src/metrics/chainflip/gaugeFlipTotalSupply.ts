@@ -18,7 +18,7 @@ export const gaugeFlipTotalSupply = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricName }).set(0);
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
     try {
-        const totalSupply: bigint = await api.query.flip.totalIssuance();
+        const totalSupply: bigint = context.data.flip_supply.total_supply;
         const metricValue: number = Number(Number(totalSupply) / 10 ** 18);
         metric.set(metricValue);
     } catch (err) {

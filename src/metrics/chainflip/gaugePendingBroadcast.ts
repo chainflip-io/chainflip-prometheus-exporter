@@ -20,21 +20,17 @@ export const gaugePendingBroadcast = async (context: Context): Promise<void> => 
     metricFailure.labels({ metric: metricName }).set(0);
 
     try {
-        const dotQueue: any = await api.query.polkadotBroadcaster.pendingBroadcasts();
-        const dotQueueLenght: number = dotQueue.size;
-        metric.labels('polkadot').set(dotQueueLenght);
+        // Polkadot
+        metric.labels('polkadot').set(context.data.pending_broadcasts.polkadot);
 
-        const btcQueue: any = await api.query.bitcoinBroadcaster.pendingBroadcasts();
-        const btcQueueLenght: number = btcQueue.size;
-        metric.labels('bitcoin').set(btcQueueLenght);
+        // Bitcoin
+        metric.labels('bitcoin').set(context.data.pending_broadcasts.bitcoin);
 
-        const ethQueue: any = await api.query.ethereumBroadcaster.pendingBroadcasts();
-        const ethQueueLenght: number = ethQueue.size;
-        metric.labels('ethereum').set(ethQueueLenght);
+        // Ethereum
+        metric.labels('ethereum').set(context.data.pending_broadcasts.ethereum);
 
-        const arbQueue: any = await api.query.arbitrumBroadcaster.pendingBroadcasts();
-        const arbQueueLenght: number = arbQueue.size;
-        metric.labels('arbitrum').set(arbQueueLenght);
+        // Arbitrum
+        metric.labels('arbitrum').set(context.data.pending_broadcasts.arbitrum);
     } catch (err) {
         logger.error(err);
         metricFailure.labels({ metric: metricName }).set(1);
