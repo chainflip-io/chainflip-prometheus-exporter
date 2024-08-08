@@ -18,10 +18,8 @@ export const gaugeBlocksPerEpoch = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
     metricFailure.labels({ metric: metricName }).set(0);
 
-    let blocksPerEpoch: any;
     try {
-        blocksPerEpoch = await api.query.validator.blocksPerEpoch();
-        metric.set(blocksPerEpoch.toJSON());
+        metric.set(context.data.epoch.blocks_per_epoch);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricName }).set(1);

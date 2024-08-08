@@ -45,7 +45,13 @@ const metricBalance: Gauge = new promClient.Gauge({
     registers: [],
     labelNames: ['ss58Address', 'alias'],
 });
-
+const metricNameReputation: string = 'cf_reputation';
+const metricReputation: Gauge = new promClient.Gauge({
+    name: metricNameReputation,
+    help: 'The reputation of a validator',
+    labelNames: ['ss58', 'alias'],
+    registers: [],
+});
 export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_validator')) {
         return;
@@ -58,7 +64,7 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
     }
 
     logger.debug(
-        `Scraping ${metricNameValidatorOnline}, ${metricNameValidatorAuthority}, ${metricNameValidatorBackup}, ${metricNameValidatorQualified}`,
+        `Scraping ${metricNameValidatorOnline}, ${metricNameValidatorAuthority}, ${metricNameValidatorBackup}, ${metricNameValidatorQualified}, ${metricNameReputation}`,
     );
 
     if (registry.getSingleMetric(metricNameValidatorOnline) === undefined)
@@ -73,6 +79,8 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
         registry.registerMetric(metricBidding);
     if (registry.getSingleMetric(metricNameValidatorBalance) === undefined)
         registry.registerMetric(metricBalance);
+    if (registry.getSingleMetric(metricNameReputation) === undefined)
+        registry.registerMetric(metricReputation);
 
     metricFailure.labels({ metric: metricNameValidatorOnline }).set(0);
     metricFailure.labels({ metric: metricNameValidatorAuthority }).set(0);
@@ -80,10 +88,17 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricNameValidatorQualified }).set(0);
     metricFailure.labels({ metric: metricNameValidatorBidding }).set(0);
     metricFailure.labels({ metric: metricNameValidatorBalance }).set(0);
+    metricFailure.labels({ metric: metricNameReputation }).set(0);
 
+    const accounts = [];
+    const vanityNames = [];
     for (const { ss58Address, alias } of config.accounts) {
-        try {
-            const result = await makeRpcRequest(api, 'account_info_v2', ss58Address);
+        accounts.push(ss58Address);
+        vanityNames.push(alias);
+    }
+    try {
+        const result = await makeRpcRequest(api, 'monitoring_accounts_info', accounts);
+        for (const [i, validatorInfo] of result.entries()) {
             const {
                 balance,
                 is_current_authority,
@@ -91,23 +106,26 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
                 is_online,
                 is_bidding,
                 is_qualified,
-            } = result;
-            metricAuthorityOnline.labels({ alias, ss58Address }).set(is_online ? 1 : 0);
-            metricAuthority.labels({ alias, ss58Address }).set(is_current_authority ? 1 : 0);
-            metricBackup.labels({ alias, ss58Address }).set(is_current_backup ? 1 : 0);
-            metricQualified.labels({ alias, ss58Address }).set(is_qualified ? 1 : 0);
-            metricBidding.labels({ alias, ss58Address }).set(is_bidding ? 1 : 0);
+                reputation_points,
+            } = validatorInfo;
 
+            metricAuthorityOnline.labels(accounts[i], vanityNames[i]).set(is_online ? 1 : 0);
+            metricAuthority.labels(accounts[i], vanityNames[i]).set(is_current_authority ? 1 : 0);
+            metricBackup.labels(accounts[i], vanityNames[i]).set(is_current_backup ? 1 : 0);
+            metricQualified.labels(accounts[i], vanityNames[i]).set(is_qualified ? 1 : 0);
+            metricBidding.labels(accounts[i], vanityNames[i]).set(is_bidding ? 1 : 0);
+            metricReputation.labels(accounts[i], vanityNames[i]).set(reputation_points);
             const balanceValue: number = Number(Number(balance) / 10 ** 18);
-            metricBalance.labels({ alias, ss58Address }).set(balanceValue || 0);
-        } catch (e) {
-            logger.error(e);
-            metricFailure.labels({ metric: metricNameValidatorOnline }).set(1);
-            metricFailure.labels({ metric: metricNameValidatorAuthority }).set(1);
-            metricFailure.labels({ metric: metricNameValidatorBackup }).set(1);
-            metricFailure.labels({ metric: metricNameValidatorQualified }).set(1);
-            metricFailure.labels({ metric: metricNameValidatorBidding }).set(1);
-            metricFailure.labels({ metric: metricNameValidatorBalance }).set(1);
+            metricBalance.labels(accounts[i], vanityNames[i]).set(balanceValue || 0);
         }
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNameValidatorOnline }).set(1);
+        metricFailure.labels({ metric: metricNameValidatorAuthority }).set(1);
+        metricFailure.labels({ metric: metricNameValidatorBackup }).set(1);
+        metricFailure.labels({ metric: metricNameValidatorQualified }).set(1);
+        metricFailure.labels({ metric: metricNameValidatorBidding }).set(1);
+        metricFailure.labels({ metric: metricNameValidatorBalance }).set(1);
+        metricFailure.labels({ metric: metricNameReputation }).set(1);
     }
 };

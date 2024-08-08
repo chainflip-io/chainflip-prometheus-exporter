@@ -20,8 +20,8 @@ export const gaugeCurrentEpochDurationBlocks = async (context: Context): Promise
     metricFailure.labels({ metric: metricName }).set(0);
 
     try {
-        const currentEpochStartedAt: number = await api.query.validator.currentEpochStartedAt();
-        const currentBlockHeight: number = await api.query.system.number();
+        const currentEpochStartedAt: number = context.data.epoch.current_epoch_started_at;
+        const currentBlockHeight: number = context.header.number;
 
         const currentEpochDurationBlocks: number = currentBlockHeight - currentEpochStartedAt;
         metric.set(currentEpochDurationBlocks);

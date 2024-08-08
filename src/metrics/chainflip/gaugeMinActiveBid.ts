@@ -22,8 +22,7 @@ export const gaugeMinActiveBid = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricName }).set(0);
 
     try {
-        const result = await makeRpcRequest(api, 'auction_state');
-        const { min_active_bid } = result;
+        const min_active_bid = context.data.epoch.min_active_bid;
 
         const MAB: number = Number(Number(min_active_bid) / 10 ** 18);
 
