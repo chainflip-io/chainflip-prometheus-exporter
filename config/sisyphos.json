@@ -9,6 +9,7 @@
   "flip": {
     "enabled": true,
     "network": "sisyphos",
+    "eventLog": false,
     "defaultMetrics": [],
     "accounts": [],
     "skipEvents": [

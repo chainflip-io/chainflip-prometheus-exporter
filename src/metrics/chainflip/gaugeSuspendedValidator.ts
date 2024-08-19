@@ -20,9 +20,9 @@ export const gaugeSuspendedValidator = async (context: Context): Promise<void> =
     metricFailure.labels({ metric: metricName }).set(0);
 
     try {
-        const suspensionList: any = await api.query.reputation.suspensions.entries();
-        suspensionList.forEach(([key, element]: [any, any]) => {
-            metric.labels({ offence: key.toHuman() }).set(element.length);
+        const suspensionList: any = context.data.suspended_validators;
+        suspensionList.forEach(([offence, count]: [any, any]) => {
+            metric.labels(offence).set(count);
         });
     } catch (err) {
         logger.error(err);

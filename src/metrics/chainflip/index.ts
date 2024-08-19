@@ -9,7 +9,6 @@ export * from './gaugeRotationDuration';
 export * from './gaugeSuspendedValidator';
 export * from './guageBlockHeight';
 export * from './gaugeBackupValidator';
-export * from './gaugeReputation';
 export * from './gaugeBuildVersion';
 export * from './gaugeBlockWeight';
 export * from './gaugePendingRedemptions';

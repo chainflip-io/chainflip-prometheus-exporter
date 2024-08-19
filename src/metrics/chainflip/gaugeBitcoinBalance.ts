@@ -21,11 +21,7 @@ export const gaugeBitcoinBalance = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricName }).set(0);
 
     try {
-        const bitcoinAvailableUtxos: any = await api.query.environment.bitcoinAvailableUtxos();
-        const aggregatedAmount = bitcoinAvailableUtxos.reduce((acc: number, utxo: any) => {
-            return acc + Number(utxo.amount);
-        }, 0);
-        metric.set(aggregatedAmount);
+        metric.set(context.data.btc_utxos.total_balance);
     } catch (err) {
         logger.error(err);
         metricFailure.labels({ metric: metricName }).set(1);

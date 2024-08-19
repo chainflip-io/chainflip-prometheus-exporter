@@ -18,9 +18,8 @@ export const gaugeBtcUtxos = async (context: Context): Promise<void> => {
     metricFailure.labels({ metric: metricName }).set(0);
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
     try {
-        const utxos: any = await api.query.environment.bitcoinAvailableUtxos();
-        const metricValue: number = utxos.length;
-        metric.set(metricValue);
+        const utxos: any = context.data.btc_utxos.count;
+        metric.set(utxos);
     } catch (err) {
         logger.error(err);
         metricFailure.labels({ metric: metricName }).set(1);

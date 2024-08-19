@@ -31,14 +31,12 @@ export const gaugePendingRedemptions = async (context: Context): Promise<void> =
 
     logger.debug(`Scraping ${metricNamePendingRedemption}, ${metricNamePendingRedemptionBalance}`);
     try {
-        const pendingRedemptions = await api.query.funding.pendingRedemptions.entries();
-        let totalRedemptionBalance: number = 0;
-        pendingRedemptions.forEach(([key, element]: [any, any]) => {
-            totalRedemptionBalance += parseInt(element.toJSON().total, 16) / 1e18;
-        });
+        const pendingRedemptions = context.data.pending_redemptions.count;
+        const totalRedemptionBalance: number =
+            Number(context.data.pending_redemptions.total_balance) / 1e18;
 
         metricPendingRedemptionBalance.set(totalRedemptionBalance);
-        metricPendingRedemption.set(pendingRedemptions.length);
+        metricPendingRedemption.set(pendingRedemptions);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricNamePendingRedemption }).set(1);
