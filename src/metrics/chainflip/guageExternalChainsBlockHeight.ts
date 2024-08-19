@@ -30,11 +30,7 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
         metric.labels('polkadot').set(context.data.external_chains_height.polkadot);
 
         // Arbitrum
-        // TODO! change it to use the data coming from the RPC after release 1.5.1
-        const arbBlockHeight = Number(
-            (await api.query.arbitrumChainTracking.currentChainState()).toJSON().blockHeight,
-        );
-        metric.labels('arbitrum').set(arbBlockHeight);
+        metric.labels('arbitrum').set(context.data.external_chains_height.arbitrum);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricName }).set(1);
