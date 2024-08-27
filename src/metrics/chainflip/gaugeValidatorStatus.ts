@@ -2,6 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 import { FlipConfig } from '../../config/interfaces';
+import { chunk } from '../../utils/utils';
 
 const metricNameValidatorOnline: string = 'cf_validator_online';
 const metricAuthorityOnline: Gauge = new promClient.Gauge({
@@ -96,27 +97,42 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
         accounts.push(ss58Address);
         vanityNames.push(alias);
     }
+    // monitoring_accounts_info support up to 10 accounts
+    const accountsChunked = chunk(accounts, 10);
+    const vanityNamesChunked = chunk(vanityNames, 10);
     try {
-        const result = await makeRpcRequest(api, 'monitoring_accounts_info', accounts);
-        for (const [i, validatorInfo] of result.entries()) {
-            const {
-                balance,
-                is_current_authority,
-                is_current_backup,
-                is_online,
-                is_bidding,
-                is_qualified,
-                reputation_points,
-            } = validatorInfo;
+        let j = 0;
+        for (const chunk of accountsChunked) {
+            const result = await makeRpcRequest(api, 'monitoring_accounts_info', chunk);
+            for (const [i, validatorInfo] of result.entries()) {
+                const {
+                    balance,
+                    is_current_authority,
+                    is_current_backup,
+                    is_online,
+                    is_bidding,
+                    is_qualified,
+                    reputation_points,
+                } = validatorInfo;
 
-            metricAuthorityOnline.labels(accounts[i], vanityNames[i]).set(is_online ? 1 : 0);
-            metricAuthority.labels(accounts[i], vanityNames[i]).set(is_current_authority ? 1 : 0);
-            metricBackup.labels(accounts[i], vanityNames[i]).set(is_current_backup ? 1 : 0);
-            metricQualified.labels(accounts[i], vanityNames[i]).set(is_qualified ? 1 : 0);
-            metricBidding.labels(accounts[i], vanityNames[i]).set(is_bidding ? 1 : 0);
-            metricReputation.labels(accounts[i], vanityNames[i]).set(reputation_points);
-            const balanceValue: number = Number(Number(balance) / 10 ** 18);
-            metricBalance.labels(accounts[i], vanityNames[i]).set(balanceValue || 0);
+                metricAuthorityOnline
+                    .labels(chunk[i], vanityNamesChunked[j][i])
+                    .set(is_online ? 1 : 0);
+                metricAuthority
+                    .labels(chunk[i], vanityNamesChunked[j][i])
+                    .set(is_current_authority ? 1 : 0);
+                metricBackup
+                    .labels(chunk[i], vanityNamesChunked[j][i])
+                    .set(is_current_backup ? 1 : 0);
+                metricQualified
+                    .labels(chunk[i], vanityNamesChunked[j][i])
+                    .set(is_qualified ? 1 : 0);
+                metricBidding.labels(chunk[i], vanityNamesChunked[j][i]).set(is_bidding ? 1 : 0);
+                metricReputation.labels(chunk[i], vanityNamesChunked[j][i]).set(reputation_points);
+                const balanceValue: number = Number(Number(balance) / 10 ** 18);
+                metricBalance.labels(chunk[i], vanityNamesChunked[j][i]).set(balanceValue || 0);
+            }
+            j++;
         }
     } catch (e) {
         logger.error(e);
