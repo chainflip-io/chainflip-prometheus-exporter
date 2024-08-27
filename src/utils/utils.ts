@@ -2,6 +2,11 @@ import { ApiPromise } from '@polkadot/api';
 import { Metadata, TypeRegistry } from '@polkadot/types';
 import { BN } from '@polkadot/util';
 
+export function chunk(arr: any[], n: number) {
+    const r = Array(Math.ceil(arr.length / n)).fill(0);
+    return r.map((e, i) => arr.slice(i * n, i * n + n));
+}
+
 export function insertOrReplace(
     map: Map<number, Set<string>>,
     elem: string,
