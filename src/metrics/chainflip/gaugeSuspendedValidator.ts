@@ -13,19 +13,13 @@ export const gaugeSuspendedValidator = async (context: Context): Promise<void> =
     if (context.config.skipMetrics.includes('cf_suspended_validators')) {
         return;
     }
-    const { logger, api, registry, metricFailure } = context;
+    const { logger, registry } = context;
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-    metricFailure.labels({ metric: metricName }).set(0);
 
-    try {
-        const suspensionList: any = context.data.suspended_validators;
-        suspensionList.forEach(([offence, count]: [any, any]) => {
-            metric.labels(offence).set(count);
-        });
-    } catch (err) {
-        logger.error(err);
-        metricFailure.labels({ metric: metricName }).set(1);
-    }
+    const suspensionList: any = context.data.suspended_validators;
+    suspensionList.forEach(([offence, count]: [any, any]) => {
+        metric.labels(offence).set(count);
+    });
 };

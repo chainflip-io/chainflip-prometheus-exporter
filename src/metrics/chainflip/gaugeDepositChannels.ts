@@ -16,31 +16,24 @@ export const gaugeDepositChannels = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_open_deposit_channels')) {
         return;
     }
-    const { logger, api, registry, metricFailure } = context;
+    const { logger, registry } = context;
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metricFailure.labels({ metric: metricName }).set(0);
+    // BTC
+    const btcChannels = context.data.open_deposit_channels.bitcoin;
+    metric.labels('bitcoin').set(btcChannels);
 
-    try {
-        // BTC
-        const btcChannels = context.data.open_deposit_channels.bitcoin;
-        metric.labels('bitcoin').set(btcChannels);
+    // DOT
+    const dotChannels = context.data.open_deposit_channels.polkadot;
+    metric.labels('polkadot').set(dotChannels);
 
-        // DOT
-        const dotChannels = context.data.open_deposit_channels.polkadot;
-        metric.labels('polkadot').set(dotChannels);
+    // ETH
+    const ethChannels = context.data.open_deposit_channels.ethereum;
+    metric.labels('ethereum').set(ethChannels);
 
-        // ETH
-        const ethChannels = context.data.open_deposit_channels.ethereum;
-        metric.labels('ethereum').set(ethChannels);
-
-        // ARB
-        const arbChannels = context.data.open_deposit_channels.arbitrum;
-        metric.labels('arbitrum').set(arbChannels);
-    } catch (e) {
-        logger.error(e);
-        metricFailure.labels({ metric: metricName }).set(1);
-    }
+    // ARB
+    const arbChannels = context.data.open_deposit_channels.arbitrum;
+    metric.labels('arbitrum').set(arbChannels);
 };

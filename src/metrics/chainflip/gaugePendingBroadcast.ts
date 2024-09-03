@@ -13,26 +13,20 @@ export const gaugePendingBroadcast = async (context: Context): Promise<void> => 
     if (context.config.skipMetrics.includes('cf_pending_broadcast')) {
         return;
     }
-    const { logger, api, registry, metricFailure } = context;
+    const { logger, registry } = context;
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-    metricFailure.labels({ metric: metricName }).set(0);
 
-    try {
-        // Polkadot
-        metric.labels('polkadot').set(context.data.pending_broadcasts.polkadot);
+    // Polkadot
+    metric.labels('polkadot').set(context.data.pending_broadcasts.polkadot);
 
-        // Bitcoin
-        metric.labels('bitcoin').set(context.data.pending_broadcasts.bitcoin);
+    // Bitcoin
+    metric.labels('bitcoin').set(context.data.pending_broadcasts.bitcoin);
 
-        // Ethereum
-        metric.labels('ethereum').set(context.data.pending_broadcasts.ethereum);
+    // Ethereum
+    metric.labels('ethereum').set(context.data.pending_broadcasts.ethereum);
 
-        // Arbitrum
-        metric.labels('arbitrum').set(context.data.pending_broadcasts.arbitrum);
-    } catch (err) {
-        logger.error(err);
-        metricFailure.labels({ metric: metricName }).set(1);
-    }
+    // Arbitrum
+    metric.labels('arbitrum').set(context.data.pending_broadcasts.arbitrum);
 };

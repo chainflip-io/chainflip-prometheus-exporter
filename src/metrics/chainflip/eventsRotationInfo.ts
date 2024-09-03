@@ -1,7 +1,6 @@
 import promClient, { Counter, Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
-import { decodeAddress } from '@polkadot/util-crypto';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const metricNameRotationPhaseAttempt: string = 'cf_rotation_phase_attempts';
@@ -31,8 +30,6 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
         return;
     }
     const { logger, registry, events, api } = context;
-    const config = context.config as FlipConfig;
-    const { accounts, skipEvents } = config;
 
     logger.debug(
         `Scraping ${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`,
