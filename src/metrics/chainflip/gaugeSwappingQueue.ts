@@ -12,17 +12,10 @@ export const gaugeSwappingQueue = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_swapping_queue')) {
         return;
     }
-    const { logger, api, registry, metricFailure } = context;
+    const { logger, registry } = context;
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-    metricFailure.labels({ metric: metricName }).set(0);
 
-    try {
-        const swapQueueLenght: number = context.data.pending_swaps;
-        metric.set(swapQueueLenght);
-    } catch (err) {
-        logger.error(err);
-        metricFailure.labels({ metric: metricName }).set(1);
-    }
+    metric.set(context.data.pending_swaps);
 };

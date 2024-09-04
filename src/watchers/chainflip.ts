@@ -5,18 +5,14 @@ import {
     eventsRotationInfo,
     gatherGlobalValues,
     gaugeAuthorities,
-    gaugeBackupValidator,
-    gaugeBitcoinBalance,
     gaugeBlockHeight,
-    gaugeBlocksPerEpoch,
     gaugeBtcUtxos,
     gaugeBuildVersion,
-    gaugeCurrentEpochDurationBlocks,
     gaugeDepositChannels,
+    gaugeEpoch,
     gaugeExternalChainsBlockHeight,
     gaugeFeeDeficit,
     gaugeFlipTotalSupply,
-    gaugeMinActiveBid,
     gaugePendingBroadcast,
     gaugePendingRedemptions,
     gaugePriceDelta,
@@ -106,16 +102,12 @@ async function startWatcher(context: Context) {
             gaugeWitnessChainTracking(context);
             gaugeWitnessCount(context);
             gaugeExternalChainsBlockHeight(context);
-            gaugeBitcoinBalance(context);
-            gaugeCurrentEpochDurationBlocks({ ...context, header });
-            gaugeBlocksPerEpoch(context);
+            gaugeEpoch({ ...context, header });
             gaugeSuspendedValidator(context);
             gaugeFlipTotalSupply(context);
             gaugeRotationDuration(context);
-            gaugeBackupValidator(context);
             gaugeBuildVersion(context);
             gaugeValidatorStatus(context);
-            gaugeMinActiveBid(context);
             gaugeBtcUtxos(context);
             // gaugeBlockWeight(context);
             gaugePendingRedemptions(context);

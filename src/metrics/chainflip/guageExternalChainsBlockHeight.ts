@@ -13,27 +13,20 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
     if (context.config.skipMetrics.includes('cf_external_chain_block_height')) {
         return;
     }
-    const { logger, registry, metricFailure, api } = context;
+    const { logger, registry } = context;
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-    metricFailure.labels({ metric: metricName }).set(0);
 
-    try {
-        // Ethereum
-        metric.labels('ethereum').set(context.data.external_chains_height.ethereum);
+    // Ethereum
+    metric.labels('ethereum').set(context.data.external_chains_height.ethereum);
 
-        // Bitcoin
-        metric.labels('bitcoin').set(context.data.external_chains_height.bitcoin);
+    // Bitcoin
+    metric.labels('bitcoin').set(context.data.external_chains_height.bitcoin);
 
-        // Polkadot
-        metric.labels('polkadot').set(context.data.external_chains_height.polkadot);
+    // Polkadot
+    metric.labels('polkadot').set(context.data.external_chains_height.polkadot);
 
-        // Arbitrum
-        metric.labels('arbitrum').set(context.data.external_chains_height.arbitrum);
-    } catch (e) {
-        logger.error(e);
-        metricFailure.labels({ metric: metricName }).set(1);
-    }
-    registry.registerMetric(metric);
+    // Arbitrum
+    metric.labels('arbitrum').set(context.data.external_chains_height.arbitrum);
 };

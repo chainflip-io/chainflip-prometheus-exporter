@@ -19,27 +19,19 @@ export const gaugePendingRedemptions = async (context: Context): Promise<void> =
     if (context.config.skipMetrics.includes('cf_pending_redemptions')) {
         return;
     }
-    const { logger, api, registry, metricFailure } = context;
+    const { logger, registry } = context;
 
     if (registry.getSingleMetric(metricNamePendingRedemption) === undefined)
         registry.registerMetric(metricPendingRedemption);
     if (registry.getSingleMetric(metricNamePendingRedemptionBalance) === undefined)
         registry.registerMetric(metricPendingRedemptionBalance);
 
-    metricFailure.labels({ metric: metricNamePendingRedemption }).set(0);
-    metricFailure.labels({ metric: metricNamePendingRedemptionBalance }).set(0);
-
     logger.debug(`Scraping ${metricNamePendingRedemption}, ${metricNamePendingRedemptionBalance}`);
-    try {
-        const pendingRedemptions = context.data.pending_redemptions.count;
-        const totalRedemptionBalance: number =
-            Number(context.data.pending_redemptions.total_balance) / 1e18;
 
-        metricPendingRedemptionBalance.set(totalRedemptionBalance);
-        metricPendingRedemption.set(pendingRedemptions);
-    } catch (e) {
-        logger.error(e);
-        metricFailure.labels({ metric: metricNamePendingRedemption }).set(1);
-        metricFailure.labels({ metric: metricNamePendingRedemptionBalance }).set(1);
-    }
+    const pendingRedemptions = context.data.pending_redemptions.count;
+    const totalRedemptionBalance: number =
+        Number(context.data.pending_redemptions.total_balance) / 1e18;
+
+    metricPendingRedemptionBalance.set(totalRedemptionBalance);
+    metricPendingRedemption.set(pendingRedemptions);
 };
