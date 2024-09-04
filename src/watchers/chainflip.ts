@@ -33,6 +33,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
 import stateChainTypes from '../utils/chainTypes';
 import makeRpcRequest from '../utils/makeRpcRequest';
+import { gaugeKeyActivationBroadcast } from '../metrics/chainflip/gaugeKeyActivationBroadcast';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -124,6 +125,7 @@ async function startWatcher(context: Context) {
             gaugeFeeDeficit(context);
             gaugePriceDelta(context);
             gaugeDepositChannels(context);
+            gaugeKeyActivationBroadcast(context);
             metric.set(0);
         });
         await api.query.system.events(async (events: any) => {
