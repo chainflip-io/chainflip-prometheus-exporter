@@ -3,6 +3,7 @@ import Client from 'bitcoin-core';
 import { gaugeBlockHeight } from '../metrics/btc';
 import promClient from 'prom-client';
 import { BtcConfig } from '../config/interfaces';
+import { pollEndpoint } from '../utils/utils';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -11,13 +12,6 @@ const metricFailure: promClient.Gauge = new promClient.Gauge({
     labelNames: ['metric'],
     registers: [],
 });
-
-async function pollEndpoint(func: any, context: Context, intervalSeconds: number): Promise<void> {
-    const { logger } = context;
-    func(context);
-
-    setInterval(() => func(context), intervalSeconds * 1000);
-}
 
 const startBitcoinService = async (context: Context) => {
     const { logger } = context;

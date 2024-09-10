@@ -12,3 +12,5 @@ jsonvalidator.validate(local.eth, schema.definitions.EthConfig, {throwAll: true}
 jsonvalidator.validate(local.btc, schema.definitions.BtcConfig, {throwAll: true});
 
 jsonvalidator.validate(local.arb, schema.definitions.ArbConfig, {throwAll: true});
+
+jsonvalidator.validate(local.sol, schema.definitions.SolConfig, {throwAll: true});

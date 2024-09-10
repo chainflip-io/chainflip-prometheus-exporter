@@ -22,3 +22,4 @@ export * from './gaugeFeeDeficit';
 export * from './guageExternalChainsBlockHeight';
 export * from './gaugePriceDelta';
 export * from './gaugeDepositChannels';
+export * from './gaugeSolanaDurableNonces';

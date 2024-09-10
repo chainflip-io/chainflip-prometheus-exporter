@@ -169,6 +169,9 @@
         },
         "flip": {
           "$ref": "#/definitions/FlipConfig"
+        },
+        "sol": {
+          "$ref": "#/definitions/SolConfig"
         }
       },
       "required": [
@@ -176,7 +179,8 @@
         "btc",
         "dot",
         "flip",
-        "arb"
+        "arb",
+        "sol"
       ],
       "type": "object"
     },
@@ -442,6 +446,89 @@
         "localnet"
       ],
       "type": "string"
+    },
+    "SolConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "contracts": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "defaultMetrics": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "network": {
+          "type": "string"
+        },
+        "skipMetrics": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "wallets": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "contracts",
+        "defaultMetrics",
+        "enabled",
+        "network",
+        "skipMetrics",
+        "wallets"
+      ],
+      "type": "object"
     }
   }
 }

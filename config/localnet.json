@@ -46,7 +46,7 @@
 		]
 	},
 	"btc": {
-		"enabled": false,
+		"enabled": true,
 		"network": "testnet",
 		"defaultMetrics": [],
 		"wallets": [],
@@ -149,6 +149,16 @@
 				"alias": "vault",
 				"address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
 			}
+		],
+		"skipMetrics": []
+	},
+	"sol": {
+		"enabled": true,
+		"network": "local",
+		"defaultMetrics": [],
+		"contracts": [
+		],
+		"wallets": [
 		],
 		"skipMetrics": []
 	}

@@ -24,6 +24,7 @@ import {
     gaugeValidatorStatus,
     gaugeWitnessChainTracking,
     gaugeWitnessCount,
+    gaugeSolanaNonces,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -45,26 +46,6 @@ export default async (context: Context): Promise<void> => {
 
     startWatcher(context);
 };
-
-declare global {
-    var rotationInProgress: boolean;
-    var epochIndex: number;
-    var dotAggKeyAddress: string;
-    var currentBlock: number;
-    var currentAuthorities: number;
-
-    interface CustomApiPromise extends ApiPromise {
-        rpc: ApiPromise['rpc'] & {
-            cf: {
-                [K in keyof typeof customRpcs.cf]: (...args: any[]) => Promise<any>;
-            };
-        };
-    }
-
-    type DeepMutable<T> = {
-        -readonly [P in keyof T]: DeepMutable<T[P]>;
-    };
-}
 
 async function startWatcher(context: Context) {
     const { logger, env, registry } = context;
@@ -115,9 +96,10 @@ async function startWatcher(context: Context) {
             gaugeTssRetryQueues(context);
             gaugeSwappingQueue(context);
             gaugeFeeDeficit(context);
-            gaugePriceDelta(context);
+            // gaugePriceDelta(context);
             gaugeDepositChannels(context);
             gaugeKeyActivationBroadcast(context);
+            gaugeSolanaNonces(context);
             metric.set(0);
         });
         await api.query.system.events(async (events: any) => {
