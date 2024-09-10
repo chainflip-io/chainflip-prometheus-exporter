@@ -14,7 +14,7 @@ interface SkipEvent {
     method: string;
 }
 
-interface EthConfigContract {
+interface ConfigContract {
     alias: string;
     address: string;
 }
@@ -33,7 +33,7 @@ export interface EthConfig extends ConfigBase {
     defaultMetrics: DefaultMetrics[];
     network: string;
     networkId: number;
-    contracts: EthConfigContract[];
+    contracts: ConfigContract[];
     wallets: ConfigWallet[];
     tokens: ConfigToken[];
 }
@@ -42,7 +42,14 @@ export interface ArbConfig extends ConfigBase {
     defaultMetrics: DefaultMetrics[];
     network: string;
     networkId: number;
-    contracts: EthConfigContract[];
+    contracts: ConfigContract[];
+    wallets: ConfigWallet[];
+}
+
+export interface SolConfig extends ConfigBase {
+    defaultMetrics: DefaultMetrics[];
+    network: string;
+    contracts: ConfigContract[];
     wallets: ConfigWallet[];
 }
 
@@ -79,6 +86,7 @@ export interface Config {
     dot: DotConfig;
     flip: FlipConfig;
     arb: ArbConfig;
+    sol: SolConfig;
 }
 
 export enum Network {

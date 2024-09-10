@@ -117,5 +117,16 @@
       }
     ],
     "skipMetrics": []
+  },
+  "sol": {
+    "enabled": true,
+    "network": "devnet",
+    "defaultMetrics": [],
+    "contracts": [
+
+    ],
+    "wallets": [
+    ],
+    "skipMetrics": []
   }
 }

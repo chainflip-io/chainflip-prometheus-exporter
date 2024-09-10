@@ -11,6 +11,7 @@ import createContext from './lib/createContext';
 import loadDefaultMetrics from './lib/loadDefaultMetrics';
 import startBitcoinService from './watchers/bitcoin';
 import startArbitrumService from './watchers/arbitrum';
+import startSolanaService from './watchers/solana';
 
 const logger: Logger = winston.createLogger();
 logger.add(
@@ -51,6 +52,12 @@ const arbitrumRegistry = new promClient.Registry();
 arbitrumRegistry.setDefaultLabels({
     chain: 'arbitrum',
     network: config.arb.network,
+});
+
+const solanaRegistry = new promClient.Registry();
+solanaRegistry.setDefaultLabels({
+    chain: 'solana',
+    network: config.sol.network,
 });
 
 app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
@@ -127,6 +134,15 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
         );
         startArbitrumService(arbitrumContext);
     }
+    if (config.sol.enabled) {
+        const solanaLogger: Logger = logger.child({
+            chain: 'solana',
+            network: config.sol.network,
+        });
+        const solanaContext: Context = createContext(solanaLogger, solanaRegistry, env, config.sol);
+        loadDefaultMetrics(solanaContext);
+        startSolanaService(solanaContext);
+    }
 });
 
 app.get('/metrics', async (req, res) => {
@@ -136,7 +152,8 @@ app.get('/metrics', async (req, res) => {
             (await ethereumRegistry.metrics()) +
             (await polkadotRegistry.metrics()) +
             (await bitcoinRegistry.metrics()) +
-            (await arbitrumRegistry.metrics()),
+            (await arbitrumRegistry.metrics()) +
+            (await solanaRegistry.metrics()),
     );
 });
 

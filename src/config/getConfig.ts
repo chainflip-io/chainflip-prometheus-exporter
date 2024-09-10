@@ -23,6 +23,8 @@ const ETH_WS_ENDPOINT: string = process.env.ETH_WS_ENDPOINT || 'ws://localhost:8
 
 const ARB_WS_ENDPOINT: string = process.env.ARB_WS_ENDPOINT || 'ws://localhost:8548';
 
+const SOL_HTTP_ENDPOINT: string = process.env.SOL_HTTP_ENDPOINT || 'http://localhost:8899';
+
 const CACHE_ENDPOINT: string = process.env.CACHE_ENDPOINT || '';
 
 const PROCESSOR_ENDPOINT: string = process.env.PROCESSOR_ENDPOINT || '';
@@ -38,6 +40,7 @@ export interface Env {
     CACHE_ENDPOINT: string;
     PROCESSOR_ENDPOINT: string;
     ARB_WS_ENDPOINT: string;
+    SOL_HTTP_ENDPOINT: string;
 }
 
 export const env: Env = {
@@ -51,6 +54,7 @@ export const env: Env = {
     CACHE_ENDPOINT,
     PROCESSOR_ENDPOINT,
     ARB_WS_ENDPOINT,
+    SOL_HTTP_ENDPOINT,
 };
 
 export default function getConfig(logger: Logger): any {
@@ -83,10 +87,14 @@ export default function getConfig(logger: Logger): any {
             logger.error(`Invalid Dot config: ${result.errors}`);
             process.exit(1);
         }
+        result = jsonvalidator.validate(config.sol, schema.definitions.SolConfig);
+        if (!result.valid) {
+            logger.error(`Invalid Sol config: ${result.errors}`);
+            process.exit(1);
+        }
         return config;
     } catch (err) {
         logger.error('Error reading production config', err);
         process.exit(1);
     }
-    return;
 }

@@ -1,6 +1,47 @@
 import { ApiPromise } from '@polkadot/api';
-import { Metadata, TypeRegistry } from '@polkadot/types';
 import { BN } from '@polkadot/util';
+import { Context } from '../lib/interfaces';
+import { customRpcs } from './customRpcSpecification';
+
+declare global {
+    var rotationInProgress: boolean;
+    var epochIndex: number;
+    var dotAggKeyAddress: string;
+    var solAggKeyAddress: string;
+    var currentBlock: number;
+    var currentAuthorities: number;
+    var availableSolanaNonces: SolanaNonce[];
+    var solanaRotationTx: string;
+
+    interface CustomApiPromise extends ApiPromise {
+        rpc: ApiPromise['rpc'] & {
+            cf: {
+                [K in keyof typeof customRpcs.cf]: (...args: any[]) => Promise<any>;
+            };
+        };
+    }
+
+    type DeepMutable<T> = {
+        -readonly [P in keyof T]: DeepMutable<T[P]>;
+    };
+}
+
+export type SolanaNonce = {
+    address: string;
+    nonce: string;
+    base58address: string;
+    base58nonce: string;
+};
+
+export async function pollEndpoint(
+    func: any,
+    context: Context,
+    intervalSeconds: number,
+): Promise<void> {
+    func(context);
+
+    setInterval(() => func(context), intervalSeconds * 1000);
+}
 
 export function chunk(arr: any[], n: number) {
     const r = Array(Math.ceil(arr.length / n)).fill(0);
