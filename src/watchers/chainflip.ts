@@ -96,7 +96,7 @@ async function startWatcher(context: Context) {
             gaugeTssRetryQueues(context);
             gaugeSwappingQueue(context);
             gaugeFeeDeficit(context);
-            // gaugePriceDelta(context);
+            gaugePriceDelta(context);
             gaugeDepositChannels(context);
             gaugeKeyActivationBroadcast(context);
             gaugeSolanaNonces(context);
