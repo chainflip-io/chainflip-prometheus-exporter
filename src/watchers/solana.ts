@@ -38,8 +38,10 @@ async function startWatcher(context: Context) {
         const solanaURL = new URL(env.SOL_HTTP_ENDPOINT);
         context.connection = new solanaWeb3.Connection(solanaURL.origin, {
             httpHeaders: {
-                'Authorization': 'Basic ' + Buffer.from(solanaURL.username + ':' + solanaURL.password).toString('base64')
-            }
+                Authorization:
+                    'Basic ' +
+                    Buffer.from(solanaURL.username + ':' + solanaURL.password).toString('base64'),
+            },
         });
 
         pollEndpoint(gaugeSolBalance, context, 6);

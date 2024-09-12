@@ -31,8 +31,8 @@ export const gaugeSolNonces = async (context: Context) => {
             const accountsInfo = await connection.getMultipleAccountsInfo(accounts);
 
             for (let i = 0; i < accounts.length; i++) {
-                if(!accountsInfo[i]) {
-                    continue
+                if (!accountsInfo[i]) {
+                    continue;
                 }
                 if (
                     global.availableSolanaNonces[i].base58nonce !==
