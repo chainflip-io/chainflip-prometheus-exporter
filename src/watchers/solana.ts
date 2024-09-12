@@ -35,8 +35,12 @@ async function startWatcher(context: Context) {
             registry.registerMetric(metricFailure);
 
         metric.set(0);
-        const provider = new solanaWeb3.Connection(env.SOL_HTTP_ENDPOINT);
-        context.connection = provider;
+        const solanaURL = new URL(env.SOL_HTTP_ENDPOINT);
+        context.connection = new solanaWeb3.Connection(solanaURL.origin, {
+            httpHeaders: {
+                'Authorization': 'Basic ' + Buffer.from(solanaURL.username + ':' + solanaURL.password).toString('base64')
+            }
+        });
 
         pollEndpoint(gaugeSolBalance, context, 6);
         pollEndpoint(gaugeTxOutcome, context, 6);
