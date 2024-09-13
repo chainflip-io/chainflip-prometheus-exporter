@@ -36,4 +36,8 @@ export const gaugeDepositChannels = async (context: Context): Promise<void> => {
     // ARB
     const arbChannels = context.data.open_deposit_channels.arbitrum;
     metric.labels('arbitrum').set(arbChannels);
+
+    // SOL
+    const solChannels = context.data.open_deposit_channels.solana;
+    metric.labels('solana').set(solChannels);
 };

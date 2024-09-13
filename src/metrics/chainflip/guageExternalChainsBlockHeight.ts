@@ -29,4 +29,7 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
 
     // Arbitrum
     metric.labels('arbitrum').set(context.data.external_chains_height.arbitrum);
+
+    // Solana
+    metric.labels('solana').set(context.data.external_chains_height.solana);
 };
