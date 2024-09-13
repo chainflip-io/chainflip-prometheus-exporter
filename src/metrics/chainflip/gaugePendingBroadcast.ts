@@ -29,4 +29,7 @@ export const gaugePendingBroadcast = async (context: Context): Promise<void> => 
 
     // Arbitrum
     metric.labels('arbitrum').set(context.data.pending_broadcasts.arbitrum);
+
+    // Solana
+    metric.labels('solana').set(context.data.pending_broadcasts.solana);
 };

@@ -51,7 +51,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
         metric.labels('polkadot').set(metricValue);
     } else {
         // Surplus case
-        const metricValue = Number(dot_fees.Deficit) / 1e10;
+        const metricValue = Number(dot_fees.Surplus) / 1e10;
         metric.labels('polkadot').set(metricValue);
     }
 
@@ -63,7 +63,19 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
         metric.labels('bitcoin').set(metricValue);
     } else {
         // Surplus case
-        const metricValue = Number(btc_fees.Deficit) / 1e8;
+        const metricValue = Number(btc_fees.Surplus) / 1e8;
         metric.labels('bitcoin').set(metricValue);
+    }
+
+    // SOL fees balance
+    const sol_fees = context.data.fee_imbalance.solana;
+    if (Object.hasOwn(sol_fees, 'Deficit')) {
+        // Deficit case
+        const metricValue = -(Number(sol_fees.Deficit) / 1e9);
+        metric.labels('solana').set(metricValue);
+    } else {
+        // Surplus case
+        const metricValue = Number(sol_fees.Surplus) / 1e9;
+        metric.labels('solana').set(metricValue);
     }
 };

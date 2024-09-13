@@ -27,4 +27,7 @@ export const gaugeTssRetryQueues = async (context: Context): Promise<void> => {
 
     // Polkadot
     metricPendingTss.labels('polkadot').set(context.data.pending_tss.polkadot);
+
+    // Solana
+    metricPendingTss.labels('solana').set(context.data.pending_tss.solana);
 };
