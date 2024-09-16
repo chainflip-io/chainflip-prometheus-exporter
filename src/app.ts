@@ -78,62 +78,62 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
         startChainflipService(chainflipContext);
     }
 
-    if (config.dot.enabled) {
-        const polkadotLogger: Logger = logger.child({
-            chain: 'polkadot',
-            network: config.dot.network,
-        });
-        const polkadotContext: Context = createContext(
-            polkadotLogger,
-            polkadotRegistry,
-            env,
-            config.dot,
-        );
-        startPolkadotService(polkadotContext);
-    }
-
-    if (config.eth.enabled) {
-        const ethereumLogger: Logger = logger.child({
-            chain: 'ethereum',
-            network: config.eth.network,
-        });
-        const ethereumContext: Context = createContext(
-            ethereumLogger,
-            ethereumRegistry,
-            env,
-            config.eth,
-        );
-        loadDefaultMetrics(ethereumContext);
-        startEthereumService(ethereumContext);
-    }
-
-    if (config.btc.enabled) {
-        const bitcoinLogger: Logger = logger.child({
-            chain: 'bitcoin',
-            network: config.btc.network,
-        });
-        const bitcoinContext: Context = createContext(
-            bitcoinLogger,
-            bitcoinRegistry,
-            env,
-            config.btc,
-        );
-        startBitcoinService(bitcoinContext);
-    }
-
-    if (config.arb.enabled) {
-        const arbitrumLogger: Logger = logger.child({
-            chain: 'arbitrum',
-            network: config.arb.network,
-        });
-        const arbitrumContext: Context = createContext(
-            arbitrumLogger,
-            arbitrumRegistry,
-            env,
-            config.arb,
-        );
-        startArbitrumService(arbitrumContext);
-    }
+    // if (config.dot.enabled) {
+    //     const polkadotLogger: Logger = logger.child({
+    //         chain: 'polkadot',
+    //         network: config.dot.network,
+    //     });
+    //     const polkadotContext: Context = createContext(
+    //         polkadotLogger,
+    //         polkadotRegistry,
+    //         env,
+    //         config.dot,
+    //     );
+    //     startPolkadotService(polkadotContext);
+    // }
+    //
+    // if (config.eth.enabled) {
+    //     const ethereumLogger: Logger = logger.child({
+    //         chain: 'ethereum',
+    //         network: config.eth.network,
+    //     });
+    //     const ethereumContext: Context = createContext(
+    //         ethereumLogger,
+    //         ethereumRegistry,
+    //         env,
+    //         config.eth,
+    //     );
+    //     loadDefaultMetrics(ethereumContext);
+    //     startEthereumService(ethereumContext);
+    // }
+    //
+    // if (config.btc.enabled) {
+    //     const bitcoinLogger: Logger = logger.child({
+    //         chain: 'bitcoin',
+    //         network: config.btc.network,
+    //     });
+    //     const bitcoinContext: Context = createContext(
+    //         bitcoinLogger,
+    //         bitcoinRegistry,
+    //         env,
+    //         config.btc,
+    //     );
+    //     startBitcoinService(bitcoinContext);
+    // }
+    //
+    // if (config.arb.enabled) {
+    //     const arbitrumLogger: Logger = logger.child({
+    //         chain: 'arbitrum',
+    //         network: config.arb.network,
+    //     });
+    //     const arbitrumContext: Context = createContext(
+    //         arbitrumLogger,
+    //         arbitrumRegistry,
+    //         env,
+    //         config.arb,
+    //     );
+    //     startArbitrumService(arbitrumContext);
+    // }
     if (config.sol.enabled) {
         const solanaLogger: Logger = logger.child({
             chain: 'solana',
