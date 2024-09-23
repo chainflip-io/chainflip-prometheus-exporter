@@ -78,37 +78,37 @@ async function startWatcher(context: Context) {
         await api.rpc.chain.subscribeNewHeads(async (header: any) => {
             context.data = await makeRpcRequest(api, 'monitoring_data');
             gatherGlobalValues(context);
-            // gaugeBlockHeight({ ...context, header });
-            // gaugeAuthorities(context);
-            // gaugeWitnessChainTracking(context);
-            // gaugeWitnessCount(context);
-            // gaugeExternalChainsBlockHeight(context);
-            // gaugeEpoch({ ...context, header });
-            // gaugeSuspendedValidator(context);
-            // gaugeFlipTotalSupply(context);
-            // gaugeRotationDuration(context);
-            // gaugeBuildVersion(context);
-            // gaugeValidatorStatus(context);
-            // gaugeBtcUtxos(context);
-            // // gaugeBlockWeight(context);
-            // gaugePendingRedemptions(context);
-            // gaugePendingBroadcast(context);
-            // gaugeTssRetryQueues(context);
-            // gaugeSwappingQueue(context);
-            // gaugeFeeDeficit(context);
-            // gaugePriceDelta(context);
-            // gaugeDepositChannels(context);
-            // gaugeKeyActivationBroadcast(context);
-            // gaugeSolanaNonces(context);
+            gaugeBlockHeight({ ...context, header });
+            gaugeAuthorities(context);
+            gaugeWitnessChainTracking(context);
+            gaugeWitnessCount(context);
+            gaugeExternalChainsBlockHeight(context);
+            gaugeEpoch({ ...context, header });
+            gaugeSuspendedValidator(context);
+            gaugeFlipTotalSupply(context);
+            gaugeRotationDuration(context);
+            gaugeBuildVersion(context);
+            gaugeValidatorStatus(context);
+            gaugeBtcUtxos(context);
+            // gaugeBlockWeight(context);
+            gaugePendingRedemptions(context);
+            gaugePendingBroadcast(context);
+            gaugeTssRetryQueues(context);
+            gaugeSwappingQueue(context);
+            gaugeFeeDeficit(context);
+            gaugePriceDelta(context);
+            gaugeDepositChannels(context);
+            gaugeKeyActivationBroadcast(context);
+            gaugeSolanaNonces(context);
             metric.set(0);
         });
-        // await api.query.system.events(async (events: any) => {
-        //     // we want to listen to rotation events in the same block we start rotating
-        //     // hence we wait for this before checking the events
-        //     await gaugeRotating(context);
-        //     countEvents({ ...context, events });
-        //     eventsRotationInfo({ ...context, events });
-        // });
+        await api.query.system.events(async (events: any) => {
+            // we want to listen to rotation events in the same block we start rotating
+            // hence we wait for this before checking the events
+            await gaugeRotating(context);
+            countEvents({ ...context, events });
+            eventsRotationInfo({ ...context, events });
+        });
     } catch (e) {
         logger.error(e);
     }

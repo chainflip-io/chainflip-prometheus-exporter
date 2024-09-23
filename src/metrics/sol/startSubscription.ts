@@ -11,21 +11,18 @@ const metricSolanaTxReverted: Gauge = new promClient.Gauge({
 });
 
 let lastOnChainKey = '';
-let subscriptionId :number;
+let subscriptionId: number;
 
 export const startSubscription = async (context: Context) => {
     if (context.config.skipMetrics.includes('sol_subscriptions')) {
         return;
     }
     if (lastOnChainKey === global.solanaCurrentOnChainKey || !global.solanaCurrentOnChainKey) {
-        console.log("SUB ID: " + subscriptionId);
         return;
     }
     lastOnChainKey = global.solanaCurrentOnChainKey;
-    console.log("QUA arriavmo");
     const { logger, registry, connection, metricFailure, config } = context;
-    if (subscriptionId) {
-        console.log("Removing sub : " + subscriptionId);
+    if (subscriptionId !== undefined) {
         await connection.removeOnLogsListener(subscriptionId);
     }
     logger.debug(`Scraping ${metricSolanaTxRevertedName}`);
@@ -36,18 +33,20 @@ export const startSubscription = async (context: Context) => {
     metricFailure.labels({ metric: metricSolanaTxRevertedName }).set(0);
 
     try {
-        console.log("STARTING SUBSCRIPTION");
-        subscriptionId = connection.onLogs(new PublicKey(global.solanaCurrentOnChainKey), (log) => {
-            console.log(log);
-            if(log.err) {
-                metricSolanaTxReverted.labels(log.signature).set(1);
-                // TODO: set timeout and delete it after ~1h?? otherwise we'll remain with a firing alert the whole time
-            }
-        })
-        console.log("ID: " + subscriptionId);
+        subscriptionId = connection.onLogs(
+            new PublicKey(global.solanaCurrentOnChainKey),
+            (log: any) => {
+                if (log.err !== null) {
+                    metricSolanaTxReverted.labels(log.signature).set(1);
+                    setTimeout(() => {
+                        metricSolanaTxReverted.remove(log.signature);
+                    }, 600000); // 10m
+                }
+            },
+        );
     } catch (err) {
         logger.error(err);
-        if(subscriptionId) {
+        if (subscriptionId !== undefined) {
             await connection.removeOnLogsListener(subscriptionId);
         }
         metricFailure.labels({ metric: metricSolanaTxRevertedName }).set(1);
