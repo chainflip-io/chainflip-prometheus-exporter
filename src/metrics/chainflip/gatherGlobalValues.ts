@@ -12,6 +12,9 @@ export const gatherGlobalValues = async (context: Context): Promise<void> => {
         const epoch = (await api.query.solanaThresholdSigner.currentKeyEpoch()).toJSON();
         const solAggKey = (await api.query.solanaThresholdSigner.keys(epoch)).toJSON();
         global.solAggKeyAddress = base58.encode(hexToU8a(solAggKey));
+
+        const onChainKey = (await api.query.solanaBroadcaster.currentOnChainKey()).toJSON();
+        global.solanaCurrentOnChainKey = base58.encode(hexToU8a(onChainKey));
     } catch (err) {
         logger.error(err);
     }

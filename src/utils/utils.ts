@@ -12,6 +12,7 @@ declare global {
     var currentAuthorities: number;
     var availableSolanaNonces: SolanaNonce[];
     var solanaRotationTx: string;
+    var solanaCurrentOnChainKey: string;
 
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {

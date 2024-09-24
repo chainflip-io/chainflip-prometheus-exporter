@@ -5,6 +5,7 @@ import { pollEndpoint } from '../utils/utils';
 import { gaugeSolBalance } from '../metrics/sol/gaugeSolBalance';
 import { gaugeSolNonces } from '../metrics/sol/gaugeDurableNonces';
 import { gaugeTxOutcome } from '../metrics/sol/gaugeTransactionsOutcome';
+import { startSubscription } from '../metrics/sol/startSubscription';
 
 const metricName: string = 'sol_watcher_failure';
 const metric: promClient.Gauge = new promClient.Gauge({
@@ -47,6 +48,7 @@ async function startWatcher(context: Context) {
         pollEndpoint(gaugeSolBalance, context, 6);
         pollEndpoint(gaugeTxOutcome, context, 6);
         pollEndpoint(gaugeSolNonces, context, 6);
+        pollEndpoint(startSubscription, context, 6);
     } catch (e) {
         logger.error(`catch: ${e}`);
         metric.set(1);
