@@ -122,11 +122,8 @@
     "enabled": true,
     "network": "devnet",
     "defaultMetrics": [],
-    "contracts": [
-
-    ],
-    "wallets": [
-    ],
+    "contracts": [],
+    "wallets": [],
     "skipMetrics": []
   }
 }
