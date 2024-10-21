@@ -1,10 +1,10 @@
-import promClient, { Counter, Gauge } from 'prom-client';
+import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { DotConfig, FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
 
 const metricName: string = 'dot_events_count_total';
-const metric: Counter = new promClient.Counter({
+const metric: Gauge = new promClient.Gauge({
     name: metricName,
     help: 'Count of events on chain',
     labelNames: ['event'],
@@ -22,10 +22,10 @@ export const countEvents = async (context: Context): Promise<void> => {
 
     if (registry.getSingleMetric(metricName) === undefined) {
         registry.registerMetric(metric);
-        metric.labels('system:CodeUpdated').inc();
+        metric.labels('system:CodeUpdated').set(0);
     }
 
     for (const { event } of events) {
-        metric.labels(`${event.section}:${event.method}`).inc(1);
+        metric.labels(`${event.section}:${event.method}`).inc();
     }
 };

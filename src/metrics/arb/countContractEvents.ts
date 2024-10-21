@@ -2,7 +2,7 @@ import promClient from 'prom-client';
 import { Context } from '../../lib/interfaces';
 
 const metricName = 'arb_contract_events_count';
-const metric = new promClient.Counter({
+const metric = new promClient.Gauge({
     name: metricName,
     help: 'Total of contract events',
     labelNames: ['event', 'alias'],
