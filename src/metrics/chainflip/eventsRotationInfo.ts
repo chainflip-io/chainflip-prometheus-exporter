@@ -1,6 +1,5 @@
 import promClient, { Counter, Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { FlipConfig } from '../../config/interfaces';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const metricNameRotationPhaseAttempt: string = 'cf_rotation_phase_attempts';

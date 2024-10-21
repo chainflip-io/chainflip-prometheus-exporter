@@ -1,11 +1,11 @@
-import promClient, { Counter, Gauge } from 'prom-client';
+import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { getStateChainError } from '../../utils/utils';
 
 const metricName: string = 'cf_events_count_total';
-const metric: Counter = new promClient.Counter({
+const metric: Gauge = new promClient.Gauge({
     name: metricName,
     help: 'Count of extrinsics on chain',
     labelNames: ['event'],
@@ -13,7 +13,7 @@ const metric: Counter = new promClient.Counter({
 });
 
 const metricExtrinsicFailedName: string = 'cf_event_extrinsic_failed';
-const metricExtrinsicFailed: Counter = new promClient.Counter({
+const metricExtrinsicFailed: Gauge = new promClient.Gauge({
     name: metricExtrinsicFailedName,
     help: 'Count of failed extrinsics on chain',
     labelNames: ['pallet', 'error'],
@@ -21,24 +21,26 @@ const metricExtrinsicFailed: Counter = new promClient.Counter({
 });
 
 const metricNameSlashing: string = 'cf_node_slashed';
-const metricSlash: Counter = new promClient.Counter({
+const metricSlash: Gauge = new promClient.Gauge({
     name: metricNameSlashing,
     help: 'Number of time ss58 has been slashed',
-    labelNames: ['event', 'ss58', 'publicKey', 'alias'],
+    labelNames: ['ss58', 'publicKey', 'alias'],
     registers: [],
 });
 
 const metricNameCcmBroadcastAborted: string = 'cf_ccm_broadcast_aborted';
-const metricCcmBroadcastAborted: Counter = new promClient.Counter({
+const metricCcmBroadcastAborted: Gauge = new promClient.Gauge({
     name: metricNameCcmBroadcastAborted,
     help: 'Count of CCM broadcast aborted events',
+    labelNames: ['broadcaster'],
     registers: [],
 });
 
 const metricNameBroadcastAborted: string = 'cf_broadcast_aborted';
-const metricBroadcastAborted: Counter = new promClient.Counter({
+const metricBroadcastAborted: Gauge = new promClient.Gauge({
     name: metricNameBroadcastAborted,
     help: 'Count of NON-CCM broadcast aborted events',
+    labelNames: ['broadcaster'],
     registers: [],
 });
 
@@ -56,39 +58,52 @@ export const countEvents = async (context: Context): Promise<void> => {
 
     if (registry.getSingleMetric(metricName) === undefined) {
         registry.registerMetric(metric);
-        metric.labels('governance:Approved').inc();
-        metric.labels('governance:Executed').inc();
-        metric.labels('governance:Proposed').inc();
-        metric.labels('ethereumBroadcaster:BroadcastAborted').inc();
-        metric.labels('polkadotBroadcaster:BroadcastAborted').inc();
-        metric.labels('arbitrumBroadcaster:BroadcastAborted').inc();
-        metric.labels('bitcoinBroadcaster:BroadcastAborted').inc();
-        metric.labels('solanaBroadcaster:BroadcastAborted').inc();
-        metric.labels('bitcoinBroadcaster:BroadcastTimeout').inc();
-        metric.labels('ethereumBroadcaster:BroadcastTimeout').inc();
-        metric.labels('polkadotBroadcaster:BroadcastTimeout').inc();
-        metric.labels('arbitrumBroadcaster:BroadcastTimeout').inc();
-        metric.labels('solanaBroadcaster:BroadcastTimeout').inc();
-        metric.labels('evmThresholdSigner:RetryRequested').inc();
-        metric.labels('bitcoinThresholdSigner:RetryRequested').inc();
-        metric.labels('polkadotThresholdSigner:RetryRequested').inc();
-        metric.labels('solanaThresholdSigner:RetryRequested').inc();
-        metric.labels('evmThresholdSigner:KeygenFailure').inc();
-        metric.labels('bitcoinThresholdSigner:KeygenFailure').inc();
-        metric.labels('polkadotThresholdSigner:KeygenFailure').inc();
-        metric.labels('solanaThresholdSigner:KeygenFailure').inc();
+        metric.labels('governance:Approved').set(0);
+        metric.labels('governance:Executed').set(0);
+        metric.labels('governance:Proposed').set(0);
+        metric.labels('ethereumBroadcaster:BroadcastAborted').set(0);
+        metric.labels('polkadotBroadcaster:BroadcastAborted').set(0);
+        metric.labels('arbitrumBroadcaster:BroadcastAborted').set(0);
+        metric.labels('bitcoinBroadcaster:BroadcastAborted').set(0);
+        metric.labels('solanaBroadcaster:BroadcastAborted').set(0);
+        metric.labels('bitcoinBroadcaster:BroadcastTimeout').set(0);
+        metric.labels('ethereumBroadcaster:BroadcastTimeout').set(0);
+        metric.labels('polkadotBroadcaster:BroadcastTimeout').set(0);
+        metric.labels('arbitrumBroadcaster:BroadcastTimeout').set(0);
+        metric.labels('solanaBroadcaster:BroadcastTimeout').set(0);
+        metric.labels('evmThresholdSigner:RetryRequested').set(0);
+        metric.labels('bitcoinThresholdSigner:RetryRequested').set(0);
+        metric.labels('polkadotThresholdSigner:RetryRequested').set(0);
+        metric.labels('solanaThresholdSigner:RetryRequested').set(0);
+        metric.labels('evmThresholdSigner:KeygenFailure').set(0);
+        metric.labels('bitcoinThresholdSigner:KeygenFailure').set(0);
+        metric.labels('polkadotThresholdSigner:KeygenFailure').set(0);
+        metric.labels('solanaThresholdSigner:KeygenFailure').set(0);
     }
     if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
         registry.registerMetric(metricExtrinsicFailed);
-    if (registry.getSingleMetric(metricNameSlashing) === undefined)
+    if (registry.getSingleMetric(metricNameSlashing) === undefined) {
         registry.registerMetric(metricSlash);
+        for (const { ss58Address, alias } of accounts) {
+            const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
+            metricSlash.labels(ss58Address, hex, alias).set(0);
+        }
+    }
     if (registry.getSingleMetric(metricNameCcmBroadcastAborted) === undefined) {
         registry.registerMetric(metricCcmBroadcastAborted);
-        metricCcmBroadcastAborted.inc();
+        metricCcmBroadcastAborted.labels('arbitrumBroadcaster').set(0);
+        metricCcmBroadcastAborted.labels('bitcoinBroadcaster').set(0);
+        metricCcmBroadcastAborted.labels('ethereumBroadcaster').set(0);
+        metricCcmBroadcastAborted.labels('polkadotBroadcaster').set(0);
+        metricCcmBroadcastAborted.labels('solanaBroadcaster').set(0);
     }
     if (registry.getSingleMetric(metricNameBroadcastAborted) === undefined) {
         registry.registerMetric(metricBroadcastAborted);
-        metricBroadcastAborted.inc();
+        metricBroadcastAborted.labels('arbitrumBroadcaster').set(0);
+        metricBroadcastAborted.labels('bitcoinBroadcaster').set(0);
+        metricBroadcastAborted.labels('ethereumBroadcaster').set(0);
+        metricBroadcastAborted.labels('polkadotBroadcaster').set(0);
+        metricBroadcastAborted.labels('solanaBroadcaster').set(0);
     }
 
     for (const { event } of events) {
@@ -116,10 +131,10 @@ export const countEvents = async (context: Context): Promise<void> => {
             const broacastId = event.data.toJSON()[0];
             if (ccmBroadcasts.delete(broacastId)) {
                 // this is a ccm broadcast aborted!
-                metricCcmBroadcastAborted.inc();
+                metricCcmBroadcastAborted.labels(event.section).inc();
             } else {
                 // this is a normal broadcast aborted!
-                metricBroadcastAborted.inc();
+                metricBroadcastAborted.labels(event.section).inc();
             }
         }
         // Remove it on broadcast success to avoid saving the broadcast_id indefinitely
@@ -155,9 +170,7 @@ export const countEvents = async (context: Context): Promise<void> => {
             for (const { ss58Address, alias } of accounts) {
                 const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
                 if (event.data.who.toString() === ss58Address) {
-                    metricSlash
-                        .labels(`${event.section}:${event.method}`, ss58Address, hex, alias)
-                        .inc(1);
+                    metricSlash.labels(ss58Address, hex, alias).inc(1);
                 }
             }
         }
