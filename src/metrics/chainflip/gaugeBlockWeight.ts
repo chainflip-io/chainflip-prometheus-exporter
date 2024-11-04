@@ -20,11 +20,13 @@ export const gaugeBlockWeight = async (context: Context): Promise<void> => {
     logger.debug(`Scraping ${metricName}`);
 
     try {
-        const systemBlockWeights = await api.consts.system.blockWeights;
-        logger.debug(systemBlockWeights.toJSON());
-
-        const currentBlockWeight = await api.query.system.blockWeight();
-        logger.debug(currentBlockWeight.toJSON());
+        const currentBlockWeight = (await api.query.system.blockWeight()).toJSON();
+        const totalWeight: number =
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            currentBlockWeight.mandatory.refTime +
+            currentBlockWeight.normal.refTime +
+            currentBlockWeight.operational.refTime;
+        metric.set(totalWeight);
     } catch (e) {
         logger.error(e);
     }
