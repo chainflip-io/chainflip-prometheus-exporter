@@ -43,6 +43,7 @@ const FLIPPriceId = 'evm-10x826180541412D574cf1336d22c0C0a287822678A';
 const USDCPriceId = 'evm-10xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const DOTPriceId = 'dot0x0000000000000000000000000000000000000000';
 const USDTPriceId = 'evm-10xdAC17F958D2ee523a2206206994597C13D831ec7';
+const SOLPriceId = 'sol0x0000000000000000000000000000000000000000';
 
 const prices = new Map();
 let ingressFees: any;
@@ -56,6 +57,8 @@ type tokenDecimals = {
     USDT: number;
     ARBETH: number;
     ARBUSDC: number;
+    SOL: number;
+    SOLUSDC: number;
 };
 const decimals: tokenDecimals = {
     BTC: 1e8,
@@ -66,6 +69,8 @@ const decimals: tokenDecimals = {
     USDT: 1e6,
     ARBETH: 1e18,
     ARBUSDC: 1e6,
+    SOL: 1e9,
+    SOLUSDC: 1e6,
 };
 
 type asset = {
@@ -132,6 +137,22 @@ const ARBUSDC: asset = {
     chainAsset: 'ETH',
     chainAssetPriceId: ETHPriceId,
 };
+const SOL: asset = {
+    asset: 'SOL',
+    absoluteAsset: 'SOL',
+    priceId: SOLPriceId,
+    chain: 'Solana',
+    chainAsset: 'SOL',
+    chainAssetPriceId: SOLPriceId,
+};
+const SOLUSDC: asset = {
+    asset: 'USDC',
+    absoluteAsset: 'SOLUSDC',
+    priceId: USDCPriceId,
+    chain: 'Solana',
+    chainAsset: 'SOL',
+    chainAssetPriceId: SOLPriceId,
+};
 export const gaugePriceDelta = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_price_delta')) {
         return;
@@ -157,11 +178,12 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         const tenKFlip = 10000000000000000000000;
         const tenKUsdc = 10000000000;
         const fiftyKUsdc = 50000000000;
+        const fiftySol = 50000000000;
 
         // query all index prices
         const data = await axios.post(
             env.CACHE_ENDPOINT,
-            '{"query":"\\nquery GetTokenPrices($tokens: [PriceQueryInput\u0021]\u0021) {\\n  tokenPrices: getTokenPrices(input: $tokens) {\\n    chainId\\n    address\\n    usdPrice\\n    }\\n}","variables":{"tokens":[{"chainId":"btc","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0xdAC17F958D2ee523a2206206994597C13D831ec7"},{"chainId":"evm-1","address":"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}, {"chainId":"evm-1","address":"0x826180541412D574cf1336d22c0C0a287822678A"}, {"chainId":"dot","address":"0x0000000000000000000000000000000000000000"}]}}',
+            '{"query":"\\nquery GetTokenPrices($tokens: [PriceQueryInput\u0021]\u0021) {\\n  tokenPrices: getTokenPrices(input: $tokens) {\\n    chainId\\n    address\\n    usdPrice\\n    }\\n}","variables":{"tokens":[{"chainId":"btc","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0xdAC17F958D2ee523a2206206994597C13D831ec7"},{"chainId":"evm-1","address":"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}, {"chainId":"evm-1","address":"0x826180541412D574cf1336d22c0C0a287822678A"}, {"chainId":"dot","address":"0x0000000000000000000000000000000000000000"}, {"chainId":"sol","address":"0x0000000000000000000000000000000000000000"}, {"chainId":"sol","address":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"}]}}',
         );
         const formattedData = JSON.parse(data.data).data.tokenPrices;
         formattedData.forEach((element: any) => {
@@ -188,6 +210,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         calculateRateToUsdc(ARBUSDC, fiftyKUsdc);
         calculateRateToUsdc(USDT, tenKUsdc);
         calculateRateToUsdc(USDT, fiftyKUsdc);
+        calculateRateToUsdc(SOL, fiftySol);
 
         /// USDC -> ...
         calculateRateFromUsdc(BTC, tenKUsdc);
@@ -203,6 +226,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         calculateRateFromUsdc(ARBUSDC, fiftyKUsdc);
         calculateRateFromUsdc(USDT, tenKUsdc);
         calculateRateFromUsdc(USDT, fiftyKUsdc);
+        calculateRateFromUsdc(SOL, tenKUsdc);
     } catch (e: any) {
         logger.error(e);
     }
