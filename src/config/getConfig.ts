@@ -27,8 +27,6 @@ const SOL_HTTP_ENDPOINT: string = process.env.SOL_HTTP_ENDPOINT || 'http://local
 
 const CACHE_ENDPOINT: string = process.env.CACHE_ENDPOINT || '';
 
-const PROCESSOR_ENDPOINT: string = process.env.PROCESSOR_ENDPOINT || '';
-
 export interface Env {
     CONFIG_PATH: string;
     BTC_HTTP_ENDPOINT: string;
@@ -38,7 +36,6 @@ export interface Env {
     DOT_WS_ENDPOINT: string;
     ETH_WS_ENDPOINT: string;
     CACHE_ENDPOINT: string;
-    PROCESSOR_ENDPOINT: string;
     ARB_WS_ENDPOINT: string;
     SOL_HTTP_ENDPOINT: string;
 }
@@ -52,7 +49,6 @@ export const env: Env = {
     DOT_WS_ENDPOINT,
     ETH_WS_ENDPOINT,
     CACHE_ENDPOINT,
-    PROCESSOR_ENDPOINT,
     ARB_WS_ENDPOINT,
     SOL_HTTP_ENDPOINT,
 };
