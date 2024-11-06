@@ -142,7 +142,7 @@ You can disable specific metrics that you are not interested in scraping. To do 
     - Open the metric file and locate the key value used to control whether the metric is enabled. Usually, this value matches the metric name, but some files may define multiple metrics.
     - **Example**: To disable `cf_btc_utxo_balance` (from [`src/metrics/chainflip/gaugeBtcUtxos.ts`](src/metrics/chainflip/gaugeBtcUtxos.ts)), add `cf_btc_utxos` to the config, which will disable both `cf_btc_utxos` and `cf_btc_utxo_balance`.
 
-2. **Locate the Control Statement**:
+2. **Locate the Key Value**:
     - The metric key can typically be found at the top of the function. For instance:
       ```js
       export const gaugeBtcUtxos = async (context: Context): Promise<void> => {
