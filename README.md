@@ -16,7 +16,7 @@ variables can be found in [.env.example](.env.example).
 
 ## Contributing
 
-### Getting started
+### Getting Started
 
 Install dependencies:
 
@@ -29,6 +29,7 @@ Start up the exporter against a [localnet](https://github.com/chainflip-io/chain
 ```shell
 pnpm start:dev:local
 ```
+
 The exporter is already configured to point to the correct local endpoints if no env file is provided.
 
 You can also run the exporter against a testnet or mainnet:
@@ -36,17 +37,16 @@ You can also run the exporter against a testnet or mainnet:
 ```shell
 cp .env.example .env
 ```
-copy the env file and populate it with the correct endpoints, then run:
+Copy the env file and populate it with the correct endpoints, then run:
 
 ```shell
 pnpm start:dev:sisyphos
 pnpm start:dev:perseverance
-
 pnpm start:dev:berghain
 ```
 depending on the network you want to target.
 
-In a new terminal run:
+In a new terminal, run:
 
 ```shell
 pnpm metrics
@@ -56,7 +56,7 @@ This will display the metrics in the terminal.
 
 ### Testing with Prometheus
 
-First copy the `alerts.yaml.example` file to `alerts.yaml`:
+First, copy the `alerts.yaml.example` file to `alerts.yaml`:
 
 ```shell
 cp alerts.yaml.example alerts.yaml
@@ -76,52 +76,50 @@ To add new alerts to Prometheus, add them to the `alerts.yaml` file. Then restar
 docker-compose restart prometheus
 ```
 
-
-
-### Custom config file
+### Custom Config File
 
 Check out the config file in `config/local.json`. This can be modified to point at different chains and networks. You
 can update the tracked wallets and Chainflip accounts.
 
-#### Enable/disable chains
+#### Enable/Disable Chains
 
-You can enable or disable tracking for any of the chains at your leisure.
+You can enable or disable tracking for any of the chains as needed.
 
 ```json
-    {
+{
     "eth": {
-	  "enabled": true
+        "enabled": true
     },
     "dot": {
-	  "enabled": true
+        "enabled": true
     },
     "btc": {
-	  "enabled": true
+        "enabled": true
     },
     "flip": {
-	  "enabled": true
+        "enabled": true
     }
 }
-``` 
+```
 
-#### Adding your validator
+#### Adding Your Validator
 
 Update `flip.accounts` with your validator address and alias. This will add metrics for your validator.
 
 ```json
 {
     "flip": {
-	  "accounts": [
-		{
-		    "alias": "MY_NODE_ALIAS",
-		    "ss58Address": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
-		}
-	  ]
+        "accounts": [
+            {
+                "alias": "MY_NODE_ALIAS",
+                "ss58Address": "cFNzzoURRFHx2fw2EmsCvTc7hBFP34EaP2B23oUcFdbp1FMvx"
+            }
+        ]
     }
 }
 ```
 
-#### Setting default metrics
+#### Setting Default Metrics
 
 If you would like to expose some constants to Prometheus, you can add them to `defaultMetrics` in the config file. These
 will be exposed as a gauge.
@@ -129,13 +127,12 @@ will be exposed as a gauge.
 ```json
 {
     "defaultMetrics": {
-	  "cf_expected_rotation_duration_blocks": 2400
+        "cf_expected_rotation_duration_blocks": 2400
     }
 }
 ```
 
 This can be useful for alerting.
-
 
 #### Disabling Unnecessary Metrics
 
@@ -169,12 +166,11 @@ You can disable specific metrics that you are not interested in scraping. To do 
 4. **Recommended Disables**:
     - We recommend keeping `cf_price_delta` disabled, as it is used only internally. Without access to our cache endpoint, this metric errors while scraping the necessary data.
 
-#### Current limitations
+#### Current Limitations
 
 1. You must use a Bitcoin node that accepts Basic authentication. The currently used Bitcoin client does not support API
    key authentication.
 
-   
 ## Codebase Structure
 
 Within the `src` directory, the main components are organized as follows:
@@ -219,7 +215,6 @@ Within the `src` directory, the main components are organized as follows:
         - Functions for registering and exposing each metric in a Prometheus-compatible format.
         - The data scraping logic needed to populate each metric.
 
-    
 ### Adding New Metrics
 
 To add new metrics, follow these steps:
