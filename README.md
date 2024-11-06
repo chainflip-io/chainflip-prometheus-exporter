@@ -24,7 +24,7 @@ Install dependencies:
 pnpm install
 ```
 
-Start up the exporter against a local node:
+Start up the exporter against a [localnet](https://github.com/chainflip-io/chainflip-backend):
 
 ```shell
 pnpm start:dev:local
@@ -54,7 +54,7 @@ pnpm metrics
 
 This will display the metrics in the terminal.
 
-## Testing with Prometheus
+### Testing with Prometheus
 
 First copy the `alerts.yaml.example` file to `alerts.yaml`:
 
@@ -83,7 +83,7 @@ docker-compose restart prometheus
 Check out the config file in `config/local.json`. This can be modified to point at different chains and networks. You
 can update the tracked wallets and Chainflip accounts.
 
-#### Enable/disable chain metrics
+#### Enable/disable chains
 
 You can enable or disable tracking for any of the chains at your leisure.
 
@@ -134,76 +134,105 @@ will be exposed as a gauge.
 }
 ```
 
-THis can be useful for alerting.
+This can be useful for alerting.
 
-#### Disabling metrics
 
-If you would like to disable some metrics you can simply add the metric name, which can be found inside the metric file 
+#### Disabling Unnecessary Metrics
 
-I.E [price_delta](src/metrics/chainflip/gaugePriceDelta.ts)
+You can disable specific metrics that you are not interested in scraping. To do this:
 
-```js
-export const gaugePriceDelta = async (context: Context): Promise<void> => {
-   if (context.config.skipMetrics.includes('cf_price_delta')) {
-      return;
-   }
-    ....
-}
-```
+1. **Identify the Metric Key**:
+    - Open the metric file and locate the key value used to control whether the metric is enabled. Usually, this value matches the metric name, but some files may define multiple metrics.
+    - **Example**: To disable `cf_btc_utxo_balance` (from [`src/metrics/chainflip/gaugeBtcUtxos.ts`](src/metrics/chainflip/gaugeBtcUtxos.ts)), add `cf_btc_utxos` to the config, which will disable both `cf_btc_utxos` and `cf_btc_utxo_balance`.
 
-Here you can check the actual value used to disable metrics, you can simply add that value to the config:
-```json
-{
-   "skipMetrics": [
-      "cf_price_delta"
-   ]
-}
-```
-We advise to keep `cf_price_delta` disabled since it is used only internally, hence you don't have access to our cache endpoint which is used to query the data for this metric.
+2. **Locate the Control Statement**:
+    - The metric key can typically be found at the top of the function. For instance:
+      ```js
+      export const gaugeBtcUtxos = async (context: Context): Promise<void> => {
+          if (context.config.skipMetrics.includes('cf_btc_utxos')) {
+              return;
+          }
+          ...
+      }
+      ```
 
-### Current limitations
+3. **Update the Configuration**:
+    - Add the metric key to the `skipMetrics` array in your configuration file to disable it. Example:
+      ```json
+      {
+         "skipMetrics": [
+           "cf_btc_utxos"
+         ]
+      }
+      ```
+
+4. **Recommended Disables**:
+    - We recommend keeping `cf_price_delta` disabled, as it is used only internally. Without access to our cache endpoint, this metric errors while scraping the necessary data.
+
+#### Current limitations
 
 1. You must use a Bitcoin node that accepts Basic authentication. The currently used Bitcoin client does not support API
    key authentication.
 
-## Codebase
+   
+## Codebase Structure
 
-The codebase structure is the following, inside `src`:
+Within the `src` directory, the main components are organized as follows:
 
-- `app.ts` is the entrypoint, here we inizialize a bunch of things like:
-  - Default metrics
-  - Prometheus registries, one for each chain we track
-  - Create a server with a couple of routes:
-    - `/metrics`: which exposes all the metrics in a prometheus compatible format
-    - `/health`: which is used to detect if the app is up and running
-  - create multiple services/watchers, one for each chain we track, each watcher is responsible to scrape a single chain and expose the relevant metrics for it
+#### `app.ts`
+- **Purpose**: The primary entry point for the application, initializing core components.
+- **Initializations**:
+    - Sets up default metrics.
+    - Initializes Prometheus registries—one per tracked blockchain.
+    - Creates a server with two main routes:
+        - **`/metrics`**: Exposes all metrics in a Prometheus-compatible format.
+        - **`/health`**: Provides a health check to confirm the app is running.
+    - Launches multiple chain-specific services (or "watchers"), each dedicated to scraping metrics for a single chain.
 
+#### `abi` Folder
+- Contains the ABI (Application Binary Interface) definitions for the Ethereum smart contracts used. These interfaces define the available functions and events for each contract.
 
-- `abi` folder which contains the ABI for the various ETH smart contract we use, these are interfaces describing what is exposed and available on each smart contract
-- `config` folder containing the interfaces of the configurations for different network
-- `lib` folder containing some utilities to create a context and the default metrics
-- `utils` folder containing other utilities, used throughout the codebase, like function to perform rpc calls, definitions of chain types etc..
-- `watcher` folder, here we have a file for every watcher, depending on the watcher we might create a subscription which is used as trigger to query for the 
-new state whenever a new block is received, or in some cases we do polling (BTC which doesn't support subscriptions and SOL/ARB since they are too fast)
-  - each watcher behaves differently based on the chain, usually we rely on some libraries to interact with the underlying chain
-  - I.E. in the case of chainflip, we use polkaJS to create the subscription and when a new block is received we perform an RPC call which returns all the data we need to populate our metrics.
-  This is possible cause we created a custom RPC on the chainflip-node responsible to expose all the data we need for monitoring.
-  - For other chain this is not possible, hence all the logic to retrieve the data from the external chain is performed inside the single metrics.
-- `metrics` folder, this is the most important one, it contains all the metrics we are currently scraping, divided by chain
-  - Every file is reponsible for one or more metrics (depending if they are related or not) 
-    - I.E. `/chainflip/gaugeBtcUtxos.ts` expose both the number of utxos available and their total balance.
-  - Metrics are defined at the beginning of the file, a function is then defined and will be used by the watcher.
-Inside this function there are:
-    - the logic to add the metric to the register
-    - the logic to scrape the necessary data (if needed)
-    - the logic to expose this data as a prometheus compatible metric
+#### `config` Folder
+- Contains configuration interfaces specific to each supported network.
 
-### Adding new metrics
+#### `lib` Folder
+- Contains utility functions for setting up a context and initializing default metrics.
 
-If you want to add new metrics simply create a new file inside the `metrics/<chain>/` folder.
-You can copy paste the code from another metric for the same chain.
+#### `utils` Folder
+- Contains shared utilities, such as functions for making RPC calls and definitions of chain-specific types.
 
-Change the names of the function and the metric/s and update the logic to scrape the value you want and expose it as a prometheus metric.
+#### `watcher` Folder
+- Contains a file for each chain watcher. Each watcher is responsible for tracking a specific chain’s state and collecting relevant metrics.
+    - **Behavior**: Each watcher operates according to the requirements of its respective chain:
+        - Some chains support subscriptions, where the watcher is triggered on each new block.
+        - For chains like BTC (which lacks subscriptions) or high-throughput chains (e.g., SOL/ARB), polling is used instead.
+    - **Example**: For Chainflip, `polkaJS` is used to create subscriptions, allowing watchers to react to new blocks and fetch all the necessary data via a single custom RPC call.
+    - For other chains where a single custom RPC call isn't available, metrics collection is handled individually within each watcher.
 
-Once your metric is ready you simply need to add a call for it inside the watcher responsible for such chain\
-In order to do so you need to add the metric to the `index.ts` file, and then import it inside the watcher.
+#### `metrics` Folder
+- **Purpose**: Houses all defined metrics, organized by chain.
+- **Structure**:
+    - Each file defines one or more metrics related to a specific chain.
+        - **Example**: `/chainflip/gaugeBtcUtxos.ts` defines both the count of BTC UTXOs and their total balance.
+    - **Functionality**: Each metric file contains:
+        - Metric definitions.
+        - Functions for registering and exposing each metric in a Prometheus-compatible format.
+        - The data scraping logic needed to populate each metric.
+
+    
+### Adding New Metrics
+
+To add new metrics, follow these steps:
+
+1. **Create a New File**:
+    - Inside the `metrics/<chain>/` folder, create a new file for the metric.
+    - You can copy the code from an existing metric file for the same chain as a template.
+
+2. **Modify Function Names and Logic**:
+    - Update the function and metric names to reflect the new metric.
+    - Adjust the logic to scrape the desired values and expose them as Prometheus-compatible metrics.
+
+3. **Integrate the Metric with the Watcher**:
+    - Once your metric is defined, add a call to it within the watcher responsible for that chain.
+    - To do this, add the new metric to the `index.ts` file in the `metrics/<chain>/` folder.
+    - Finally, import the metric into the watcher to complete the integration.
