@@ -2,7 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
-import { getStateChainError } from '../../utils/utils';
+import { getStateChainError, parseEvent } from '../../utils/utils';
 
 const metricName: string = 'cf_events_count_total';
 const metric: Gauge = new promClient.Gauge({
@@ -169,9 +169,11 @@ export const countEvents = async (context: Context): Promise<void> => {
                     block: global.currentBlock,
                 });
             } else {
+                const eventHumanized = event.data.toHuman();
+                parseEvent(eventHumanized);
                 logger.info('event_log', {
                     event: `${event.section}:${event.method}`,
-                    data: event.data.toHuman(),
+                    data: eventHumanized,
                     block: global.currentBlock,
                 });
             }

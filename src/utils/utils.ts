@@ -168,3 +168,16 @@ export const getStateChainError = async (
         },
     };
 };
+
+// Used to remove the commas from numbers
+export function parseEvent(event: JSON) {
+    if (event === null || event === undefined) return;
+    for (const [key, value] of Object.entries(event)) {
+        if (typeof value === 'object') {
+            parseEvent(value);
+        } else {
+            // @ts-expect-error "we are sure the key exists"
+            event[key] = value.toString().replaceAll(',', '');
+        }
+    }
+}
