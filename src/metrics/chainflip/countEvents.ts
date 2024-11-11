@@ -79,6 +79,17 @@ export const countEvents = async (context: Context): Promise<void> => {
         metric.labels('bitcoinThresholdSigner:KeygenFailure').set(0);
         metric.labels('polkadotThresholdSigner:KeygenFailure').set(0);
         metric.labels('solanaThresholdSigner:KeygenFailure').set(0);
+        metric.labels('solanaIngressEgress:ChannelOpeningFeePaid').set(0);
+        metric.labels('bitcoinIngressEgress:ChannelOpeningFeePaid').set(0);
+        metric.labels('ethereumIngressEgress:ChannelOpeningFeePaid').set(0);
+        metric.labels('polkadotIngressEgress:ChannelOpeningFeePaid').set(0);
+        metric.labels('arbitrumIngressEgress:ChannelOpeningFeePaid').set(0);
+        metric.labels('flip:SlashingPerformed').set(0);
+        metric.labels('ethereumChainTracking:ChainStateUpdated').set(0);
+        metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
+        metric.labels('polkadotChainTracking:ChainStateUpdated').set(0);
+        metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
+
     }
     if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
         registry.registerMetric(metricExtrinsicFailed);

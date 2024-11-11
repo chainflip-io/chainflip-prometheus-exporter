@@ -43,6 +43,7 @@ async function startWatcher(context: Context) {
                     'Basic ' +
                     Buffer.from(solanaURL.username + ':' + solanaURL.password).toString('base64'),
             },
+            commitment: 'finalized'
         });
 
         pollEndpoint(gaugeSolBalance, context, 6);
