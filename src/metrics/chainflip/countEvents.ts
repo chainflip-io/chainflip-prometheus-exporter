@@ -89,7 +89,6 @@ export const countEvents = async (context: Context): Promise<void> => {
         metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
         metric.labels('polkadotChainTracking:ChainStateUpdated').set(0);
         metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
-
     }
     if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
         registry.registerMetric(metricExtrinsicFailed);
