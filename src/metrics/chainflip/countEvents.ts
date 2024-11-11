@@ -2,7 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
-import { getStateChainError } from '../../utils/utils';
+import { getStateChainError, parseEvent } from '../../utils/utils';
 
 const metricName: string = 'cf_events_count_total';
 const metric: Gauge = new promClient.Gauge({
@@ -169,26 +169,11 @@ export const countEvents = async (context: Context): Promise<void> => {
                     block: global.currentBlock,
                 });
             } else {
-                // remove those annoying commas from the numbers!
-                console.log(event.data.toHuman());
-                let eventParsed = event.data.toHuman();
-                for (const [key, value] of Object.entries(eventParsed)) {
-                    // console.log(value.toString().replaceAll(',' , ''));
-                    if (typeof value === 'object') {
-                        for (const [keyValue, valueValue] of Object.entries(value)) {
-                            eventParsed[key][keyValue] = valueValue.toString().replaceAll(',' , '');
-                        }
-                    } else {
-                        eventParsed[key] = value.toString().replaceAll(',', '');
-                    }
-                }
-                console.log(eventParsed)
-                console.log("\n")
-                console.log("\n")
-
+                const eventHumanized = event.data.toHuman();
+                parseEvent(eventHumanized);
                 logger.info('event_log', {
                     event: `${event.section}:${event.method}`,
-                    data: eventParsed,
+                    data: eventHumanized,
                     block: global.currentBlock,
                 });
             }
