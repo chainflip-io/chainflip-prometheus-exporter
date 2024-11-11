@@ -169,9 +169,26 @@ export const countEvents = async (context: Context): Promise<void> => {
                     block: global.currentBlock,
                 });
             } else {
+                // remove those annoying commas from the numbers!
+                console.log(event.data.toHuman());
+                let eventParsed = event.data.toHuman();
+                for (const [key, value] of Object.entries(eventParsed)) {
+                    // console.log(value.toString().replaceAll(',' , ''));
+                    if (typeof value === 'object') {
+                        for (const [keyValue, valueValue] of Object.entries(value)) {
+                            eventParsed[key][keyValue] = valueValue.toString().replaceAll(',' , '');
+                        }
+                    } else {
+                        eventParsed[key] = value.toString().replaceAll(',', '');
+                    }
+                }
+                console.log(eventParsed)
+                console.log("\n")
+                console.log("\n")
+
                 logger.info('event_log', {
                     event: `${event.section}:${event.method}`,
-                    data: event.data.toHuman(),
+                    data: eventParsed,
                     block: global.currentBlock,
                 });
             }
