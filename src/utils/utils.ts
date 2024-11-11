@@ -176,6 +176,7 @@ export function parseEvent(event: JSON) {
         if (typeof value === 'object') {
             parseEvent(value);
         } else {
+            // @ts-expect-error "we are sure the key exists"
             event[key] = value.toString().replaceAll(',', '');
         }
     }
