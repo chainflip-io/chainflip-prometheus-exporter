@@ -37,14 +37,20 @@ async function startWatcher(context: Context) {
 
         metric.set(0);
         const solanaURL = new URL(env.SOL_HTTP_ENDPOINT);
-        context.connection = new solanaWeb3.Connection(solanaURL.origin, {
-            httpHeaders: {
-                Authorization:
-                    'Basic ' +
-                    Buffer.from(solanaURL.username + ':' + solanaURL.password).toString('base64'),
-            },
-            commitment: 'finalized',
-        });
+        if (solanaURL.username === '' && solanaURL.password === '') {
+            context.connection = new solanaWeb3.Connection(solanaURL.href, 'finalized');
+        } else {
+            context.connection = new solanaWeb3.Connection(solanaURL.origin, {
+                httpHeaders: {
+                    Authorization:
+                        'Basic ' +
+                        Buffer.from(solanaURL.username + ':' + solanaURL.password).toString(
+                            'base64',
+                        ),
+                },
+                commitment: 'finalized',
+            });
+        }
 
         pollEndpoint(gaugeSolBalance, context, 6);
         pollEndpoint(gaugeTxOutcome, context, 6);
