@@ -103,7 +103,12 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
     try {
         let j = 0;
         for (const chunk of accountsChunked) {
-            const result = await makeRpcRequest(api, 'monitoring_accounts_info', chunk);
+            const result = await makeRpcRequest(
+                api,
+                'monitoring_accounts_info',
+                chunk,
+                context.blockHash,
+            );
             for (const [i, validatorInfo] of result.entries()) {
                 const {
                     balance,

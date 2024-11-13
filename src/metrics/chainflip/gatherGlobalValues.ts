@@ -5,7 +5,7 @@ import { hexToU8a } from '@polkadot/util';
 export const gatherGlobalValues = async (context: Context): Promise<void> => {
     global.epochIndex = Number(context.data.epoch.current_epoch_index);
     const logger = context.logger;
-
+    global.currentBlock = Number(context.header.number);
     global.dotAggKeyAddress = context.data.dot_aggkey;
     try {
         const api = context.api;

@@ -43,6 +43,7 @@ export const startSubscription = async (context: Context) => {
                     }, 600000); // 10m
                 }
             },
+            'finalized',
         );
     } catch (err) {
         logger.error(err);

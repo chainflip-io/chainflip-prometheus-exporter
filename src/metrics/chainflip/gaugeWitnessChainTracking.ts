@@ -37,12 +37,11 @@ export const gaugeWitnessChainTracking = async (context: Context): Promise<void>
             registry.registerMetric(metricWitnessFailure);
         metricFailure.labels({ metric: metricName }).set(0);
         try {
-            const signedBlock = await api.rpc.chain.getBlock();
+            const signedBlock = await api.rpc.chain.getBlock(context.blockHash);
             const currentBlockNumber = Number(signedBlock.toJSON().block.header.number);
-            global.currentBlock = currentBlockNumber;
             deleteOldHashes(currentBlockNumber);
-            await processHash10(currentBlockNumber, api, logger);
-            await processHash50(currentBlockNumber, api, logger);
+            await processHash10(currentBlockNumber, api, logger, context.blockHash);
+            await processHash50(currentBlockNumber, api, logger, context.blockHash);
             let btcBlock = 0;
             let ethBlock = 0;
             let dotBlock = 0;
@@ -261,14 +260,19 @@ function arbitrumChainTracking(
     return arbBlock;
 }
 
-async function processHash10(currentBlockNumber: number, api: any, logger: any) {
+async function processHash10(currentBlockNumber: number, api: any, logger: any, blockHash: any) {
     for (const [blockNumber, set] of witnessHash10) {
         if (currentBlockNumber - blockNumber > 10) {
             const tmpSet = new Set(set);
             witnessHash10.delete(blockNumber);
             for (const hash of tmpSet) {
                 const parsedObj = JSON.parse(hash);
-                const [result, total] = await countWitnesses(parsedObj, currentBlockNumber, api);
+                const [result, total] = await countWitnesses(
+                    parsedObj,
+                    currentBlockNumber,
+                    api,
+                    blockHash,
+                );
                 if (total > 0) {
                     metric.labels(parsedObj.type, '10').set(total);
                 }
@@ -279,13 +283,19 @@ async function processHash10(currentBlockNumber: number, api: any, logger: any) 
     }
 }
 
-async function processHash50(currentBlockNumber: number, api: any, logger: any) {
+async function processHash50(
+    currentBlockNumber: number,
+    apiLastBlock: any,
+    logger: any,
+    blockHash: any,
+) {
     for (const [blockNumber, set] of witnessHash50) {
         if (currentBlockNumber - blockNumber > 50) {
             const tmpSet = new Set(set);
             witnessHash50.delete(blockNumber);
             for (const hash of tmpSet) {
                 const parsedObj = JSON.parse(hash);
+                const api = await apiLastBlock.at(blockHash);
                 api.query.witnesser
                     .votes(global.epochIndex, parsedObj.hash)
                     .then((votes: { toJSON: () => any }) => {
@@ -313,13 +323,25 @@ async function processHash50(currentBlockNumber: number, api: any, logger: any) 
     }
 }
 
-async function countWitnesses(parsedObj: any, currentBlockNumber: number, api: any) {
-    const result: any = await makeRpcRequest(api, 'witness_count', parsedObj.hash);
+async function countWitnesses(
+    parsedObj: any,
+    currentBlockNumber: number,
+    apiLastBlock: any,
+    blockHash: any,
+) {
+    const result: any = await makeRpcRequest(
+        apiLastBlock,
+        'witness_count',
+        parsedObj.hash,
+        undefined,
+        blockHash,
+    );
     let total = global.currentAuthorities;
     if (global.currentBlock === currentBlockNumber && result) {
         total = global.currentAuthorities - result.failing_count;
         // check the previous epoch as well! could be a false positive after rotation!
         if (total < global.currentAuthorities * 0.1) {
+            const api = await apiLastBlock.at(blockHash);
             const previousEpochVote = (
                 await api.query.witnesser.votes(global.epochIndex - 1, parsedObj.hash)
             )?.toJSON();

@@ -14,7 +14,7 @@ export const gaugeBuildVersion = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_build_version')) {
         return;
     }
-    const { logger, api, registry } = context;
+    const { logger, registry } = context;
 
     logger.debug(`Scraping ${metricName}`);
 
@@ -23,7 +23,8 @@ export const gaugeBuildVersion = async (context: Context): Promise<void> => {
     let runtime = '';
     let node = '';
     try {
-        node = await api.rpc.system.version();
+        node = await context.api.rpc.system.version();
+        const api = await context.api.at(context.blockHash);
         const getRuntime = await api.query.system.lastRuntimeUpgrade();
         runtime = getRuntime.toJSON().specVersion;
 

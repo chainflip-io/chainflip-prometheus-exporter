@@ -25,6 +25,8 @@ const ARB_WS_ENDPOINT: string = process.env.ARB_WS_ENDPOINT || 'ws://localhost:8
 
 const SOL_HTTP_ENDPOINT: string = process.env.SOL_HTTP_ENDPOINT || 'http://localhost:8899';
 
+const SOL_WS_ENDPOINT: string = process.env.SOL_WS_ENDPOINT || 'http://localhost:8899';
+
 const CACHE_ENDPOINT: string = process.env.CACHE_ENDPOINT || '';
 
 export interface Env {
@@ -38,6 +40,7 @@ export interface Env {
     CACHE_ENDPOINT: string;
     ARB_WS_ENDPOINT: string;
     SOL_HTTP_ENDPOINT: string;
+    SOL_WS_ENDPOINT: string;
 }
 
 export const env: Env = {
@@ -51,6 +54,7 @@ export const env: Env = {
     CACHE_ENDPOINT,
     ARB_WS_ENDPOINT,
     SOL_HTTP_ENDPOINT,
+    SOL_WS_ENDPOINT,
 };
 
 export default function getConfig(logger: Logger): any {
