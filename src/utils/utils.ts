@@ -134,8 +134,8 @@ export function hex2bin(hex: string) {
     return out;
 }
 
-const getMetadata = async (api: ApiPromise) => {
-    const metadataString = await api.rpc.state.getMetadata();
+const getMetadata = async (api: ApiPromise, blockHash: any) => {
+    const metadataString = await api.rpc.state.getMetadata(blockHash);
     return metadataString;
 };
 
@@ -143,6 +143,7 @@ let metadata: any;
 export const getStateChainError = async (
     api: ApiPromise,
     value: { error: `0x${string}`; index: number },
+    blockHash: any,
 ) => {
     // convert LE hex encoded number (e.g. "0x06000000") to BN (6)
     const error = new BN(value.error.slice(2), 'hex', 'le');
@@ -151,7 +152,7 @@ export const getStateChainError = async (
     const palletIndex = value.index;
 
     if (!metadata) {
-        metadata = await getMetadata(api);
+        metadata = await getMetadata(api, blockHash);
     }
 
     const registryError = metadata.registry.findMetaError({

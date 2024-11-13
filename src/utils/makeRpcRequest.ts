@@ -167,7 +167,7 @@ const validators = {
 } as const;
 
 type RpcParamsMap = {
-    account_info_v2: [idSs58: string];
+    account_info_v2: [idSs58: string, at?: string];
     accounts: [at?: string];
     auction_state: [];
     auction_parameters: [];
@@ -178,9 +178,9 @@ type RpcParamsMap = {
     eth_key_manager_address: [];
     eth_state_chain_gateway_address: [];
     flip_supply: [];
-    witness_count: [hash: string, epoch_index?: number];
-    monitoring_data: [];
-    monitoring_accounts_info: [accounts: string[]];
+    witness_count: [hash: string, epoch_index?: number, at?: string];
+    monitoring_data: [at?: string];
+    monitoring_accounts_info: [accounts: string[], at?: string];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof validators & keyof typeof customRpcs.cf;

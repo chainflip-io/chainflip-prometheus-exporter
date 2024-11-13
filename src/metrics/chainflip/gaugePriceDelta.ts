@@ -191,7 +191,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         });
 
         // query ingress/egress fees
-        const environment = await api.rpc('cf_ingress_egress_environment');
+        const environment = await api.rpc('cf_ingress_egress_environment', context.blockHash);
         ingressFees = environment.ingress_fees;
         egressFees = environment.egress_fees;
 
@@ -242,6 +242,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
             { chain: from.chain, asset: from.asset },
             { chain: 'Ethereum', asset: 'USDC' },
             netImputAmount.toString(16),
+            context.blockHash,
         ).then(
             (output: any) => {
                 const amount = output.output;
@@ -275,6 +276,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
             { chain: 'Ethereum', asset: 'USDC' },
             { chain: to.chain, asset: to.asset },
             netImputAmount.toString(16),
+            context.blockHash,
         ).then(
             (output: any) => {
                 const amount = output.output;

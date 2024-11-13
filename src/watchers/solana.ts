@@ -38,7 +38,10 @@ async function startWatcher(context: Context) {
         metric.set(0);
         const solanaURL = new URL(env.SOL_HTTP_ENDPOINT);
         if (solanaURL.username === '' && solanaURL.password === '') {
-            context.connection = new solanaWeb3.Connection(solanaURL.href, 'finalized');
+            context.connection = new solanaWeb3.Connection(solanaURL.href, {
+                commitment: 'finalized',
+                wsEndpoint: env.SOL_WS_ENDPOINT,
+            });
         } else {
             context.connection = new solanaWeb3.Connection(solanaURL.origin, {
                 httpHeaders: {
@@ -49,6 +52,7 @@ async function startWatcher(context: Context) {
                         ),
                 },
                 commitment: 'finalized',
+                wsEndpoint: env.SOL_WS_ENDPOINT,
             });
         }
 

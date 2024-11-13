@@ -24,7 +24,9 @@ export const gaugeBlockWeight = async (context: Context): Promise<void> => {
         const totalWeight: number =
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             currentBlockWeight.mandatory.refTime +
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             currentBlockWeight.normal.refTime +
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             currentBlockWeight.operational.refTime;
         metric.set(totalWeight);
     } catch (e) {

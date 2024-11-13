@@ -53,7 +53,12 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
                     if (bannedNodes > 0) {
                         let totalBannedBalance = 0;
                         for (const idSs58 of phase[phaseName].banned) {
-                            const result = await makeRpcRequest(api, 'account_info_v2', idSs58);
+                            const result = await makeRpcRequest(
+                                api,
+                                'account_info_v2',
+                                idSs58,
+                                context.blockHash,
+                            );
                             totalBannedBalance += Number(result.balance) / 1e18;
                         }
                         metricBalanceBanned.set(Number(totalBannedBalance));
