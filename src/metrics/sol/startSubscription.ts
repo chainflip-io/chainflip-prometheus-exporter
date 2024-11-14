@@ -35,12 +35,19 @@ export const startSubscription = async (context: Context) => {
     try {
         subscriptionId = connection.onLogs(
             new PublicKey(global.solanaCurrentOnChainKey),
-            (log: any) => {
+            async (log: any) => {
                 if (log.err !== null) {
-                    metricSolanaTxReverted.labels(log.signature).set(1);
-                    setTimeout(() => {
-                        metricSolanaTxReverted.remove(log.signature);
-                    }, 600000); // 10m
+                    const transaction = await context.connection.getTransaction(log.signature, {
+                        commitment: 'finalized',
+                    });
+                    const keys = transaction.transaction.message.accountKeys;
+                    // only report reverted tx if they are originated from our aggKey
+                    if (keys[0].toString() === global.solanaCurrentOnChainKey) {
+                        metricSolanaTxReverted.labels(log.signature).set(1);
+                        setTimeout(() => {
+                            metricSolanaTxReverted.remove(log.signature);
+                        }, 600000); // 10m
+                    }
                 }
             },
             'finalized',
