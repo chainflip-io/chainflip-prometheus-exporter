@@ -157,7 +157,7 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_price_delta')) {
         return;
     }
-    const { logger, api, registry } = context;
+    const { logger, api, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricToUsdcName}, ${metricFromUsdcName}`);
 
     if (registry.getSingleMetric(metricToUsdcName) === undefined)
@@ -227,8 +227,10 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         calculateRateFromUsdc(USDT, tenKUsdc);
         calculateRateFromUsdc(USDT, fiftyKUsdc);
         calculateRateFromUsdc(SOL, tenKUsdc);
+        metricFailure.labels('cf_price_delta').set(0);
     } catch (e: any) {
         logger.error(e);
+        metricFailure.labels('cf_price_delta').set(0);
     }
 
     function calculateRateToUsdc(from: asset, intialAmount: number) {

@@ -15,8 +15,6 @@ export const gaugeBlockWeight = async (context: Context): Promise<void> => {
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metricFailure.labels({ metric: metricName }).set(0);
-
     logger.debug(`Scraping ${metricName}`);
 
     try {
@@ -29,7 +27,9 @@ export const gaugeBlockWeight = async (context: Context): Promise<void> => {
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             currentBlockWeight.operational.refTime;
         metric.set(totalWeight);
+        metricFailure.labels({ metric: metricName }).set(0);
     } catch (e) {
+        metricFailure.labels({ metric: metricName }).set(1);
         logger.error(e);
     }
 };

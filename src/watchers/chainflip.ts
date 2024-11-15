@@ -16,7 +16,6 @@ import {
     gaugePendingBroadcast,
     gaugePendingRedemptions,
     gaugePriceDelta,
-    gaugeRotating,
     gaugeRotationDuration,
     gaugeSuspendedValidator,
     gaugeSwappingQueue,
@@ -81,7 +80,7 @@ async function startWatcher(context: Context) {
             context.api = await api.at(context.blockHash);
             context.data = await makeRpcRequest(api, 'monitoring_data', context.blockHash);
 
-            await gatherGlobalValues(context);
+            gatherGlobalValues(context);
             gaugeBlockHeight({ ...context });
             gaugeAuthorities(context);
             gaugeExternalChainsBlockHeight(context);
@@ -90,7 +89,6 @@ async function startWatcher(context: Context) {
             gaugeFlipTotalSupply(context);
             gaugeRotationDuration(context);
             gaugeBtcUtxos(context);
-            gaugeBlockWeight(context);
             gaugePendingRedemptions(context);
             gaugePendingBroadcast(context);
             gaugeTssRetryQueues(context);
@@ -99,15 +97,17 @@ async function startWatcher(context: Context) {
             gaugeDepositChannels(context);
             gaugeKeyActivationBroadcast(context);
             gaugeSolanaNonces(context);
-
+            // need to read some storage
+            gaugeBlockWeight(context);
             try {
                 const events = await context.api.query.system.events();
-                await gaugeRotating(context);
                 context.api = await api;
                 countEvents({ ...context, events });
                 eventsRotationInfo({ ...context, events });
+                metricFailure.labels('events_metrics').set(0);
             } catch (e) {
                 logger.error(e);
+                metricFailure.labels('events_metrics').set(1);
             }
 
             // These need the basic api + blockHash separately

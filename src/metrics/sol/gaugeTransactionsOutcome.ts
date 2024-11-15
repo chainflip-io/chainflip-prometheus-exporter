@@ -22,7 +22,6 @@ export const gaugeTxOutcome = async (context: Context) => {
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metricFailure.labels({ metric: metricName }).set(0);
     try {
         if (global.solanaRotationTx) {
             lastRotationTx = global.solanaRotationTx;
@@ -31,6 +30,8 @@ export const gaugeTxOutcome = async (context: Context) => {
                 // tx reverted:
                 if (txResult.meta.err !== null) {
                     metric.labels(lastRotationTx).set(1);
+                } else {
+                    metric.labels(lastRotationTx).set(0);
                 }
             }
         } else {
@@ -43,6 +44,7 @@ export const gaugeTxOutcome = async (context: Context) => {
                 deleted = true;
             }
         }
+        metricFailure.labels({ metric: metricName }).set(0);
     } catch (err) {
         logger.error(err);
         metricFailure.labels({ metric: metricName }).set(1);

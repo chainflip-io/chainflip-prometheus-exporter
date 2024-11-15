@@ -35,7 +35,6 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
         if (registry.getSingleMetric(metricFailureName) === undefined)
             registry.registerMetric(metricWitnessFailure);
 
-        metricFailure.labels({ metric: metricName }).set(0);
         try {
             const signedBlock = await api.rpc.chain.getBlock(context.blockHash);
             const currentBlockNumber = Number(signedBlock.toJSON().block.header.number);
@@ -70,6 +69,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                     }
                 }
             });
+            metricFailure.labels({ metric: metricName }).set(0);
         } catch (err) {
             logger.error(err);
             metricFailure.labels({ metric: metricName }).set(1);
@@ -104,7 +104,7 @@ async function processHash10(currentBlockNumber: number, api: any, logger: any, 
                     metric.labels(parsedObj.type, '10').set(total);
                 }
                 // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
+                if (result) log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
             }
         }
     }
