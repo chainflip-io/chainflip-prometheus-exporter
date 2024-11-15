@@ -14,7 +14,7 @@ export const gaugeBuildVersion = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_build_version')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
 
     logger.debug(`Scraping ${metricName}`);
 
@@ -29,7 +29,9 @@ export const gaugeBuildVersion = async (context: Context): Promise<void> => {
         runtime = getRuntime.toJSON().specVersion;
 
         metric.set({ runtime, node }, 1);
+        metricFailure.labels('cf_build_version').set(0);
     } catch (e) {
         logger.error(e);
+        metricFailure.labels('cf_build_version').set(0);
     }
 };

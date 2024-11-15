@@ -2,7 +2,6 @@ export * from './countEvents';
 export * from './gaugeAuthorities';
 export * from './gaugeEpoch';
 export * from './gaugeFlipTotalSupply';
-export * from './gaugeRotating';
 export * from './gaugeRotationDuration';
 export * from './gaugeSuspendedValidator';
 export * from './guageBlockHeight';

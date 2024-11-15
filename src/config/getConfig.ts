@@ -25,7 +25,7 @@ const ARB_WS_ENDPOINT: string = process.env.ARB_WS_ENDPOINT || 'ws://localhost:8
 
 const SOL_HTTP_ENDPOINT: string = process.env.SOL_HTTP_ENDPOINT || 'http://localhost:8899';
 
-const SOL_WS_ENDPOINT: string = process.env.SOL_WS_ENDPOINT || 'http://localhost:8899';
+const SOL_WS_ENDPOINT: string = process.env.SOL_WS_ENDPOINT || 'ws://localhost:8899';
 
 const CACHE_ENDPOINT: string = process.env.CACHE_ENDPOINT || '';
 
