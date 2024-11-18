@@ -79,7 +79,6 @@ async function startWatcher(context: Context) {
             context.blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
             context.api = await api.at(context.blockHash);
             context.data = await makeRpcRequest(api, 'monitoring_data', context.blockHash);
-
             gatherGlobalValues(context);
             gaugeBlockHeight({ ...context });
             gaugeAuthorities(context);
