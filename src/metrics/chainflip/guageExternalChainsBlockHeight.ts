@@ -32,4 +32,5 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
 
     // Solana
     metric.labels('solana').set(context.data.external_chains_height.solana);
+    global.solanaBlockHeight = context.data.external_chains_height.solana;
 };

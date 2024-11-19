@@ -24,11 +24,15 @@ export const gaugeSolNonces = async (context: Context) => {
     metricFailure.labels({ metric: metricAvailableNoncesMatchingName }).set(0);
 
     try {
-        if (global.availableSolanaNonces) {
+        // only scrape the metric if we have some values for the nonces and also for the latest solana block height as seen from the state-chain
+        if (global.availableSolanaNonces && global.solanaBlockHeight) {
             const accounts = global.availableSolanaNonces.map(
                 (elem) => new PublicKey(elem.base58address),
             );
-            const accountsInfo = await connection.getMultipleAccountsInfo(accounts);
+            // in case our solana node is behind we don't want the result, this can cause false positive otherwise
+            const accountsInfo = await connection.getMultipleAccountsInfo(accounts, {
+                minContextSlot: global.solanaBlockHeight,
+            });
 
             for (let i = 0; i < accounts.length; i++) {
                 if (!accountsInfo[i]) {

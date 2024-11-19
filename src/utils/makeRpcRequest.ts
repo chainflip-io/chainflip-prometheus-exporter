@@ -149,6 +149,19 @@ const validators = {
             total_supply: U128,
             offchain_supply: U128,
         }),
+        sol_aggkey: string,
+        sol_onchain_key: string,
+        sol_nonces: z.object({
+            available: z.array(z.tuple([string, string])),
+            unavailable: z.array(string),
+        }),
+        activating_key_broadcast_ids: z.object({
+            ethereum: z.optional(U32),
+            bitcoin: z.optional(U32),
+            polkadot: z.optional(U32),
+            arbitrum: z.optional(U32),
+            solana: z.tuple([z.optional(U32), z.optional(string)]),
+        }),
     }),
     monitoring_accounts_info: z.array(
         z.object({
