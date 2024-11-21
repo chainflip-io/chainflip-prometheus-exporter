@@ -2,7 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 import { FlipConfig } from '../../config/interfaces';
-import { chunk } from '../../utils/utils';
+import { chunk, ProtocolData } from '../../utils/utils';
 
 const metricNameValidatorOnline: string = 'cf_validator_online';
 const metricAuthorityOnline: Gauge = new promClient.Gauge({
@@ -53,11 +53,11 @@ const metricReputation: Gauge = new promClient.Gauge({
     labelNames: ['ss58', 'alias'],
     registers: [],
 });
-export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
+export const gaugeValidatorStatus = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_validator')) {
         return;
     }
-    const { logger, api, registry, metricFailure } = context;
+    const { logger, apiLatest, registry, metricFailure } = context;
     const config = context.config as FlipConfig;
     if (config.accounts.length === 0) {
         logger.debug('No validator accounts are tracked.');
@@ -104,10 +104,10 @@ export const gaugeValidatorStatus = async (context: Context): Promise<void> => {
         let j = 0;
         for (const chunk of accountsChunked) {
             const result = await makeRpcRequest(
-                api,
+                apiLatest,
                 'monitoring_accounts_info',
                 chunk,
-                context.blockHash,
+                data.blockHash,
             );
             for (const [i, validatorInfo] of result.entries()) {
                 const {

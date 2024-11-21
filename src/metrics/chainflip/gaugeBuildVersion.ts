@@ -1,6 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import makeRpcRequest from '../../utils/makeRpcRequest';
+import { ProtocolData } from '../../utils/utils';
 
 const metricName: string = 'cf_build_version';
 const metric: Gauge = new promClient.Gauge({
@@ -10,11 +10,11 @@ const metric: Gauge = new promClient.Gauge({
     labelNames: ['runtime', 'node'],
 });
 
-export const gaugeBuildVersion = async (context: Context): Promise<void> => {
+export const gaugeBuildVersion = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_build_version')) {
         return;
     }
-    const { logger, registry, metricFailure } = context;
+    const { logger, registry, metricFailure, apiLatest } = context;
 
     logger.debug(`Scraping ${metricName}`);
 
@@ -23,8 +23,8 @@ export const gaugeBuildVersion = async (context: Context): Promise<void> => {
     let runtime = '';
     let node = '';
     try {
-        node = await context.api.rpc.system.version();
-        const api = await context.api.at(context.blockHash);
+        node = await apiLatest.rpc.system.version();
+        const api = await apiLatest.at(data.blockHash);
         const getRuntime = await api.query.system.lastRuntimeUpgrade();
         runtime = getRuntime.toJSON().specVersion;
 

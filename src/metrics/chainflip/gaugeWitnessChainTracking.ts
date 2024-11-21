@@ -1,7 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { blake2AsHex } from '@polkadot/util-crypto';
-import { hex2bin, insertOrReplace } from '../../utils/utils';
+import { hex2bin, insertOrReplace, ProtocolData } from '../../utils/utils';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const witnessHash10 = new Map<number, Set<string>>();
@@ -24,43 +24,65 @@ const metricWitnessFailure: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeWitnessChainTracking = async (context: Context): Promise<void> => {
+export const gaugeWitnessChainTracking = async (
+    context: Context,
+    data: ProtocolData,
+): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_chain_tracking_witness_count')) {
         return;
     }
     if (global.epochIndex) {
-        const { logger, api, registry, metricFailure } = context;
+        const { logger, apiLatest, registry, metricFailure } = context;
         logger.debug(`Scraping ${metricName}`);
 
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
         if (registry.getSingleMetric(metricFailureName) === undefined)
             registry.registerMetric(metricWitnessFailure);
         try {
-            const signedBlock = await api.rpc.chain.getBlock(context.blockHash);
-            const currentBlockNumber = Number(signedBlock.toJSON().block.header.number);
+            const signedBlock = await apiLatest.rpc.chain.getBlock(data.blockHash);
+            const currentBlockNumber = data.header;
             deleteOldHashes(currentBlockNumber);
-            await processHash10(currentBlockNumber, api, logger, context.blockHash);
-            await processHash50(currentBlockNumber, api, logger, context.blockHash);
+            await processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
+            await processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);
             let btcBlock = 0;
             let ethBlock = 0;
             let dotBlock = 0;
             let arbBlock = 0;
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
-                const blockNumber: number = Number(signedBlock.block.header.number);
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
                     const callData = ex.toHuman().method.args.call;
 
                     if (callData && callData.section === 'ethereumChainTracking') {
-                        ethBlock = ethereumChainTracking(callData, blockNumber, ethBlock, api);
+                        ethBlock = ethereumChainTracking(
+                            callData,
+                            currentBlockNumber,
+                            ethBlock,
+                            apiLatest,
+                        );
                     }
                     if (callData && callData.section === 'bitcoinChainTracking') {
-                        btcBlock = bitcoinChainTracking(callData, blockNumber, btcBlock, api);
+                        btcBlock = bitcoinChainTracking(
+                            callData,
+                            currentBlockNumber,
+                            btcBlock,
+                            apiLatest,
+                        );
                     }
                     if (callData && callData.section === 'polkadotChainTracking') {
-                        dotBlock = polkadotChainTracking(callData, blockNumber, dotBlock, api);
+                        dotBlock = polkadotChainTracking(
+                            callData,
+                            currentBlockNumber,
+                            dotBlock,
+                            apiLatest,
+                        );
                     }
                     if (callData && callData.section === 'arbitrumChainTracking') {
-                        arbBlock = arbitrumChainTracking(callData, blockNumber, arbBlock, api);
+                        arbBlock = arbitrumChainTracking(
+                            callData,
+                            currentBlockNumber,
+                            arbBlock,
+                            apiLatest,
+                        );
                     }
                 }
             });
@@ -86,7 +108,7 @@ function ethereumChainTracking(
     callData: any,
     blockNumber: number,
     ethBlock: number,
-    api: any,
+    apiLatest: any,
 ): number {
     const finalData = callData.args;
     // set priorityFee to 0, it is not kept into account for the chaintracking
@@ -97,7 +119,9 @@ function ethereumChainTracking(
     finalData.new_chain_state.trackedData.baseFee = baseFee;
     finalData.new_chain_state.blockHeight = blockHeight;
     // create the extrinsic we need to witness (ETH chain tracking in this case)
-    const extrinsic = api.tx.ethereumChainTracking.updateChainState(finalData.new_chain_state);
+    const extrinsic = apiLatest.tx.ethereumChainTracking.updateChainState(
+        finalData.new_chain_state,
+    );
     // obtain the hash of the extrinsic call
     const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
     if (Number(blockHeight) > ethBlock) {
@@ -128,7 +152,7 @@ function polkadotChainTracking(
     callData: any,
     blockNumber: number,
     dotBlock: number,
-    api: any,
+    apiLatest: any,
 ): number {
     const finalData = callData.args;
     // set medianTip to 0, it is not kept into account for the chaintracking
@@ -142,7 +166,9 @@ function polkadotChainTracking(
     finalData.new_chain_state.trackedData.runtimeVersion.specVersion = runtimeVersion;
     finalData.new_chain_state.blockHeight = blockHeight;
     // create the extrinsic we need to witness (DOT chain tracking in this case)
-    const extrinsic = api.tx.polkadotChainTracking.updateChainState(finalData.new_chain_state);
+    const extrinsic = apiLatest.tx.polkadotChainTracking.updateChainState(
+        finalData.new_chain_state,
+    );
     // obtain the hash of the extrinsic call
     const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
     if (Number(blockHeight) > dotBlock) {
@@ -173,7 +199,7 @@ function bitcoinChainTracking(
     callData: any,
     blockNumber: number,
     btcBlock: number,
-    api: any,
+    apiLatest: any,
 ): number {
     const finalData = callData.args;
     const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
@@ -186,7 +212,7 @@ function bitcoinChainTracking(
     };
 
     // create the extrinsic we need to witness (ETH chain tracking in this case)
-    const extrinsic = api.tx.bitcoinChainTracking.updateChainState(finalData.new_chain_state);
+    const extrinsic = apiLatest.tx.bitcoinChainTracking.updateChainState(finalData.new_chain_state);
 
     // obtain the hash of the extrinsic call
     const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
@@ -218,7 +244,7 @@ function arbitrumChainTracking(
     callData: any,
     blockNumber: number,
     arbBlock: number,
-    api: any,
+    apiLatest: any,
 ): number {
     const finalData = callData.args;
     // set priorityFee to 0, it is not kept into account for the chaintracking
@@ -233,7 +259,9 @@ function arbitrumChainTracking(
     };
     finalData.new_chain_state.blockHeight = blockHeight;
     // create the extrinsic we need to witness (ETH chain tracking in this case)
-    const extrinsic = api.tx.arbitrumChainTracking.updateChainState(finalData.new_chain_state);
+    const extrinsic = apiLatest.tx.arbitrumChainTracking.updateChainState(
+        finalData.new_chain_state,
+    );
     // obtain the hash of the extrinsic call
     const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
     if (Number(blockHeight) > arbBlock) {
@@ -260,7 +288,12 @@ function arbitrumChainTracking(
     return arbBlock;
 }
 
-async function processHash10(currentBlockNumber: number, api: any, logger: any, blockHash: any) {
+async function processHash10(
+    currentBlockNumber: number,
+    apiLatest: any,
+    logger: any,
+    blockHash: string,
+) {
     for (const [blockNumber, set] of witnessHash10) {
         if (currentBlockNumber - blockNumber > 10) {
             const tmpSet = new Set(set);
@@ -270,14 +303,15 @@ async function processHash10(currentBlockNumber: number, api: any, logger: any, 
                 const [result, total] = await countWitnesses(
                     parsedObj,
                     currentBlockNumber,
-                    api,
+                    apiLatest,
                     blockHash,
                 );
                 if (total > 0) {
                     metric.labels(parsedObj.type, '10').set(total);
                 }
                 // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                if (result) log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
+                if (result && total > 0)
+                    log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
             }
         }
     }
@@ -285,9 +319,9 @@ async function processHash10(currentBlockNumber: number, api: any, logger: any, 
 
 async function processHash50(
     currentBlockNumber: number,
-    apiLastBlock: any,
+    apiLatest: any,
     logger: any,
-    blockHash: any,
+    blockHash: string,
 ) {
     for (const [blockNumber, set] of witnessHash50) {
         if (currentBlockNumber - blockNumber > 50) {
@@ -295,7 +329,7 @@ async function processHash50(
             witnessHash50.delete(blockNumber);
             for (const hash of tmpSet) {
                 const parsedObj = JSON.parse(hash);
-                const api = await apiLastBlock.at(blockHash);
+                const api = await apiLatest.at(blockHash);
                 api.query.witnesser
                     .votes(global.epochIndex, parsedObj.hash)
                     .then((votes: { toJSON: () => any }) => {
@@ -326,11 +360,11 @@ async function processHash50(
 async function countWitnesses(
     parsedObj: any,
     currentBlockNumber: number,
-    apiLastBlock: any,
-    blockHash: any,
+    apiLatest: any,
+    blockHash: string,
 ) {
     const result: any = await makeRpcRequest(
-        apiLastBlock,
+        apiLatest,
         'witness_count',
         parsedObj.hash,
         undefined,
@@ -341,7 +375,7 @@ async function countWitnesses(
         total = global.currentAuthorities - result.failing_count;
         // check the previous epoch as well! could be a false positive after rotation!
         if (total < global.currentAuthorities * 0.1) {
-            const api = await apiLastBlock.at(blockHash);
+            const api = await apiLatest.at(blockHash);
             const previousEpochVote = (
                 await api.query.witnesser.votes(global.epochIndex - 1, parsedObj.hash)
             )?.toJSON();

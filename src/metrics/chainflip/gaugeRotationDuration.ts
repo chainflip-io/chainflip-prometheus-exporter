@@ -1,5 +1,6 @@
 import promClient, { Counter } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 enum rotationPhase {
     idle,
@@ -29,7 +30,10 @@ const metricRotationDuration: Counter = new promClient.Counter({
     registers: [],
 });
 
-export const gaugeRotationDuration = async (context: Context): Promise<void> => {
+export const gaugeRotationDuration = async (
+    context: Context,
+    data: ProtocolData,
+): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_rotation_duration')) {
         return;
     }
@@ -42,7 +46,7 @@ export const gaugeRotationDuration = async (context: Context): Promise<void> => 
     if (registry.getSingleMetric(metricName) === undefined)
         registry.registerMetric(metricRotationPhase);
 
-    const currentRotationPhase: any = context.data.epoch.rotation_phase;
+    const currentRotationPhase: any = data.data.epoch.rotation_phase;
 
     switch (currentRotationPhase) {
         case 'Idle':

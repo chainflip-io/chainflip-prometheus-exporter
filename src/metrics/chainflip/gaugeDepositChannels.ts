@@ -1,8 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { FlipConfig } from '../../config/interfaces';
-import { Axios } from 'axios';
-import { env } from '../../config/getConfig';
+import { ProtocolData } from '../../utils/utils';
 
 const metricName: string = 'cf_open_deposit_channels';
 const metric: Gauge = new promClient.Gauge({
@@ -12,7 +10,7 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeDepositChannels = async (context: Context): Promise<void> => {
+export const gaugeDepositChannels = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_open_deposit_channels')) {
         return;
     }
@@ -22,22 +20,22 @@ export const gaugeDepositChannels = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     // BTC
-    const btcChannels = context.data.open_deposit_channels.bitcoin;
+    const btcChannels = data.data.open_deposit_channels.bitcoin;
     metric.labels('bitcoin').set(btcChannels);
 
     // DOT
-    const dotChannels = context.data.open_deposit_channels.polkadot;
+    const dotChannels = data.data.open_deposit_channels.polkadot;
     metric.labels('polkadot').set(dotChannels);
 
     // ETH
-    const ethChannels = context.data.open_deposit_channels.ethereum;
+    const ethChannels = data.data.open_deposit_channels.ethereum;
     metric.labels('ethereum').set(ethChannels);
 
     // ARB
-    const arbChannels = context.data.open_deposit_channels.arbitrum;
+    const arbChannels = data.data.open_deposit_channels.arbitrum;
     metric.labels('arbitrum').set(arbChannels);
 
     // SOL
-    const solChannels = context.data.open_deposit_channels.solana;
+    const solChannels = data.data.open_deposit_channels.solana;
     metric.labels('solana').set(solChannels);
 };

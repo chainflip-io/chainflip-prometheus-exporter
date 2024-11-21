@@ -35,7 +35,7 @@ const AuctionParameters = z.tuple([U32, U32]);
 const CurrentEpochStartedAt = U32;
 const EpochDuration = U32;
 
-const validators = {
+export const customRpcTypes = {
     account_info_v2: z.object({
         balance: U128,
         bond: U128,
@@ -126,11 +126,11 @@ const validators = {
             solana: U32,
         }),
         fee_imbalance: z.object({
-            ethereum: U32,
-            bitcoin: U32,
-            polkadot: U32,
-            arbitrum: U32,
-            solana: U32,
+            ethereum: z.object({ Surplus: U128, Deficit: U128 }),
+            bitcoin: z.object({ Surplus: U128, Deficit: U128 }),
+            polkadot: z.object({ Surplus: U128, Deficit: U128 }),
+            arbitrum: z.object({ Surplus: U128, Deficit: U128 }),
+            solana: z.object({ Surplus: U128, Deficit: U128 }),
         }),
         authorities: z.object({
             authorities: U32,
@@ -196,10 +196,10 @@ type RpcParamsMap = {
     monitoring_accounts_info: [accounts: string[], at?: string];
 };
 
-type RpcCall = keyof RpcParamsMap & keyof typeof validators & keyof typeof customRpcs.cf;
+type RpcCall = keyof RpcParamsMap & keyof typeof customRpcTypes & keyof typeof customRpcs.cf;
 
 export type RpcReturnValue = {
-    [K in RpcCall]: z.infer<(typeof validators)[K]>;
+    [K in RpcCall]: z.infer<(typeof customRpcTypes)[K]>;
 };
 
 export default async function makeRpcRequest<M extends RpcCall>(

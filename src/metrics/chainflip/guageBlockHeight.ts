@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 const metricName: string = 'cf_block_height';
 const metric: Gauge = new promClient.Gauge({
@@ -8,15 +9,15 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeBlockHeight = async (context: Context) => {
+export const gaugeBlockHeight = async (context: Context, data: ProtocolData) => {
     if (context.config.skipMetrics.includes('cf_block_height')) {
         return;
     }
-    const { logger, registry, header } = context;
+    const { logger, registry } = context;
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.set(Number(header.number));
+    metric.set(data.header);
     registry.registerMetric(metric);
 };

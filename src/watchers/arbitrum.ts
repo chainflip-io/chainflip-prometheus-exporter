@@ -43,11 +43,11 @@ process.on('uncaughtException', async (err) => {
         loggerCopy.error(`Error opening ARB ws connection: ${err}`);
         loggerCopy.info(`ARB retrying in 15s`);
         await wsProvider.destroy();
+        metric.set(1);
         setTimeout(() => {
             isExceptionCaught = false;
             startWatcher(mainContext); // Retry after a delay
         }, 15000); // 15s
-        metric.set(1);
     }
     isExceptionCaught = true;
 });
@@ -78,6 +78,7 @@ async function startWatcher(context: Context) {
             logger.info(`retrying in 5s`);
             await wsProvider.destroy();
             isWatcherRunning = false;
+            metric.set(1);
             setTimeout(() => {
                 startWatcher(context); // Retry after a delay
             }, 5000); // 5s

@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 const metricNameBlocksPerEpoch: string = 'cf_block_per_epoch';
 const metricBlocksPerEpoch: Gauge = new promClient.Gauge({
@@ -29,7 +30,7 @@ const metricRotating: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeEpoch = async (context: Context): Promise<void> => {
+export const gaugeEpoch = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_epoch')) {
         return;
     }
@@ -46,17 +47,17 @@ export const gaugeEpoch = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricNameRotating) === undefined)
         registry.registerMetric(metricRotating);
 
-    metricBlocksPerEpoch.set(context.data.epoch.blocks_per_epoch);
+    metricBlocksPerEpoch.set(data.data.epoch.blocks_per_epoch);
 
-    const MAB: number = Number(Number(context.data.epoch.min_active_bid) / 10 ** 18);
+    const MAB: number = Number(Number(data.data.epoch.min_active_bid) / 10 ** 18);
     metricMAB.set(MAB);
 
     const currentEpochDurationBlocks: number =
-        context.header.number - context.data.epoch.current_epoch_started_at;
+        data.header - data.data.epoch.current_epoch_started_at;
     metricEpochDuration.set(currentEpochDurationBlocks);
 
     let metricValue: number;
-    if (context.data.epoch.rotation_phase === 'Idle') {
+    if (data.data.epoch.rotation_phase === 'Idle') {
         global.rotationInProgress = false;
         metricValue = 0;
     } else {

@@ -1,6 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { hex2bin, insertOrReplace } from '../../utils/utils';
+import { hex2bin, insertOrReplace, ProtocolData } from '../../utils/utils';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const witnessExtrinsicHash10 = new Map<number, Set<string>>();
@@ -23,12 +23,12 @@ const metricWitnessFailure: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeWitnessCount = async (context: Context): Promise<void> => {
+export const gaugeWitnessCount = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_witness_count')) {
         return;
     }
     if (global.epochIndex) {
-        const { logger, api, registry, metricFailure, header } = context;
+        const { logger, apiLatest, registry, metricFailure, header } = context;
         logger.debug(`Scraping ${metricName}`);
 
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
@@ -36,14 +36,13 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
             registry.registerMetric(metricWitnessFailure);
 
         try {
-            const signedBlock = await api.rpc.chain.getBlock(context.blockHash);
-            const currentBlockNumber = Number(signedBlock.toJSON().block.header.number);
+            const signedBlock = await apiLatest.rpc.chain.getBlock(data.blockHash);
+            const currentBlockNumber = data.header;
             deleteOldHashes(currentBlockNumber);
-            processHash10(currentBlockNumber, api, logger, context.blockHash);
-            processHash50(currentBlockNumber, api, logger, context.blockHash);
+            processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
+            processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);
             // chech the witnessAtEpoch extrinsics in a block and save the encoded callHash to check later
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
-                const blockNumber: number = Number(signedBlock.block.header.number);
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
                     const callData = ex.toHuman().method.args.call;
                     if (callData.method !== 'updateChainState') {
@@ -54,7 +53,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                                 type: `${callData.section}:${callData.method}`,
                                 hash: hashToCheck,
                             }),
-                            blockNumber,
+                            currentBlockNumber,
                             ``,
                         );
                         insertOrReplace(
@@ -63,7 +62,7 @@ export const gaugeWitnessCount = async (context: Context): Promise<void> => {
                                 type: `${callData.section}:${callData.method}`,
                                 hash: hashToCheck,
                             }),
-                            blockNumber,
+                            currentBlockNumber,
                             ``,
                         );
                     }
@@ -87,7 +86,12 @@ function deleteOldHashes(currentBlockNumber: number) {
     });
 }
 
-async function processHash10(currentBlockNumber: number, api: any, logger: any, blockHash: any) {
+async function processHash10(
+    currentBlockNumber: number,
+    apiLatest: any,
+    logger: any,
+    blockHash: string,
+) {
     for (const [blockNumber, set] of witnessExtrinsicHash10) {
         if (currentBlockNumber - blockNumber > 10) {
             const tmpSet = new Set(set);
@@ -97,14 +101,15 @@ async function processHash10(currentBlockNumber: number, api: any, logger: any, 
                 const [result, total] = await countWitnesses(
                     parsedObj,
                     currentBlockNumber,
-                    api,
+                    apiLatest,
                     blockHash,
                 );
                 if (total > 0) {
                     metric.labels(parsedObj.type, '10').set(total);
                 }
                 // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                if (result) log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
+                if (result && total > 0)
+                    log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
             }
         }
     }
@@ -113,11 +118,11 @@ async function processHash10(currentBlockNumber: number, api: any, logger: any, 
 async function countWitnesses(
     parsedObj: any,
     currentBlockNumber: number,
-    apiLastBlock: any,
-    blockHash: any,
+    apiLatest: any,
+    blockHash: string,
 ) {
     const result: any = await makeRpcRequest(
-        apiLastBlock,
+        apiLatest,
         'witness_count',
         parsedObj.hash,
         undefined,
@@ -128,7 +133,7 @@ async function countWitnesses(
         total = global.currentAuthorities - result.failing_count;
         // check the previous epoch as well! could be a false positive after rotation!
         if (total < global.currentAuthorities * 0.1) {
-            const api = await apiLastBlock.at(blockHash);
+            const api = await apiLatest.at(blockHash);
             const previousEpochVote = (
                 await api.query.witnesser.votes(global.epochIndex - 1, parsedObj.hash)
             )?.toJSON();
@@ -179,9 +184,9 @@ function log(
 
 async function processHash50(
     currentBlockNumber: number,
-    apiLastBlock: any,
+    apiLatest: any,
     logger: any,
-    blockHash: any,
+    blockHash: string,
 ) {
     for (const [blockNumber, set] of witnessExtrinsicHash50) {
         if (currentBlockNumber - blockNumber > 50) {
@@ -189,7 +194,7 @@ async function processHash50(
             witnessExtrinsicHash50.delete(blockNumber);
             for (const hash of tmpSet) {
                 const parsedObj = JSON.parse(hash);
-                const api = await apiLastBlock.at(blockHash);
+                const api = await apiLatest.at(blockHash);
                 api.query.witnesser
                     .votes(global.epochIndex, parsedObj.hash)
                     .then((votes: { toJSON: () => any }) => {

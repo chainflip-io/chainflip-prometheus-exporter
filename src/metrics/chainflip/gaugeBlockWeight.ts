@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 // Currently unused. Need to understand how to properly calculate the percentage.
 
@@ -10,9 +11,9 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeBlockWeight = async (context: Context): Promise<void> => {
-    const { logger, api, registry, metricFailure } = context;
-
+export const gaugeBlockWeight = async (context: Context, data: ProtocolData): Promise<void> => {
+    const { logger, apiLatest, registry, metricFailure } = context;
+    const api = await apiLatest.at(data.blockHash);
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     logger.debug(`Scraping ${metricName}`);

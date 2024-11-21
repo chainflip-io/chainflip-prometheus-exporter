@@ -52,13 +52,13 @@ process.on('uncaughtException', async (err) => {
         loggerCopy.error(`Error opening ETH ws connection: ${err}`);
         loggerCopy.info(`ETH retrying in 15s`);
         await wsProvider.destroy();
+        metric.set(1);
         setTimeout(() => {
             isExceptionCaught = false;
             startWatcher(mainContext); // Retry after a delay
         }, 15000); // 15s
     }
     isExceptionCaught = true;
-    metric.set(1);
 });
 
 async function startWatcher(context: Context) {
@@ -86,6 +86,7 @@ async function startWatcher(context: Context) {
             logger.info(`retrying in 5s`);
             await wsProvider.destroy();
             isWatcherRunning = false;
+            metric.set(1);
             setTimeout(() => {
                 startWatcher(context); // Retry after a delay
             }, 5000); // 5s

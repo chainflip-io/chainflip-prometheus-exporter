@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 const metricName: string = 'cf_external_chain_block_height';
 const metric: Gauge = new promClient.Gauge({
@@ -9,7 +10,7 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeExternalChainsBlockHeight = async (context: Context) => {
+export const gaugeExternalChainsBlockHeight = async (context: Context, data: ProtocolData) => {
     if (context.config.skipMetrics.includes('cf_external_chain_block_height')) {
         return;
     }
@@ -19,18 +20,18 @@ export const gaugeExternalChainsBlockHeight = async (context: Context) => {
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     // Ethereum
-    metric.labels('ethereum').set(context.data.external_chains_height.ethereum);
+    metric.labels('ethereum').set(data.data.external_chains_height.ethereum);
 
     // Bitcoin
-    metric.labels('bitcoin').set(context.data.external_chains_height.bitcoin);
+    metric.labels('bitcoin').set(data.data.external_chains_height.bitcoin);
 
     // Polkadot
-    metric.labels('polkadot').set(context.data.external_chains_height.polkadot);
+    metric.labels('polkadot').set(data.data.external_chains_height.polkadot);
 
     // Arbitrum
-    metric.labels('arbitrum').set(context.data.external_chains_height.arbitrum);
+    metric.labels('arbitrum').set(data.data.external_chains_height.arbitrum);
 
     // Solana
-    metric.labels('solana').set(context.data.external_chains_height.solana);
-    global.solanaBlockHeight = context.data.external_chains_height.solana;
+    metric.labels('solana').set(data.data.external_chains_height.solana);
+    global.solanaBlockHeight = data.data.external_chains_height.solana;
 };
