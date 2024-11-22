@@ -78,7 +78,6 @@ async function startWatcher(context: Context) {
         await api.rpc.chain.subscribeFinalizedHeads(async (header: any) => {
             const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
             const stateChainData = await makeRpcRequest(api, 'monitoring_data', context.blockHash);
-            global.blockHash = blockHash;
             const data: ProtocolData = {
                 header: header.toJSON().number,
                 blockHash: blockHash.toJSON(),

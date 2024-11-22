@@ -15,7 +15,6 @@ declare global {
     var solanaRotationTx: string;
     var solanaCurrentOnChainKey: string;
     var solanaBlockHeight: number;
-    var blockHash: string;
 
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {
