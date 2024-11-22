@@ -1,6 +1,7 @@
 import promClient, { Counter, Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import makeRpcRequest from '../../utils/makeRpcRequest';
+import { ProtocolData } from '../../utils/utils';
 
 const metricNameRotationPhaseAttempt: string = 'cf_rotation_phase_attempts';
 const metricRotationPhaseAttempt: Counter = new promClient.Counter({
@@ -24,11 +25,15 @@ const metricBalanceBanned: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const eventsRotationInfo = async (context: Context): Promise<void> => {
+export const eventsRotationInfo = async (
+    context: Context,
+    data: ProtocolData,
+    events: any,
+): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_rotation_phase_attempts')) {
         return;
     }
-    const { logger, registry, events, api } = context;
+    const { logger, registry, apiLatest } = context;
 
     logger.debug(
         `Scraping ${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`,
@@ -54,17 +59,17 @@ export const eventsRotationInfo = async (context: Context): Promise<void> => {
                         let totalBannedBalance = 0;
                         for (const idSs58 of phase[phaseName].banned) {
                             const result = await makeRpcRequest(
-                                api,
+                                apiLatest,
                                 'account_info_v2',
                                 idSs58,
-                                context.blockHash,
+                                data.blockHash,
                             );
                             totalBannedBalance += Number(result.balance) / 1e18;
                         }
                         metricBalanceBanned.set(Number(totalBannedBalance));
                     }
                 } catch (e) {
-                    console.log(`Err: ${e}`);
+                    logger.error(e);
                 }
             }
         }

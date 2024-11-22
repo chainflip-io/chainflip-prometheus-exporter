@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 const metricNamePendingRedemption: string = 'cf_pending_redemptions';
 const metricPendingRedemption: Gauge = new promClient.Gauge({
@@ -15,7 +16,10 @@ const metricPendingRedemptionBalance: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugePendingRedemptions = async (context: Context): Promise<void> => {
+export const gaugePendingRedemptions = async (
+    context: Context,
+    data: ProtocolData,
+): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_pending_redemptions')) {
         return;
     }
@@ -28,9 +32,9 @@ export const gaugePendingRedemptions = async (context: Context): Promise<void> =
 
     logger.debug(`Scraping ${metricNamePendingRedemption}, ${metricNamePendingRedemptionBalance}`);
 
-    const pendingRedemptions = context.data.pending_redemptions.count;
+    const pendingRedemptions = data.data.pending_redemptions.count;
     const totalRedemptionBalance: number =
-        Number(context.data.pending_redemptions.total_balance) / 1e18;
+        Number(data.data.pending_redemptions.total_balance) / 1e18;
 
     metricPendingRedemptionBalance.set(totalRedemptionBalance);
     metricPendingRedemption.set(pendingRedemptions);

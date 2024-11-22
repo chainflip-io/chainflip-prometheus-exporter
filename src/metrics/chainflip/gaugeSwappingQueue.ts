@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 const metricName: string = 'cf_swapping_queue';
 const metric: Gauge = new promClient.Gauge({
@@ -8,7 +9,7 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeSwappingQueue = async (context: Context): Promise<void> => {
+export const gaugeSwappingQueue = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_swapping_queue')) {
         return;
     }
@@ -17,5 +18,5 @@ export const gaugeSwappingQueue = async (context: Context): Promise<void> => {
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.set(context.data.pending_swaps);
+    metric.set(data.data.pending_swaps);
 };

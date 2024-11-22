@@ -2,7 +2,8 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
-import { getStateChainError, parseEvent } from '../../utils/utils';
+import { getStateChainError, parseEvent, ProtocolData } from '../../utils/utils';
+import { eventsRotationInfo } from './eventsRotationInfo';
 
 const metricName: string = 'cf_events_count_total';
 const metric: Gauge = new promClient.Gauge({
@@ -46,11 +47,12 @@ const metricBroadcastAborted: Gauge = new promClient.Gauge({
 
 const ccmBroadcasts: Set<number> = new Set<number>();
 
-export const countEvents = async (context: Context): Promise<void> => {
+export const countEvents = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_events_count_total')) {
         return;
     }
-    const { logger, registry, events, api } = context;
+    const { logger, registry, apiLatest, metricFailure } = context;
+    const api = await apiLatest.at(data.blockHash);
     const config = context.config as FlipConfig;
     const { accounts, skipEvents } = config;
 
@@ -115,76 +117,87 @@ export const countEvents = async (context: Context): Promise<void> => {
         metricBroadcastAborted.labels('polkadotBroadcaster').set(0);
         metricBroadcastAborted.labels('solanaBroadcaster').set(0);
     }
-
-    for (const { event } of events) {
-        let skip = false;
-        for (const { section, method } of skipEvents) {
-            if (event.section === section && event.method === method) {
-                skip = true;
+    try {
+        const events = await api.query.system.events();
+        eventsRotationInfo(context, data, events);
+        for (const { event } of events) {
+            let skip = false;
+            for (const { section, method } of skipEvents) {
+                if (event.section === section && event.method === method) {
+                    skip = true;
+                    continue;
+                }
+            }
+            if (skip) {
                 continue;
             }
-        }
-        if (skip) {
-            continue;
-        }
-        metric.labels(`${event.section}:${event.method}`).inc(1);
+            metric.labels(`${event.section}:${event.method}`).inc(1);
 
-        // Save the list of broadcastId for CCM
-        if (event.method === 'CcmBroadcastRequested') {
-            const broacastId = event.data.toJSON()[0];
-            ccmBroadcasts.add(broacastId);
-        }
-
-        // Whenever a broadcast aborted is received we check if the broadcastId is in the list and if so we remove it
-        // and increase the metric ccmBroadcastAborted
-        if (event.method === 'BroadcastAborted') {
-            const broacastId = event.data.toJSON()[0];
-            if (ccmBroadcasts.delete(broacastId)) {
-                // this is a ccm broadcast aborted!
-                metricCcmBroadcastAborted.labels(event.section).inc();
-            } else {
-                // this is a normal broadcast aborted!
-                metricBroadcastAborted.labels(event.section).inc();
+            // Save the list of broadcastId for CCM
+            if (event.method === 'CcmBroadcastRequested') {
+                const broacastId = event.data.toJSON()[0];
+                ccmBroadcasts.add(broacastId);
             }
-        }
-        // Remove it on broadcast success to avoid saving the broadcast_id indefinitely
-        if (event.method === 'BroadcastSuccess') {
-            const broacastId = event.data.toJSON()[0];
-            ccmBroadcasts.delete(broacastId);
-        }
 
-        let error;
-        if (event.method === 'ExtrinsicFailed') {
-            error = await getStateChainError(api, event.data.toJSON()[0].module, context.blockHash);
-            const parsedError = error.data.name.split(':');
-            metricExtrinsicFailed.labels(`${parsedError[0]}`, `${parsedError[1]}`).inc();
-        }
-
-        if (config.eventLog) {
-            if (event.data.dispatchError) {
-                logger.info('event_log', {
-                    error,
-                    event: `${event.section}:${event.method}`,
-                    data: event.data.toHuman(),
-                    block: global.currentBlock,
-                });
-            } else {
-                const eventHumanized = event.data.toHuman();
-                parseEvent(eventHumanized);
-                logger.info('event_log', {
-                    event: `${event.section}:${event.method}`,
-                    data: eventHumanized,
-                    block: global.currentBlock,
-                });
+            // Whenever a broadcast aborted is received we check if the broadcastId is in the list and if so we remove it
+            // and increase the metric ccmBroadcastAborted
+            if (event.method === 'BroadcastAborted') {
+                const broacastId = event.data.toJSON()[0];
+                if (ccmBroadcasts.delete(broacastId)) {
+                    // this is a ccm broadcast aborted!
+                    metricCcmBroadcastAborted.labels(event.section).inc();
+                } else {
+                    // this is a normal broadcast aborted!
+                    metricBroadcastAborted.labels(event.section).inc();
+                }
             }
-        }
-        if (event.method === 'SlashingPerformed') {
-            for (const { ss58Address, alias } of accounts) {
-                const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
-                if (event.data.who.toString() === ss58Address) {
-                    metricSlash.labels(ss58Address, hex, alias).inc(1);
+            // Remove it on broadcast success to avoid saving the broadcast_id indefinitely
+            if (event.method === 'BroadcastSuccess') {
+                const broacastId = event.data.toJSON()[0];
+                ccmBroadcasts.delete(broacastId);
+            }
+
+            let error;
+            if (event.method === 'ExtrinsicFailed') {
+                error = await getStateChainError(
+                    apiLatest,
+                    event.data.toJSON()[0].module,
+                    data.blockHash,
+                );
+                const parsedError = error.data.name.split(':');
+                metricExtrinsicFailed.labels(`${parsedError[0]}`, `${parsedError[1]}`).inc();
+            }
+
+            if (config.eventLog) {
+                if (event.data.dispatchError) {
+                    logger.info('event_log', {
+                        error,
+                        event: `${event.section}:${event.method}`,
+                        data: event.data.toHuman(),
+                        block: data.header,
+                    });
+                } else {
+                    const eventHumanized = event.data.toHuman();
+                    parseEvent(eventHumanized);
+                    logger.info('event_log', {
+                        event: `${event.section}:${event.method}`,
+                        data: eventHumanized,
+                        block: data.header,
+                    });
+                }
+            }
+            if (event.method === 'SlashingPerformed') {
+                for (const { ss58Address, alias } of accounts) {
+                    const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
+                    if (event.data.who.toString() === ss58Address) {
+                        metricSlash.labels(ss58Address, hex, alias).inc(1);
+                    }
                 }
             }
         }
+        metricFailure.labels('events_metrics').set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels('events_metrics').set(1);
     }
 };

@@ -1,6 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import makeRpcRequest from '../../utils/makeRpcRequest';
+import { ProtocolData } from '../../utils/utils';
 
 const metricNameAuthorities: string = 'cf_authorities';
 const metricAuthorities: Gauge = new promClient.Gauge({
@@ -30,7 +30,7 @@ const metricOnlineBackups: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeAuthorities = async (context: Context): Promise<void> => {
+export const gaugeAuthorities = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_authorities')) {
         return;
     }
@@ -48,10 +48,10 @@ export const gaugeAuthorities = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricNameOnlineBackups) === undefined)
         registry.registerMetric(metricOnlineBackups);
 
-    metricAuthorities.set(context.data.authorities.authorities);
-    global.currentAuthorities = context.data.authorities.authorities;
-    metricOnlineAuthorities.set(context.data.authorities.online_authorities);
+    metricAuthorities.set(data.data.authorities.authorities);
+    global.currentAuthorities = data.data.authorities.authorities;
+    metricOnlineAuthorities.set(data.data.authorities.online_authorities);
 
-    metricBackups.set(context.data.authorities.backups);
-    metricOnlineBackups.set(context.data.authorities.online_backups);
+    metricBackups.set(data.data.authorities.backups);
+    metricOnlineBackups.set(data.data.authorities.online_backups);
 };

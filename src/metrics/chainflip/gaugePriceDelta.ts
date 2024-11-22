@@ -2,6 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { Axios } from 'axios';
 import { env } from '../../config/getConfig';
+import { ProtocolData } from '../../utils/utils';
 
 const metricToUsdcName: string = 'cf_price_delta_to_usdc';
 const metricToUsdc: Gauge = new promClient.Gauge({
@@ -153,11 +154,11 @@ const SOLUSDC: asset = {
     chainAsset: 'SOL',
     chainAssetPriceId: SOLPriceId,
 };
-export const gaugePriceDelta = async (context: Context): Promise<void> => {
+export const gaugePriceDelta = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_price_delta')) {
         return;
     }
-    const { logger, api, registry, metricFailure } = context;
+    const { logger, apiLatest, registry, metricFailure } = context;
     logger.debug(`Scraping ${metricToUsdcName}, ${metricFromUsdcName}`);
 
     if (registry.getSingleMetric(metricToUsdcName) === undefined)
@@ -181,17 +182,17 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         const fiftySol = 50000000000;
 
         // query all index prices
-        const data = await axios.post(
+        const dataPrices = await axios.post(
             env.CACHE_ENDPOINT,
             '{"query":"\\nquery GetTokenPrices($tokens: [PriceQueryInput\u0021]\u0021) {\\n  tokenPrices: getTokenPrices(input: $tokens) {\\n    chainId\\n    address\\n    usdPrice\\n    }\\n}","variables":{"tokens":[{"chainId":"btc","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0x0000000000000000000000000000000000000000"},{"chainId":"evm-1","address":"0xdAC17F958D2ee523a2206206994597C13D831ec7"},{"chainId":"evm-1","address":"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}, {"chainId":"evm-1","address":"0x826180541412D574cf1336d22c0C0a287822678A"}, {"chainId":"dot","address":"0x0000000000000000000000000000000000000000"}, {"chainId":"sol","address":"0x0000000000000000000000000000000000000000"}, {"chainId":"sol","address":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"}]}}',
         );
-        const formattedData = JSON.parse(data.data).data.tokenPrices;
+        const formattedData = JSON.parse(dataPrices.data).data.tokenPrices;
         formattedData.forEach((element: any) => {
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
         });
 
         // query ingress/egress fees
-        const environment = await api.rpc('cf_ingress_egress_environment', context.blockHash);
+        const environment = await apiLatest.rpc('cf_ingress_egress_environment', data.blockHash);
         ingressFees = environment.ingress_fees;
         egressFees = environment.egress_fees;
 
@@ -239,31 +240,37 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         let netImputAmount = intialAmount - parseInt(ingressFees[from.chain][from.asset]);
         netImputAmount = Math.round(netImputAmount);
         // simulate the swap
-        api.rpc(
-            'cf_swap_rate',
-            { chain: from.chain, asset: from.asset },
-            { chain: 'Ethereum', asset: 'USDC' },
-            netImputAmount.toString(16),
-            context.blockHash,
-        ).then(
-            (output: any) => {
-                const amount = output.output;
-                const netEgressAmount = (parseInt(amount) - egressFees.Ethereum.USDC) / 1e6;
+        apiLatest
+            .rpc(
+                'cf_swap_rate',
+                { chain: from.chain, asset: from.asset },
+                { chain: 'Ethereum', asset: 'USDC' },
+                netImputAmount.toString(16),
+                data.blockHash,
+            )
+            .then(
+                (output: any) => {
+                    const amount = output.output;
+                    const netEgressAmount = (parseInt(amount) - egressFees.Ethereum.USDC) / 1e6;
 
-                const delta =
-                    (netEgressAmount * prices.get(USDCPriceId) * 100) /
-                        (prices.get(from.priceId) * (intialAmount / decimals[from.asset])) -
-                    100;
-                metricToUsdc.labels(from.absoluteAsset, labelAmount).set(delta);
-                metricPriceDeltaNotWorking.labels(from.absoluteAsset, 'USDC', labelAmount).set(0);
-            },
-            () => {
-                logger.info(
-                    `Failed to query cf_swap_rate: ${from.absoluteAsset}(${labelAmount}) -> USDC`,
-                );
-                metricPriceDeltaNotWorking.labels(from.absoluteAsset, 'USDC', labelAmount).set(1);
-            },
-        );
+                    const delta =
+                        (netEgressAmount * prices.get(USDCPriceId) * 100) /
+                            (prices.get(from.priceId) * (intialAmount / decimals[from.asset])) -
+                        100;
+                    metricToUsdc.labels(from.absoluteAsset, labelAmount).set(delta);
+                    metricPriceDeltaNotWorking
+                        .labels(from.absoluteAsset, 'USDC', labelAmount)
+                        .set(0);
+                },
+                () => {
+                    logger.info(
+                        `Failed to query cf_swap_rate: ${from.absoluteAsset}(${labelAmount}) -> USDC`,
+                    );
+                    metricPriceDeltaNotWorking
+                        .labels(from.absoluteAsset, 'USDC', labelAmount)
+                        .set(1);
+                },
+            );
     }
 
     function calculateRateFromUsdc(to: asset, intialAmount: number) {
@@ -273,31 +280,33 @@ export const gaugePriceDelta = async (context: Context): Promise<void> => {
         netImputAmount = Math.round(netImputAmount);
 
         // simulate the swap
-        api.rpc(
-            'cf_swap_rate',
-            { chain: 'Ethereum', asset: 'USDC' },
-            { chain: to.chain, asset: to.asset },
-            netImputAmount.toString(16),
-            context.blockHash,
-        ).then(
-            (output: any) => {
-                const amount = output.output;
-                const netEgressAmount =
-                    (parseInt(amount) - egressFees[to.chain][to.asset]) / decimals[to.asset];
+        apiLatest
+            .rpc(
+                'cf_swap_rate',
+                { chain: 'Ethereum', asset: 'USDC' },
+                { chain: to.chain, asset: to.asset },
+                netImputAmount.toString(16),
+                data.blockHash,
+            )
+            .then(
+                (output: any) => {
+                    const amount = output.output;
+                    const netEgressAmount =
+                        (parseInt(amount) - egressFees[to.chain][to.asset]) / decimals[to.asset];
 
-                const delta =
-                    (netEgressAmount * prices.get(to.priceId) * 100) /
-                        (prices.get(USDCPriceId) * (intialAmount / decimals.USDC)) -
-                    100;
-                metricFromUsdc.labels(to.absoluteAsset, labelAmount).set(delta);
-                metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(0);
-            },
-            () => {
-                logger.info(
-                    `Failed to query cf_swap_rate: USDC(${labelAmount}) -> ${to.absoluteAsset}`,
-                );
-                metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(1);
-            },
-        );
+                    const delta =
+                        (netEgressAmount * prices.get(to.priceId) * 100) /
+                            (prices.get(USDCPriceId) * (intialAmount / decimals.USDC)) -
+                        100;
+                    metricFromUsdc.labels(to.absoluteAsset, labelAmount).set(delta);
+                    metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(0);
+                },
+                () => {
+                    logger.info(
+                        `Failed to query cf_swap_rate: USDC(${labelAmount}) -> ${to.absoluteAsset}`,
+                    );
+                    metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(1);
+                },
+            );
     }
 };

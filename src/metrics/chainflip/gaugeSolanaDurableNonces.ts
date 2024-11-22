@@ -1,8 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import base58 from 'bs58';
-import { SolanaNonce } from '../../utils/utils';
-import { hexToU8a } from '@polkadot/util';
+import { ProtocolData, SolanaNonce } from '../../utils/utils';
 
 const metricSolanaNoncesName: string = 'cf_solana_available_nonces_count';
 const metricSolanaNonces: Gauge = new promClient.Gauge({
@@ -19,7 +18,7 @@ const metricSolanaUnavailableNonces: Gauge = new promClient.Gauge({
     labelNames: ['address', 'base58Address'],
 });
 
-export const gaugeSolanaNonces = async (context: Context): Promise<void> => {
+export const gaugeSolanaNonces = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_solana_nonces')) {
         return;
     }
@@ -31,8 +30,8 @@ export const gaugeSolanaNonces = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricSolanaUnavailableNoncesName) === undefined)
         registry.registerMetric(metricSolanaUnavailableNonces);
 
-    const availableNonces = context.data.sol_nonces.available;
-    const unavailableNonces = context.data.sol_nonces.unavailable;
+    const availableNonces = data.data.sol_nonces.available;
+    const unavailableNonces = data.data.sol_nonces.unavailable;
 
     metricSolanaNonces.set(availableNonces.length);
     const nonces: SolanaNonce[] = [];
@@ -50,7 +49,7 @@ export const gaugeSolanaNonces = async (context: Context): Promise<void> => {
     });
     global.availableSolanaNonces = nonces;
 
-    unavailableNonces.forEach(([addressBase58, blockHash]: [string, string]) => {
+    unavailableNonces.forEach((addressBase58: string) => {
         const address = '0x' + Buffer.from(base58.decode(addressBase58)).toString('hex');
         metricSolanaUnavailableNonces.labels(address, addressBase58).set(1);
     });

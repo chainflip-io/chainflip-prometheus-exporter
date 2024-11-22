@@ -2,6 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
 import { Context } from '../lib/interfaces';
 import { customRpcs } from './customRpcSpecification';
+import { RpcReturnValue } from './makeRpcRequest';
 
 declare global {
     var rotationInProgress: boolean;
@@ -27,6 +28,12 @@ declare global {
         -readonly [P in keyof T]: DeepMutable<T[P]>;
     };
 }
+
+export type ProtocolData = {
+    blockHash: string;
+    header: number;
+    data: RpcReturnValue['monitoring_data'];
+};
 
 export type SolanaNonce = {
     address: string;

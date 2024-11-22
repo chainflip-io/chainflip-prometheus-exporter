@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 const metricNameUtxosCount: string = 'cf_btc_utxos';
 const metricUtxosCount: Gauge = new promClient.Gauge({
@@ -15,7 +16,7 @@ const metricUtxosBalance = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeBtcUtxos = async (context: Context): Promise<void> => {
+export const gaugeBtcUtxos = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_btc_utxos')) {
         return;
     }
@@ -27,7 +28,7 @@ export const gaugeBtcUtxos = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricNameUtxosBalance) === undefined)
         registry.registerMetric(metricUtxosBalance);
 
-    metricUtxosCount.set(context.data.btc_utxos.count);
+    metricUtxosCount.set(data.data.btc_utxos.count);
 
-    metricUtxosBalance.set(context.data.btc_utxos.total_balance);
+    metricUtxosBalance.set(Number(data.data.btc_utxos.total_balance));
 };

@@ -2,7 +2,6 @@ import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import {
     countEvents,
-    eventsRotationInfo,
     gatherGlobalValues,
     gaugeAuthorities,
     gaugeBlockHeight,
@@ -31,6 +30,7 @@ import { customRpcs } from '../utils/customRpcSpecification';
 import stateChainTypes from '../utils/chainTypes';
 import makeRpcRequest from '../utils/makeRpcRequest';
 import { gaugeKeyActivationBroadcast } from '../metrics/chainflip/gaugeKeyActivationBroadcast';
+import { ProtocolData } from '../utils/utils';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -73,49 +73,41 @@ async function startWatcher(context: Context) {
             types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
             rpc: { ...customRpcs },
         });
+        context.apiLatest = api;
 
         await api.rpc.chain.subscribeFinalizedHeads(async (header: any) => {
-            context.header = header;
-            context.blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
-            context.api = await api.at(context.blockHash);
-            context.data = await makeRpcRequest(api, 'monitoring_data', context.blockHash);
-            gatherGlobalValues(context);
-            gaugeBlockHeight({ ...context });
-            gaugeAuthorities(context);
-            gaugeExternalChainsBlockHeight(context);
-            gaugeEpoch({ ...context });
-            gaugeSuspendedValidator(context);
-            gaugeFlipTotalSupply(context);
-            gaugeRotationDuration(context);
-            gaugeBtcUtxos(context);
-            gaugePendingRedemptions(context);
-            gaugePendingBroadcast(context);
-            gaugeTssRetryQueues(context);
-            gaugeSwappingQueue(context);
-            gaugeFeeDeficit(context);
-            gaugeDepositChannels(context);
-            gaugeKeyActivationBroadcast(context);
-            gaugeSolanaNonces(context);
-            // need to read some storage
-            gaugeBlockWeight(context);
-            try {
-                const events = await context.api.query.system.events();
-                context.api = await api;
-                countEvents({ ...context, events });
-                eventsRotationInfo({ ...context, events });
-                metricFailure.labels('events_metrics').set(0);
-            } catch (e) {
-                logger.error(e);
-                metricFailure.labels('events_metrics').set(1);
-            }
+            const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
+            const stateChainData = await makeRpcRequest(api, 'monitoring_data', context.blockHash);
+            const data: ProtocolData = {
+                header: header.toJSON().number,
+                blockHash: blockHash.toJSON(),
+                data: stateChainData,
+            };
+            gatherGlobalValues(data);
+            gaugeBlockHeight(context, data);
+            gaugeAuthorities(context, data);
+            gaugeExternalChainsBlockHeight(context, data);
+            gaugeEpoch(context, data);
+            gaugeSuspendedValidator(context, data);
+            gaugeFlipTotalSupply(context, data);
+            gaugeRotationDuration(context, data);
+            gaugeBtcUtxos(context, data);
+            gaugePendingRedemptions(context, data);
+            gaugePendingBroadcast(context, data);
+            gaugeTssRetryQueues(context, data);
+            gaugeSwappingQueue(context, data);
+            gaugeFeeDeficit(context, data);
+            gaugeDepositChannels(context, data);
+            gaugeKeyActivationBroadcast(context, data);
+            gaugeSolanaNonces(context, data);
 
-            // These need the basic api + blockHash separately
-            context.api = await api;
-            gaugeWitnessChainTracking(context);
-            gaugeWitnessCount(context);
-            gaugeValidatorStatus(context);
-            gaugeBuildVersion(context);
-            gaugePriceDelta(context);
+            gaugeBlockWeight(context, data);
+            countEvents(context, data);
+            gaugeWitnessChainTracking(context, data);
+            gaugeWitnessCount(context, data);
+            gaugeValidatorStatus(context, data);
+            gaugeBuildVersion(context, data);
+            gaugePriceDelta(context, data);
             metric.set(0);
         });
     } catch (e) {

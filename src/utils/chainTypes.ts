@@ -147,11 +147,13 @@ const stateChainTypes = {
         _enum: [
             'ParticipateSigningFailed',
             'ParticipateKeygenFailed',
-            'InvalidTransactionAuthored',
+            'FailedToBroadcastTransaction',
             'FailedToSignTransaction',
             'MissedAuthorshipSlot',
             'MissedHeartbeat',
             'GrandpaEquivocation',
+            'ParticipateKeyHandoverFailed',
+            'FailedToWitnessInTime',
         ],
     },
     OnlineCredits: 'BlockNumber',
@@ -302,6 +304,12 @@ const stateChainTypes = {
     RpcFailingWitnessValidators: {
         failing_count: 'u32',
         validators: 'Vec<(ValidatorId, Vec<u8>, bool)>',
+    },
+    VaultImbalance: {
+        _enum: {
+            Surplus: 'u128',
+            Deficit: 'u128',
+        },
     },
 } as const;
 

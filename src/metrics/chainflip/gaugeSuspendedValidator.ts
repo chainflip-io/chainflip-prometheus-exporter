@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
 const metricName: string = 'cf_suspended_validators';
 const metric: Gauge = new promClient.Gauge({
@@ -9,7 +10,10 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-export const gaugeSuspendedValidator = async (context: Context): Promise<void> => {
+export const gaugeSuspendedValidator = async (
+    context: Context,
+    data: ProtocolData,
+): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_suspended_validators')) {
         return;
     }
@@ -18,7 +22,7 @@ export const gaugeSuspendedValidator = async (context: Context): Promise<void> =
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    const suspensionList: any = context.data.suspended_validators;
+    const suspensionList: any = data.data.suspended_validators;
     suspensionList.forEach(([offence, count]: [any, any]) => {
         metric.labels(offence).set(count);
     });

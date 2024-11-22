@@ -1,15 +1,16 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { ProtocolData } from '../../utils/utils';
 
-const metricName: string = 'cf_fee_deficit';
+const metricName: string = 'cf_fee_imbalance';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
-    help: 'The fee deficit, (witheld fee - fee actually spent)',
+    help: 'The fee imbalance, (witheld fee - fee actually spent)',
     labelNames: ['tracked_chain'],
     registers: [],
 });
 
-export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
+export const gaugeFeeDeficit = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_fee_deficit')) {
         return;
     }
@@ -20,7 +21,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     // ETH fees balance
-    const eth_fees = context.data.fee_imbalance.ethereum;
+    const eth_fees = data.data.fee_imbalance.ethereum;
     if (Object.hasOwn(eth_fees, 'Deficit')) {
         // Deficit case
         const metricValue = -(Number(eth_fees.Deficit) / 1e18);
@@ -32,7 +33,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
     }
 
     // ARB fees balance
-    const arb_fees = context.data.fee_imbalance.arbitrum;
+    const arb_fees = data.data.fee_imbalance.arbitrum;
     if (Object.hasOwn(arb_fees, 'Deficit')) {
         // Deficit case
         const metricValue = -(Number(arb_fees.Deficit) / 1e18);
@@ -44,7 +45,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
     }
 
     // DOT fees balance
-    const dot_fees = context.data.fee_imbalance.polkadot;
+    const dot_fees = data.data.fee_imbalance.polkadot;
     if (Object.hasOwn(dot_fees, 'Deficit')) {
         // Deficit case
         const metricValue = -(Number(dot_fees.Deficit) / 1e10);
@@ -56,7 +57,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
     }
 
     // BTC fees balance
-    const btc_fees = context.data.fee_imbalance.bitcoin;
+    const btc_fees = data.data.fee_imbalance.bitcoin;
     if (Object.hasOwn(btc_fees, 'Deficit')) {
         // Deficit case
         const metricValue = -(Number(btc_fees.Deficit) / 1e8);
@@ -68,7 +69,7 @@ export const gaugeFeeDeficit = async (context: Context): Promise<void> => {
     }
 
     // SOL fees balance
-    const sol_fees = context.data.fee_imbalance.solana;
+    const sol_fees = data.data.fee_imbalance.solana;
     if (Object.hasOwn(sol_fees, 'Deficit')) {
         // Deficit case
         const metricValue = -(Number(sol_fees.Deficit) / 1e9);

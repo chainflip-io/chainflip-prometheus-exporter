@@ -49,16 +49,20 @@ export default async function startEthereumService(context: Context) {
 
 process.on('uncaughtException', async (err) => {
     if (!isExceptionCaught && !isWatcherRunning) {
+        isExceptionCaught = true;
         loggerCopy.error(`Error opening ETH ws connection: ${err}`);
         loggerCopy.info(`ETH retrying in 15s`);
-        await wsProvider.destroy();
+        await wsProvider?.destroy();
+        metric.set(1);
         setTimeout(() => {
             isExceptionCaught = false;
             startWatcher(mainContext); // Retry after a delay
         }, 15000); // 15s
     }
-    isExceptionCaught = true;
-    metric.set(1);
+    loggerCopy.debug(`UncaughtException ${err}`);
+    loggerCopy.debug(
+        `isExceptionCaught: ${isExceptionCaught}, isWatcherRunning: ${isWatcherRunning}`,
+    );
 });
 
 async function startWatcher(context: Context) {
@@ -84,8 +88,9 @@ async function startWatcher(context: Context) {
         wsProvider._websocket.on('close', async (err: any, origin: any) => {
             logger.error(`ETH ws connection closed ${err} ${origin}`);
             logger.info(`retrying in 5s`);
-            await wsProvider.destroy();
+            await wsProvider?.destroy();
             isWatcherRunning = false;
+            metric.set(1);
             setTimeout(() => {
                 startWatcher(context); // Retry after a delay
             }, 5000); // 5s
@@ -173,8 +178,12 @@ async function startWatcher(context: Context) {
             }
         });
     } catch (e) {
-        logger.error(`catch: ${e}`);
-        await wsProvider.destroy();
+        logger.error(`ETH catch: ${e}`);
+        await wsProvider?.destroy();
         isWatcherRunning = false;
+        metric.set(1);
+        setTimeout(() => {
+            startWatcher(context); // Retry after a delay
+        }, 5000); // 5s
     }
 }

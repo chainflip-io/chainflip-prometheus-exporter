@@ -1,12 +1,9 @@
-import { Context } from '../../lib/interfaces';
-import base58 from 'bs58';
-import { hexToU8a } from '@polkadot/util';
+import { ProtocolData } from '../../utils/utils';
 
-export const gatherGlobalValues = async (context: Context): Promise<void> => {
-    global.epochIndex = Number(context.data.epoch.current_epoch_index);
-    const logger = context.logger;
-    global.currentBlock = Number(context.header.number);
-    global.dotAggKeyAddress = context.data.dot_aggkey;
-    global.solAggKeyAddress = context.data.sol_aggkey;
-    global.solanaCurrentOnChainKey = context.data.sol_onchain_key;
+export const gatherGlobalValues = async (data: ProtocolData): Promise<void> => {
+    global.epochIndex = data.data.epoch.current_epoch_index;
+    global.currentBlock = data.header;
+    global.dotAggKeyAddress = data.data.dot_aggkey;
+    global.solAggKeyAddress = data.data.sol_aggkey;
+    global.solanaCurrentOnChainKey = data.data.sol_onchain_key;
 };
