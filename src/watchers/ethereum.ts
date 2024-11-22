@@ -59,6 +59,10 @@ process.on('uncaughtException', async (err) => {
             startWatcher(mainContext); // Retry after a delay
         }, 15000); // 15s
     }
+    loggerCopy.debug(`UncaughtException ${err}`);
+    loggerCopy.debug(
+        `isExceptionCaught: ${isExceptionCaught}, isWatcherRunning: ${isWatcherRunning}`,
+    );
 });
 
 async function startWatcher(context: Context) {
