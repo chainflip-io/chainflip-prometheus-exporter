@@ -2,10 +2,10 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { PublicKey, NonceAccount } from '@solana/web3.js';
 
-const metricAvailableNoncesMatchingName: string = 'sol_available_nonce_not_matching';
-const metricAvailableNoncesMatching: Gauge = new promClient.Gauge({
-    name: metricAvailableNoncesMatchingName,
-    help: 'If a durable nonce account contain the same nonce both on the state-chain and on solana',
+const metricAvailableNoncesNotMatchingName: string = 'sol_available_nonce_not_matching';
+const metricAvailableNoncesNotMatching: Gauge = new promClient.Gauge({
+    name: metricAvailableNoncesNotMatchingName,
+    help: 'If a durable nonce account on the state-chain contains a different nonce on solana',
     registers: [],
     labelNames: ['address', 'base58Address'],
 });
@@ -16,12 +16,10 @@ export const gaugeSolNonces = async (context: Context) => {
     }
     const { logger, registry, connection, metricFailure, config } = context;
 
-    logger.debug(`Scraping ${metricAvailableNoncesMatchingName}`);
+    logger.debug(`Scraping ${metricAvailableNoncesNotMatchingName}`);
 
-    if (registry.getSingleMetric(metricAvailableNoncesMatchingName) === undefined)
-        registry.registerMetric(metricAvailableNoncesMatching);
-
-    metricFailure.labels({ metric: metricAvailableNoncesMatchingName }).set(0);
+    if (registry.getSingleMetric(metricAvailableNoncesNotMatchingName) === undefined)
+        registry.registerMetric(metricAvailableNoncesNotMatching);
 
     try {
         // only scrape the metric if we have some values for the nonces and also for the latest solana block height as seen from the state-chain
@@ -34,7 +32,7 @@ export const gaugeSolNonces = async (context: Context) => {
                 minContextSlot: global.solanaBlockHeight,
             });
 
-            for (let i = 0; i < accounts.length; i++) {
+            for (let i = 0; i < accountsInfo?.length || 0; i++) {
                 if (!accountsInfo[i]) {
                     continue;
                 }
@@ -42,14 +40,14 @@ export const gaugeSolNonces = async (context: Context) => {
                     global.availableSolanaNonces[i].base58nonce !==
                     NonceAccount.fromAccountData(accountsInfo[i].data).nonce
                 ) {
-                    metricAvailableNoncesMatching
+                    metricAvailableNoncesNotMatching
                         .labels(
                             global.availableSolanaNonces[i].address,
                             global.availableSolanaNonces[i].base58address,
                         )
                         .set(1);
                 } else {
-                    metricAvailableNoncesMatching
+                    metricAvailableNoncesNotMatching
                         .labels(
                             global.availableSolanaNonces[i].address,
                             global.availableSolanaNonces[i].base58address,
@@ -58,8 +56,9 @@ export const gaugeSolNonces = async (context: Context) => {
                 }
             }
         }
+        metricFailure.labels({ metric: metricAvailableNoncesNotMatchingName }).set(0);
     } catch (err) {
         logger.error(err);
-        metricFailure.labels({ metric: metricAvailableNoncesMatchingName }).set(1);
+        metricFailure.labels({ metric: metricAvailableNoncesNotMatchingName }).set(1);
     }
 };
