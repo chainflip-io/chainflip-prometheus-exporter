@@ -179,6 +179,11 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
                 } else {
                     const eventHumanized = event.data.toHuman();
                     parseEvent(eventHumanized);
+                    if (typeof eventHumanized?.offence === 'object') {
+                        eventHumanized.offence = Object.keys(eventHumanized.offence)[0].concat(
+                            eventHumanized.offence[Object.keys(eventHumanized.offence)[0]],
+                        );
+                    }
                     logger.info('event_log', {
                         event: `${event.section}:${event.method}`,
                         data: eventHumanized,

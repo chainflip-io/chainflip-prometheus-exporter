@@ -405,8 +405,8 @@ function log(
             }
         });
         logger.info(
-            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${total} validators after 10 blocks!
-        Validators: [${validators}]`,
+            `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnessed by ${total} validators after 10 blocks!
+            Failing validators: [${validators}]`,
         );
         // in case less than 90% witnessed it
         // create a temporary metric so that we can fetch the list of validators in our alerting system
