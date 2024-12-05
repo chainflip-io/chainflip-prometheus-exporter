@@ -42,13 +42,12 @@ async function startWatcher(context: Context) {
             provider,
             noInitWarn: true,
         });
-        await api.rpc.chain.subscribeNewHeads(async (header) => {
+        context.api = api;
+        await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
             await gaugeBlockHeight({ ...context, header });
-            await gaugeDotBalance({ ...context, api });
+            await gaugeDotBalance(context);
+            await countEvents({ ...context, header });
             metric.set(0);
-        });
-        await api.query.system.events(async (events: any) => {
-            await countEvents({ ...context, events });
         });
     } catch (e) {
         logger.error(`catch ${e}`);

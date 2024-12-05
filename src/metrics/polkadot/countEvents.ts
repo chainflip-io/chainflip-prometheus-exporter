@@ -15,7 +15,7 @@ export const countEvents = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('dot_events_count_total')) {
         return;
     }
-    const { logger, registry, events, api } = context;
+    const { logger, registry, header, api, metricFailure } = context;
     const config = context.config as DotConfig;
 
     logger.debug(`Scraping ${metricName}`);
@@ -25,7 +25,17 @@ export const countEvents = async (context: Context): Promise<void> => {
         metric.labels('system:CodeUpdated').set(0);
     }
 
-    for (const { event } of events) {
-        metric.labels(`${event.section}:${event.method}`).inc();
+    try {
+        const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
+        const apiAt = await api.at(blockHash);
+        const events = await apiAt.query.system.events();
+
+        for (const { event } of events) {
+            metric.labels(`${event.section}:${event.method}`).inc();
+        }
+        metricFailure.labels('dot_events_count_total').set(0);
+    } catch (e) {
+        logger.error(`catch ${e}`);
+        metricFailure.labels('dot_events_count_total').set(1);
     }
 };
