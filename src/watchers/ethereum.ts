@@ -15,6 +15,7 @@ import {
     gaugeTokenBalance,
     gaugeFlipBalance,
 } from '../metrics/eth';
+import { pollEndpoint } from '../utils/utils';
 
 const metricName: string = 'eth_watcher_failure';
 const metric: promClient.Gauge = new promClient.Gauge({
@@ -80,6 +81,7 @@ async function startWatcher(context: Context) {
         if (mainRegistry.getSingleMetric(metricFailureName) === undefined)
             mainRegistry.registerMetric(metricFailure);
 
+        const httpProvider = new ethers.providers.JsonRpcProvider(env.ETH_HTTP_ENDPOINT);
         wsProvider = new ethers.providers.WebSocketProvider(env.ETH_WS_ENDPOINT);
         await wsProvider.ready;
         isWatcherRunning = true;
@@ -123,12 +125,13 @@ async function startWatcher(context: Context) {
         );
 
         context.provider = wsProvider;
+        context.httpProvider = httpProvider;
 
+        pollEndpoint(gaugeBlockHeight, context, 12);
         wsProvider.on('block', async (blockNumber: number) => {
             gaugeEthBalance(context);
             gaugeTokenBalance({ ...context, contract: flipContract }, 'FLIP');
             gaugeTokenBalance({ ...context, contract: usdcContract }, 'USDC');
-            gaugeBlockHeight({ ...context, blockNumber });
             gaugeFlipBalance({ ...context, contract: flipContract });
         });
 

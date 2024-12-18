@@ -6,6 +6,7 @@ import { ArbConfig } from '../config/interfaces';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import { countContractEvents, gaugeBlockHeight, gaugeEthBalance } from '../metrics/arb';
+import { pollEndpoint } from '../utils/utils';
 
 const metricName: string = 'arb_watcher_failure';
 const metric: promClient.Gauge = new promClient.Gauge({
@@ -71,6 +72,7 @@ async function startWatcher(context: Context) {
         if (mainRegistry.getSingleMetric(metricFailureName) === undefined)
             mainRegistry.registerMetric(metricFailure);
 
+        const httpProvider = new ethers.providers.JsonRpcProvider(env.ARB_HTTP_ENDPOINT);
         wsProvider = new ethers.providers.WebSocketProvider(env.ARB_WS_ENDPOINT);
         await wsProvider.ready;
         isWatcherRunning = true;
@@ -99,11 +101,12 @@ async function startWatcher(context: Context) {
         );
 
         context.provider = wsProvider;
+        context.httpProvider = httpProvider;
+        pollEndpoint(gaugeBlockHeight, context, 6);
 
         wsProvider.on('block', async (blockNumber: number) => {
             if (blockNumber % 20 === 0) {
                 gaugeEthBalance(context);
-                gaugeBlockHeight({ ...context, blockNumber });
             }
         });
 

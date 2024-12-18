@@ -20,8 +20,10 @@ const CONFIG_PATH: string = process.env.CONFIG_PATH || `config/${CF_NETWORK}.jso
 const DOT_WS_ENDPOINT: string = process.env.DOT_WS_ENDPOINT || 'ws://localhost:9947';
 
 const ETH_WS_ENDPOINT: string = process.env.ETH_WS_ENDPOINT || 'ws://localhost:8546';
+const ETH_HTTP_ENDPOINT: string = process.env.ETH_HTTP_ENDPOINT || 'http://localhost:8545';
 
 const ARB_WS_ENDPOINT: string = process.env.ARB_WS_ENDPOINT || 'ws://localhost:8548';
+const ARB_HTTP_ENDPOINT: string = process.env.ARB_HTTP_ENDPOINT || 'http://localhost:8547';
 
 const SOL_HTTP_ENDPOINT: string = process.env.SOL_HTTP_ENDPOINT || 'http://localhost:8899';
 
@@ -37,8 +39,10 @@ export interface Env {
     CF_WS_ENDPOINT: string;
     DOT_WS_ENDPOINT: string;
     ETH_WS_ENDPOINT: string;
+    ETH_HTTP_ENDPOINT: string;
     CACHE_ENDPOINT: string;
     ARB_WS_ENDPOINT: string;
+    ARB_HTTP_ENDPOINT: string;
     SOL_HTTP_ENDPOINT: string;
     SOL_WS_ENDPOINT: string;
 }
@@ -51,8 +55,10 @@ export const env: Env = {
     CF_WS_ENDPOINT,
     DOT_WS_ENDPOINT,
     ETH_WS_ENDPOINT,
+    ETH_HTTP_ENDPOINT,
     CACHE_ENDPOINT,
     ARB_WS_ENDPOINT,
+    ARB_HTTP_ENDPOINT,
     SOL_HTTP_ENDPOINT,
     SOL_WS_ENDPOINT,
 };
