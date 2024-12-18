@@ -12,11 +12,16 @@ export const gaugeBlockHeight = async (context: Context) => {
     if (context.config.skipMetrics.includes('arb_block_height')) {
         return;
     }
-    const { logger, registry, blockNumber } = context;
+    const { logger, registry, httpProvider } = context;
 
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.set(Number(blockNumber));
+    try {
+        const blockNumber = await httpProvider.send('eth_blockNumber');
+        metric.set(Number(blockNumber));
+    } catch (e) {
+        logger.error(e);
+    }
 };
