@@ -208,7 +208,7 @@ async function processHash50(
                                 // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
                                 if (number < global.currentAuthorities) {
                                     logger.info(
-                                        `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnesssed by ${number} validators after 50 blocks!`,
+                                        `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnessed by ${number} validators after 50 blocks!`,
                                     );
                                 }
                             }
