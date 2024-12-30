@@ -3,7 +3,7 @@ import { Context } from '../../lib/interfaces';
 import { Axios } from 'axios';
 import { env } from '../../config/getConfig';
 import { ProtocolData } from '../../utils/utils';
-import { SwapSDK, Chains, Assets } from '@chainflip/sdk/swap';
+import { SwapSDK, Chains, Assets, SwapSDKOptions, ChainflipNetworks } from '@chainflip/sdk/swap';
 
 const metricToUsdcName: string = 'cf_price_delta_to_usdc';
 const metricToUsdc: Gauge = new promClient.Gauge({
@@ -184,8 +184,8 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         registry.registerMetric(metricPriceDeltaNotWorking);
 
     if (swapSDK === undefined) {
-        const options = {
-            network: env.CF_NETWORK === 'berghain' ? 'mainnet' : env.CF_NETWORK,
+        const options: SwapSDKOptions = {
+            network: ChainflipNetworks.mainnet,
         };
         swapSDK = new SwapSDK(options);
     }
@@ -251,6 +251,7 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         };
 
         try {
+            // @ts-expect-error "sdk is initialized"
             const response = await swapSDK.getQuote(quoteRequest);
             const egressAmount = Number(response.quote.egressAmount) / 1e6;
             const delta =
@@ -278,6 +279,7 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
             amount,
         };
         try {
+            // @ts-expect-error "sdk is initialized"
             const response = await swapSDK.getQuote(quoteRequest);
             const egressAmount = Number(response.quote.egressAmount) / decimals[to.asset];
 
