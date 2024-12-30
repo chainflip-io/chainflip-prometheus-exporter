@@ -3,6 +3,7 @@ import { Context } from '../../lib/interfaces';
 import { Axios } from 'axios';
 import { env } from '../../config/getConfig';
 import { ProtocolData } from '../../utils/utils';
+import { SwapSDK, Chains, Assets } from '@chainflip/sdk/swap';
 
 const metricToUsdcName: string = 'cf_price_delta_to_usdc';
 const metricToUsdc: Gauge = new promClient.Gauge({
@@ -23,7 +24,7 @@ const metricFromUsdc: Gauge = new promClient.Gauge({
 const metricPriceDeltaNotWorkingName: string = 'cf_quote_unavailable';
 const metricPriceDeltaNotWorking: Gauge = new promClient.Gauge({
     name: metricPriceDeltaNotWorkingName,
-    help: "If == to 1 menas we don't have a quote for the given asset and amount",
+    help: "If == to 1 means we don't have a quote for the given pair and amount",
     labelNames: ['fromAsset', 'toAsset', 'amount'],
     registers: [],
 });
@@ -154,6 +155,20 @@ const SOLUSDC: asset = {
     chainAsset: 'SOL',
     chainAssetPriceId: SOLPriceId,
 };
+
+const pointOneBtc = '10000000';
+const pointFiveBtc = '50000000';
+const oneBtc = '100000000';
+const fiveEth = '5000000000000000000';
+const twentyEth = '20000000000000000000';
+const oneKDot = '10000000000000';
+const fiveKFlip = '5000000000000000000000';
+const tenKFlip = '10000000000000000000000';
+const tenKUsdc = '10000000000';
+const fiftyKUsdc = '50000000000';
+const fiftySol = '50000000000';
+
+let swapSDK: SwapSDK | undefined;
 export const gaugePriceDelta = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_price_delta')) {
         return;
@@ -168,19 +183,14 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
     if (registry.getSingleMetric(metricPriceDeltaNotWorkingName) === undefined)
         registry.registerMetric(metricPriceDeltaNotWorking);
 
-    try {
-        const pointOneBtc = 10000000;
-        const pointFiveBtc = 50000000;
-        const oneBtc = 100000000;
-        const fiveEth = 5000000000000000000;
-        const twentyEth = 20000000000000000000;
-        const oneKDot = 10000000000000;
-        const fiveKFlip = 5000000000000000000000;
-        const tenKFlip = 10000000000000000000000;
-        const tenKUsdc = 10000000000;
-        const fiftyKUsdc = 50000000000;
-        const fiftySol = 50000000000;
+    if (swapSDK === undefined) {
+        const options = {
+            network: env.CF_NETWORK === 'berghain' ? 'mainnet' : env.CF_NETWORK,
+        };
+        swapSDK = new SwapSDK(options);
+    }
 
+    try {
         // query all index prices
         const dataPrices = await axios.post(
             env.CACHE_ENDPOINT,
@@ -190,11 +200,6 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         formattedData.forEach((element: any) => {
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
         });
-
-        // query ingress/egress fees
-        const environment = await apiLatest.rpc('cf_ingress_egress_environment', data.blockHash);
-        ingressFees = environment.ingress_fees;
-        egressFees = environment.egress_fees;
 
         /// ... -> USDC
         calculateRateToUsdc(BTC, pointOneBtc);
@@ -219,7 +224,7 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateFromUsdc(FLIP, tenKUsdc);
         calculateRateFromUsdc(BTC, fiftyKUsdc);
         calculateRateFromUsdc(ETH, fiftyKUsdc);
-        calculateRateFromUsdc(FLIP, fiftyKUsdc);
+        // calculateRateFromUsdc(FLIP, fiftyKUsdc);
         calculateRateFromUsdc(DOT, tenKUsdc);
         calculateRateFromUsdc(ARBETH, tenKUsdc);
         calculateRateFromUsdc(ARBETH, fiftyKUsdc);
@@ -228,85 +233,65 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateFromUsdc(USDT, tenKUsdc);
         calculateRateFromUsdc(USDT, fiftyKUsdc);
         calculateRateFromUsdc(SOL, tenKUsdc);
+        calculateRateFromUsdc(SOLUSDC, tenKUsdc);
         metricFailure.labels('cf_price_delta').set(0);
-    } catch (e: any) {
+    } catch (e) {
         logger.error(e);
-        metricFailure.labels('cf_price_delta').set(0);
+        metricFailure.labels('cf_price_delta').set(1);
     }
 
-    function calculateRateToUsdc(from: asset, intialAmount: number) {
-        const labelAmount = (intialAmount / decimals[from.asset]).toString();
-        // we need to subtract ingress fee before calculating the swap rate
-        let netImputAmount = intialAmount - parseInt(ingressFees[from.chain][from.asset]);
-        netImputAmount = Math.round(netImputAmount);
-        // simulate the swap
-        apiLatest
-            .rpc(
-                'cf_swap_rate',
-                { chain: from.chain, asset: from.asset },
-                { chain: 'Ethereum', asset: 'USDC' },
-                netImputAmount.toString(16),
-                data.blockHash,
-            )
-            .then(
-                (output: any) => {
-                    const amount = output.output;
-                    const netEgressAmount = (parseInt(amount) - egressFees.Ethereum.USDC) / 1e6;
+    async function calculateRateToUsdc(from: asset, amount: string) {
+        const labelAmount = (Number(amount) / decimals[from.asset]).toString();
+        const quoteRequest = {
+            srcChain: from.chain,
+            destChain: Chains.Ethereum,
+            srcAsset: from.asset,
+            destAsset: Assets.USDC,
+            amount,
+        };
 
-                    const delta =
-                        (netEgressAmount * prices.get(USDCPriceId) * 100) /
-                            (prices.get(from.priceId) * (intialAmount / decimals[from.asset])) -
-                        100;
-                    metricToUsdc.labels(from.absoluteAsset, labelAmount).set(delta);
-                    metricPriceDeltaNotWorking
-                        .labels(from.absoluteAsset, 'USDC', labelAmount)
-                        .set(0);
-                },
-                () => {
-                    logger.info(
-                        `Failed to query cf_swap_rate: ${from.absoluteAsset}(${labelAmount}) -> USDC`,
-                    );
-                    metricPriceDeltaNotWorking
-                        .labels(from.absoluteAsset, 'USDC', labelAmount)
-                        .set(1);
-                },
+        try {
+            const response = await swapSDK.getQuote(quoteRequest);
+            const egressAmount = Number(response.quote.egressAmount) / 1e6;
+            const delta =
+                (egressAmount * prices.get(USDCPriceId) * 100) /
+                    (prices.get(from.priceId) * (Number(amount) / decimals[from.asset])) -
+                100;
+            metricToUsdc.labels(from.absoluteAsset, labelAmount).set(delta);
+            metricPriceDeltaNotWorking.labels(from.absoluteAsset, 'USDC', labelAmount).set(0);
+        } catch (e) {
+            logger.info(
+                `Failed to query cf_swap_rate: ${from.absoluteAsset}(${labelAmount}) -> USDC`,
             );
+            metricPriceDeltaNotWorking.labels(from.absoluteAsset, 'USDC', labelAmount).set(1);
+        }
     }
 
-    function calculateRateFromUsdc(to: asset, intialAmount: number) {
-        const labelAmount = Math.round(intialAmount / decimals.USDC).toString();
-        // we need to subtract ingress fee before calculating the swap rate
-        let netImputAmount = intialAmount - parseInt(ingressFees.Ethereum.USDC);
-        netImputAmount = Math.round(netImputAmount);
+    async function calculateRateFromUsdc(to: asset, amount: string) {
+        const labelAmount = Math.round(Number(amount) / decimals.USDC).toString();
 
-        // simulate the swap
-        apiLatest
-            .rpc(
-                'cf_swap_rate',
-                { chain: 'Ethereum', asset: 'USDC' },
-                { chain: to.chain, asset: to.asset },
-                netImputAmount.toString(16),
-                data.blockHash,
-            )
-            .then(
-                (output: any) => {
-                    const amount = output.output;
-                    const netEgressAmount =
-                        (parseInt(amount) - egressFees[to.chain][to.asset]) / decimals[to.asset];
+        const quoteRequest = {
+            srcChain: Chains.Ethereum,
+            destChain: to.chain,
+            srcAsset: Assets.USDC,
+            destAsset: to.asset,
+            amount,
+        };
+        try {
+            const response = await swapSDK.getQuote(quoteRequest);
+            const egressAmount = Number(response.quote.egressAmount) / decimals[to.asset];
 
-                    const delta =
-                        (netEgressAmount * prices.get(to.priceId) * 100) /
-                            (prices.get(USDCPriceId) * (intialAmount / decimals.USDC)) -
-                        100;
-                    metricFromUsdc.labels(to.absoluteAsset, labelAmount).set(delta);
-                    metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(0);
-                },
-                () => {
-                    logger.info(
-                        `Failed to query cf_swap_rate: USDC(${labelAmount}) -> ${to.absoluteAsset}`,
-                    );
-                    metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(1);
-                },
+            const delta =
+                (egressAmount * prices.get(to.priceId) * 100) /
+                    (prices.get(USDCPriceId) * (Number(amount) / decimals.USDC)) -
+                100;
+            metricFromUsdc.labels(to.absoluteAsset, labelAmount).set(delta);
+            metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(0);
+        } catch (e) {
+            logger.info(
+                `Failed to query cf_swap_rate: USDC(${labelAmount}) -> ${to.absoluteAsset}`,
             );
+            metricPriceDeltaNotWorking.labels('USDC', to.absoluteAsset, labelAmount).set(1);
+        }
     }
 };
