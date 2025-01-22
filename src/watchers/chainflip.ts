@@ -31,6 +31,7 @@ import stateChainTypes from '../utils/chainTypes';
 import makeRpcRequest from '../utils/makeRpcRequest';
 import { gaugeKeyActivationBroadcast } from '../metrics/chainflip/gaugeKeyActivationBroadcast';
 import { ProtocolData } from '../utils/utils';
+import { gaugeOpenElections } from '../metrics/chainflip/gaugeOpenElections';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -101,6 +102,7 @@ async function startWatcher(context: Context) {
             gaugeKeyActivationBroadcast(context, data);
             gaugeSolanaNonces(context, data);
 
+            gaugeOpenElections(context, data);
             gaugeBlockWeight(context, data);
             countEvents(context, data);
             gaugeWitnessChainTracking(context, data);
