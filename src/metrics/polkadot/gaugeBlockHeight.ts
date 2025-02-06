@@ -12,11 +12,16 @@ export const gaugeBlockHeight = async (context: Context) => {
     if (context.config.skipMetrics.includes('dot_block_height')) {
         return;
     }
-    const { logger, registry, header } = context;
+    const { logger, api, registry, header } = context;
 
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.set(Number(header.number));
+    try {
+        const block = await api.query.system.number();
+        metric.set(block.toJSON());
+    } catch (e) {
+        logger.error(e);
+    }
 };

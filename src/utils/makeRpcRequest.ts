@@ -194,6 +194,7 @@ type RpcParamsMap = {
     witness_count: [hash: string, epoch_index?: number, at?: string];
     monitoring_data: [at?: string];
     monitoring_accounts_info: [accounts: string[], at?: string];
+    safe_mode_statuses: [];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof customRpcTypes & keyof typeof customRpcs.cf;
@@ -212,6 +213,14 @@ export default async function makeRpcRequest<M extends RpcCall>(
     return result as RpcReturnValue[M];
 }
 
+export async function makeUncheckedRpcRequest(
+    apiPromise: CustomApiPromise,
+    method: string,
+    ...args: any
+): Promise<any> {
+    const result: any = await apiPromise.rpc(`cf_${method}`, ...args);
+    return result;
+}
 // export async function customRpc<M extends RpcCall>(
 //     apiPromise: CustomApiPromise,
 //     method: M,
