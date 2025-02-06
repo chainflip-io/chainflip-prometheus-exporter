@@ -2,6 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { countEvents, gaugeBlockHeight, gaugeDotBalance } from '../metrics/polkadot';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
+import { pollEndpoint } from '../utils/utils';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -43,8 +44,9 @@ async function startWatcher(context: Context) {
             noInitWarn: true,
         });
         context.api = api;
+        pollEndpoint(gaugeBlockHeight, context, 5);
+
         await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
-            await gaugeBlockHeight({ ...context, header });
             await gaugeDotBalance(context);
             await countEvents({ ...context, header });
             metric.set(0);
