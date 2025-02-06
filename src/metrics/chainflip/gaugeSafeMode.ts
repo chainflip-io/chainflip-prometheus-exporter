@@ -12,7 +12,7 @@ const metricSafeMode: Gauge = new promClient.Gauge({
 });
 
 export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promise<void> => {
-    if (context.config.skipMetrics.includes('cf_validator')) {
+    if (context.config.skipMetrics.includes('cf_safe_mode')) {
         return;
     }
     const { logger, apiLatest, registry, metricFailure } = context;
@@ -25,12 +25,12 @@ export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promi
     metricFailure.labels({ metric: metricNameSafeMode }).set(0);
 
     try {
-        const safe_modes = await makeUncheckedRpcRequest(
+        const safe_mode = await makeUncheckedRpcRequest(
             apiLatest,
             'safe_mode_statuses',
             context.blockHash,
         );
-        const flatten = flattenObject(safe_modes);
+        const flatten = flattenObject(safe_mode);
         for (const elem of flatten) {
             if (elem[0] === 'witnesser') {
                 const status = elem[1] === 'CodeGreen' ? 0 : 1;
