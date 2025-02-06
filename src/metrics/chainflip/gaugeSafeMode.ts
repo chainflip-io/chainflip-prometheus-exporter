@@ -6,7 +6,7 @@ import { makeUncheckedRpcRequest } from '../../utils/makeRpcRequest';
 const metricNameSafeMode: string = 'cf_safe_mode';
 const metricSafeMode: Gauge = new promClient.Gauge({
     name: metricNameSafeMode,
-    help: 'The reputation of a validator',
+    help: 'Safe mode enabled for',
     labelNames: ['name'],
     registers: [],
 });
