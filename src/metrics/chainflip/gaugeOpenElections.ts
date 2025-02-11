@@ -5,19 +5,18 @@ import { ProtocolData } from '../../utils/utils';
 const metricNameOpenElection: string = 'cf_open_elections';
 const metricOpenElection: Gauge = new promClient.Gauge({
     name: metricNameOpenElection,
-    help: 'The reputation of a validator',
+    help: 'The number of open elections',
     labelNames: ['for_chain', 'electoral_system'],
     registers: [],
 });
 
 const map = new Map([
     ['A', 'SolanaBlockHeightTracking'],
-    ['B', 'SolanaFeeTracking'],
-    ['C', 'SolanaIngressTracking'],
-    ['D', 'SolanaNonceTracking'],
-    ['EE', 'SolanaEgressWitnessing'],
-    ['FF', 'SolanaLiveness'],
-    ['GG', 'SolanaVaultSwapTracking'],
+    ['B', 'SolanaIngressTracking'],
+    ['C', 'SolanaNonceTracking'],
+    ['D', 'SolanaEgressWitnessing'],
+    ['EE', 'SolanaLiveness'],
+    ['FF', 'SolanaVaultSwapTracking'],
 ]);
 
 type election_count = {
@@ -27,7 +26,6 @@ type election_count = {
     D: number;
     EE: number;
     FF: number;
-    GG: number;
 };
 export const gaugeOpenElections = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_validator')) {
@@ -48,7 +46,6 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
         D: 0,
         EE: 0,
         FF: 0,
-        GG: 0,
     };
 
     try {
