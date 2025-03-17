@@ -82,7 +82,7 @@ async function startWatcher(context: Context) {
             mainRegistry.registerMetric(metricFailure);
         const HTTP_URL = new URL(env.ETH_HTTP_ENDPOINT);
         const httpProvider = new ethers.providers.JsonRpcProvider({
-            url: HTTP_URL.origin,
+            url: HTTP_URL.origin + HTTP_URL.pathname,
             user: HTTP_URL.username,
             password: HTTP_URL.password,
         });
