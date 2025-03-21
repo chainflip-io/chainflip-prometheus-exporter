@@ -71,8 +71,12 @@ async function startWatcher(context: Context) {
             mainRegistry.registerMetric(metric);
         if (mainRegistry.getSingleMetric(metricFailureName) === undefined)
             mainRegistry.registerMetric(metricFailure);
-
-        const httpProvider = new ethers.providers.JsonRpcProvider(env.ARB_HTTP_ENDPOINT);
+        const HTTP_URL = new URL(env.ARB_HTTP_ENDPOINT);
+        const httpProvider = new ethers.providers.JsonRpcProvider({
+            url: HTTP_URL.origin + HTTP_URL.pathname,
+            user: HTTP_URL.username,
+            password: HTTP_URL.password,
+        });
         wsProvider = new ethers.providers.WebSocketProvider(env.ARB_WS_ENDPOINT);
         await wsProvider.ready;
         isWatcherRunning = true;

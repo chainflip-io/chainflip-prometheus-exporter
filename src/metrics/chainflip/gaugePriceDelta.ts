@@ -252,8 +252,17 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
 
         try {
             // @ts-expect-error "sdk is initialized"
-            const response = await swapSDK.getQuote(quoteRequest);
-            const egressAmount = Number(response.quote.egressAmount) / 1e6;
+            const response = await swapSDK.getQuoteV2(quoteRequest);
+            console.log(response);
+            let egressAmount;
+            for (const quote of response.quotes) {
+                if (quote.type === 'REGULAR') {
+                    egressAmount = Number(quote.egressAmount) / 1e6;
+                }
+            }
+            if (egressAmount === undefined) {
+                throw new Error('egressAmount is undefined');
+            }
             const delta =
                 (egressAmount * prices.get(USDCPriceId) * 100) /
                     (prices.get(from.priceId) * (Number(amount) / decimals[from.asset])) -
@@ -280,9 +289,16 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         };
         try {
             // @ts-expect-error "sdk is initialized"
-            const response = await swapSDK.getQuote(quoteRequest);
-            const egressAmount = Number(response.quote.egressAmount) / decimals[to.asset];
-
+            const response = await swapSDK.getQuoteV2(quoteRequest);
+            let egressAmount;
+            for (const quote of response.quotes) {
+                if (quote.type === 'REGULAR') {
+                    egressAmount = Number(quote.egressAmount) / decimals[to.asset];
+                }
+            }
+            if (egressAmount === undefined) {
+                throw new Error('egressAmount is undefined');
+            }
             const delta =
                 (egressAmount * prices.get(to.priceId) * 100) /
                     (prices.get(USDCPriceId) * (Number(amount) / decimals.USDC)) -
