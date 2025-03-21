@@ -253,7 +253,6 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         try {
             // @ts-expect-error "sdk is initialized"
             const response = await swapSDK.getQuoteV2(quoteRequest);
-            console.log(response);
             let egressAmount;
             for (const quote of response.quotes) {
                 if (quote.type === 'REGULAR') {

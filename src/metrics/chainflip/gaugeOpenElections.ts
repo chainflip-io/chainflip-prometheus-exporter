@@ -65,7 +65,6 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
         });
 
         for (const [key, value] of Object.entries(count)) {
-            // console.log(`${key}, ${map.get(key)}, ${value}`)
             const full_name = map.get(key) as string;
             metricOpenElection.labels('solana', key.concat('_', full_name)).set(value);
         }
