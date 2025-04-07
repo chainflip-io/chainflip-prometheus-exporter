@@ -67,12 +67,12 @@ export const startSubscription = async (context: Context) => {
                             metricSolanaCCMTxReverted.labels(log.signature).set(1);
                             setTimeout(() => {
                                 metricSolanaTxReverted.remove(log.signature);
-                            }, 600000); // 10m
+                            }, 60000); // 1m
                         } else {
                             metricSolanaTxReverted.labels(log.signature).set(1);
                             setTimeout(() => {
                                 metricSolanaTxReverted.remove(log.signature);
-                            }, 600000); // 10m
+                            }, 60000); // 1m
                         }
                     }
                 }
