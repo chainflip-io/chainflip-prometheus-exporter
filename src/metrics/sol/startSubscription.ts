@@ -57,22 +57,25 @@ export const startSubscription = async (context: Context) => {
                         maxSupportedTransactionVersion: 0,
                     });
                     const keys = transaction.transaction.message.accountKeys;
-                    const instruction = transaction.transaction.message.instructions[4].data;
                     // only report reverted tx if they are originated from our aggKey
                     if (keys[0].toString() === global.solanaCurrentOnChainKey) {
-                        const decoded_instruction = Buffer.from(
-                            base58.decode(instruction).slice(0, 8),
-                        ).toString('hex');
-                        if (ccmInstructions.includes(decoded_instruction)) {
-                            metricSolanaCCMTxReverted.labels(log.signature).set(1);
-                            setTimeout(() => {
-                                metricSolanaTxReverted.remove(log.signature);
-                            }, 60000); // 1m
-                        } else {
+                        if (transaction.transaction.message.instructions.length <= 4) {
                             metricSolanaTxReverted.labels(log.signature).set(1);
                             setTimeout(() => {
                                 metricSolanaTxReverted.remove(log.signature);
                             }, 60000); // 1m
+                        } else {
+                            const instruction =
+                                transaction.transaction.message.instructions[4].data;
+                            const decoded_instruction = Buffer.from(
+                                base58.decode(instruction).slice(0, 8),
+                            ).toString('hex');
+                            if (ccmInstructions.includes(decoded_instruction)) {
+                                metricSolanaCCMTxReverted.labels(log.signature).set(1);
+                                setTimeout(() => {
+                                    metricSolanaTxReverted.remove(log.signature);
+                                }, 60000); // 1m
+                            }
                         }
                     }
                 }
