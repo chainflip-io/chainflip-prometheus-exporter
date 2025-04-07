@@ -11,8 +11,20 @@ const metricSolanaTxReverted: Gauge = new promClient.Gauge({
     labelNames: ['txHash'],
 });
 
+const metricSolanaCCMTxRevertedName: string = 'sol_ccm_tx_reverted';
+const metricSolanaCCMTxReverted: Gauge = new promClient.Gauge({
+    name: metricSolanaCCMTxRevertedName,
+    help: 'If a ccm tx reverted on-chain',
+    registers: [],
+    labelNames: ['txHash'],
+});
+
 let lastOnChainKey = '';
 let subscriptionId: number;
+
+// ExecuteCcmNative => 7d050be38042e0b2
+// ExecuteCcmToken => 6cb8a27b9fdea223
+const ccmInstructions = ['7d050be38042e0b2', '6cb8a27b9fdea223'];
 
 export const startSubscription = async (context: Context) => {
     if (context.config.skipMetrics.includes('sol_subscriptions')) {
@@ -30,6 +42,8 @@ export const startSubscription = async (context: Context) => {
 
     if (registry.getSingleMetric(metricSolanaTxRevertedName) === undefined)
         registry.registerMetric(metricSolanaTxReverted);
+    if (registry.getSingleMetric(metricSolanaCCMTxRevertedName) === undefined)
+        registry.registerMetric(metricSolanaCCMTxReverted);
 
     metricFailure.labels({ metric: metricSolanaTxRevertedName }).set(0);
 
@@ -42,16 +56,24 @@ export const startSubscription = async (context: Context) => {
                         commitment: 'finalized',
                         maxSupportedTransactionVersion: 0,
                     });
-                    //4t5EHJWtGACTXyzT5YC8LDwAuK5iqgXckJz7gaKGBwKkcfuKT1UmCfGZdTVT8GX62oi4xDt9ZXTLbV4t91txdj1k
                     const keys = transaction.transaction.message.accountKeys;
                     const instruction = transaction.transaction.message.instructions[4].data;
-                    const decoded_instruction = base58.decode(instruction)
                     // only report reverted tx if they are originated from our aggKey
                     if (keys[0].toString() === global.solanaCurrentOnChainKey) {
-                        metricSolanaTxReverted.labels(log.signature).set(1);
-                        setTimeout(() => {
-                            metricSolanaTxReverted.remove(log.signature);
-                        }, 60000); // 1m
+                        const decoded_instruction = Buffer.from(
+                            base58.decode(instruction).slice(0, 8),
+                        ).toString('hex');
+                        if (ccmInstructions.includes(decoded_instruction)) {
+                            metricSolanaCCMTxReverted.labels(log.signature).set(1);
+                            setTimeout(() => {
+                                metricSolanaTxReverted.remove(log.signature);
+                            }, 600000); // 10m
+                        } else {
+                            metricSolanaTxReverted.labels(log.signature).set(1);
+                            setTimeout(() => {
+                                metricSolanaTxReverted.remove(log.signature);
+                            }, 600000); // 10m
+                        }
                     }
                 }
             },
