@@ -75,7 +75,7 @@ export const startSubscription = async (context: Context) => {
                                 // CCM
                                 metricSolanaCCMTxReverted.labels(log.signature).set(1);
                                 setTimeout(() => {
-                                    metricSolanaTxReverted.remove(log.signature);
+                                    metricSolanaCCMTxReverted.remove(log.signature);
                                 }, 60000); // 1m
                             } else {
                                 // Rotation/Batched fetches
