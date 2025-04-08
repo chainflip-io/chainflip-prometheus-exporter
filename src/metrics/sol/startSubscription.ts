@@ -60,6 +60,7 @@ export const startSubscription = async (context: Context) => {
                     // only report reverted tx if they are originated from our aggKey
                     if (keys[0].toString() === global.solanaCurrentOnChainKey) {
                         if (transaction.transaction.message.instructions.length <= 4) {
+                            // Transfer/fetch
                             metricSolanaTxReverted.labels(log.signature).set(1);
                             setTimeout(() => {
                                 metricSolanaTxReverted.remove(log.signature);
@@ -71,7 +72,14 @@ export const startSubscription = async (context: Context) => {
                                 base58.decode(instruction).slice(0, 8),
                             ).toString('hex');
                             if (ccmInstructions.includes(decoded_instruction)) {
+                                // CCM
                                 metricSolanaCCMTxReverted.labels(log.signature).set(1);
+                                setTimeout(() => {
+                                    metricSolanaTxReverted.remove(log.signature);
+                                }, 60000); // 1m
+                            } else {
+                                // Rotation/Batched fetches
+                                metricSolanaTxReverted.labels(log.signature).set(1);
                                 setTimeout(() => {
                                     metricSolanaTxReverted.remove(log.signature);
                                 }, 60000); // 1m
