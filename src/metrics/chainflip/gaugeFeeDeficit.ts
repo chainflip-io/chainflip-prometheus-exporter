@@ -56,18 +56,6 @@ export const gaugeFeeDeficit = async (context: Context, data: ProtocolData): Pro
         metric.labels('polkadot').set(metricValue);
     }
 
-    // BTC fees balance
-    const btc_fees = data.data.fee_imbalance.bitcoin;
-    if (Object.hasOwn(btc_fees, 'Deficit')) {
-        // Deficit case
-        const metricValue = -(Number(btc_fees.Deficit) / 1e8);
-        metric.labels('bitcoin').set(metricValue);
-    } else {
-        // Surplus case
-        const metricValue = Number(btc_fees.Surplus) / 1e8;
-        metric.labels('bitcoin').set(metricValue);
-    }
-
     // SOL fees balance
     const sol_fees = data.data.fee_imbalance.solana;
     if (Object.hasOwn(sol_fees, 'Deficit')) {
