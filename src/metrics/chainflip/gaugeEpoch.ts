@@ -47,7 +47,7 @@ export const gaugeEpoch = async (context: Context, data: ProtocolData): Promise<
     if (registry.getSingleMetric(metricNameRotating) === undefined)
         registry.registerMetric(metricRotating);
 
-    metricBlocksPerEpoch.set(data.data.epoch.blocks_per_epoch);
+    metricBlocksPerEpoch.set(data.data.epoch.epoch_duration);
 
     const MAB: number = Number(Number(data.data.epoch.min_active_bid) / 10 ** 18);
     metricMAB.set(MAB);
