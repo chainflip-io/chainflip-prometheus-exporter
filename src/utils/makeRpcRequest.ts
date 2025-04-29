@@ -52,7 +52,7 @@ export const customRpcTypes = {
     accounts: z.array(z.tuple([ValidatorId, string])),
     auction_parameters: AuctionParameters,
     auction_state: z.object({
-        blocks_per_epoch: EpochDuration,
+        epoch_duration: EpochDuration,
         current_epoch_started_at: CurrentEpochStartedAt,
         redemption_period_as_percentage: U8,
         min_funding: U128,
@@ -95,7 +95,7 @@ export const customRpcTypes = {
             count: U32,
         }),
         epoch: z.object({
-            blocks_per_epoch: U32,
+            epoch_duration: U32,
             current_epoch_started_at: U32,
             current_epoch_index: U32,
             min_active_bid: z.optional(U128),
