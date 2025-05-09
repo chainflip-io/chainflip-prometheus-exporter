@@ -255,7 +255,7 @@ function arbitrumChainTracking(
     finalData.new_chain_state.trackedData = {
         // Use the floor value of 0.01 gwei for Arbitrum One
         baseFee: 10000000,
-        gasLimitMultiplier: 1000000000,
+        l1BaseFeeEstimate: 1,
     };
     finalData.new_chain_state.blockHeight = blockHeight;
     // create the extrinsic we need to witness (ETH chain tracking in this case)
