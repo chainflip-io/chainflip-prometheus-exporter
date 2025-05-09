@@ -186,6 +186,9 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
     if (swapSDK === undefined) {
         const options: SwapSDKOptions = {
             network: ChainflipNetworks.mainnet,
+            enabledFeatures: {
+                dca: true,
+            },
         };
         swapSDK = new SwapSDK(options);
     }
@@ -253,13 +256,11 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         try {
             // @ts-expect-error "sdk is initialized"
             const response = await swapSDK.getQuoteV2(quoteRequest);
-            let egressAmount;
+            let egressAmount = 0;
             for (const quote of response.quotes) {
-                if (quote.type === 'REGULAR') {
-                    egressAmount = Number(quote.egressAmount) / 1e6;
-                }
+                egressAmount = Math.max(egressAmount, Number(quote.egressAmount) / 1e6);
             }
-            if (egressAmount === undefined) {
+            if (egressAmount === 0) {
                 throw new Error('egressAmount is undefined');
             }
             const delta =
@@ -289,13 +290,14 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         try {
             // @ts-expect-error "sdk is initialized"
             const response = await swapSDK.getQuoteV2(quoteRequest);
-            let egressAmount;
+            let egressAmount = 0;
             for (const quote of response.quotes) {
-                if (quote.type === 'REGULAR') {
-                    egressAmount = Number(quote.egressAmount) / decimals[to.asset];
-                }
+                egressAmount = Math.max(
+                    egressAmount,
+                    Number(quote.egressAmount) / decimals[to.asset],
+                );
             }
-            if (egressAmount === undefined) {
+            if (egressAmount === 0) {
                 throw new Error('egressAmount is undefined');
             }
             const delta =
