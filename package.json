@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/chainflip-io/chainflip-eth-exporter#readme",
   "dependencies": {
-    "@chainflip/sdk": "^1.8.2",
+    "@chainflip/sdk": "^1.9.1",
     "@moralisweb3/common-evm-utils": "^2.13.0",
     "@polkadot/api": "^14.3.1",
     "@polkadot/types": "^14.3.1",
