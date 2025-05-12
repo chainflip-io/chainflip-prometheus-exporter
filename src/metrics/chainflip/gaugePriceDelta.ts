@@ -48,8 +48,7 @@ const USDTPriceId = 'evm-10xdAC17F958D2ee523a2206206994597C13D831ec7';
 const SOLPriceId = 'sol0x0000000000000000000000000000000000000000';
 
 const prices = new Map();
-let ingressFees: any;
-let egressFees: any;
+
 type tokenDecimals = {
     BTC: number;
     ETH: number;
@@ -61,6 +60,9 @@ type tokenDecimals = {
     ARBUSDC: number;
     SOL: number;
     SOLUSDC: number;
+    HUBDOT: number;
+    HUBUSDC: number;
+    HUBUSDT: number;
 };
 const decimals: tokenDecimals = {
     BTC: 1e8,
@@ -73,6 +75,9 @@ const decimals: tokenDecimals = {
     ARBUSDC: 1e6,
     SOL: 1e9,
     SOLUSDC: 1e6,
+    HUBDOT: 1e10,
+    HUBUSDC: 1e6,
+    HUBUSDT: 1e6,
 };
 
 type asset = {
@@ -155,6 +160,30 @@ const SOLUSDC: asset = {
     chainAsset: 'SOL',
     chainAssetPriceId: SOLPriceId,
 };
+const HUBDOT: asset = {
+    asset: 'DOT',
+    absoluteAsset: 'HUBDOT',
+    priceId: DOTPriceId,
+    chain: 'Assethub',
+    chainAsset: 'HUBDOT',
+    chainAssetPriceId: DOTPriceId,
+};
+const HUBUSDC: asset = {
+    asset: 'USDC',
+    absoluteAsset: 'HUBUSDC',
+    priceId: USDCPriceId,
+    chain: 'Assethub',
+    chainAsset: 'HUBDOT',
+    chainAssetPriceId: DOTPriceId,
+};
+const HUBUSDT: asset = {
+    asset: 'USDT',
+    absoluteAsset: 'HUBUSDT',
+    priceId: USDTPriceId,
+    chain: 'Assethub',
+    chainAsset: 'HUBDOT',
+    chainAssetPriceId: DOTPriceId,
+};
 
 const pointOneBtc = '10000000';
 const pointFiveBtc = '50000000';
@@ -220,6 +249,9 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateToUsdc(USDT, tenKUsdc);
         calculateRateToUsdc(USDT, fiftyKUsdc);
         calculateRateToUsdc(SOL, fiftySol);
+        calculateRateToUsdc(HUBDOT, oneKDot);
+        calculateRateToUsdc(HUBUSDC, tenKUsdc);
+        calculateRateToUsdc(HUBUSDT, tenKUsdc);
 
         /// USDC -> ...
         calculateRateFromUsdc(BTC, tenKUsdc);
@@ -237,6 +269,9 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateFromUsdc(USDT, fiftyKUsdc);
         calculateRateFromUsdc(SOL, tenKUsdc);
         calculateRateFromUsdc(SOLUSDC, tenKUsdc);
+        calculateRateFromUsdc(HUBDOT, tenKUsdc);
+        calculateRateFromUsdc(HUBUSDC, tenKUsdc);
+        calculateRateFromUsdc(HUBUSDT, tenKUsdc);
         metricFailure.labels('cf_price_delta').set(0);
     } catch (e) {
         logger.error(e);
