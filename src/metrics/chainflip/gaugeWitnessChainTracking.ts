@@ -48,6 +48,7 @@ export const gaugeWitnessChainTracking = async (
             let ethBlock = 0;
             let dotBlock = 0;
             let arbBlock = 0;
+            let hubBlock = 0;
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
                     const callData = ex.toHuman().method.args.call;
@@ -81,6 +82,14 @@ export const gaugeWitnessChainTracking = async (
                             callData,
                             currentBlockNumber,
                             arbBlock,
+                            apiLatest,
+                        );
+                    }
+                    if (callData && callData.section === 'assethubChainTracking') {
+                        hubBlock = assetHubChainTracking(
+                            callData,
+                            currentBlockNumber,
+                            hubBlock,
                             apiLatest,
                         );
                     }
@@ -193,6 +202,53 @@ function polkadotChainTracking(
         return Number(blockHeight || 0);
     }
     return dotBlock;
+}
+
+function assetHubChainTracking(
+    callData: any,
+    blockNumber: number,
+    hubBlock: number,
+    apiLatest: any,
+): number {
+    const finalData = callData.args;
+    // set medianTip to 0, it is not kept into account for the chaintracking
+    finalData.new_chain_state.trackedData.medianTip = '0';
+    // parse the data and removed useless comas (damn polkadot api)
+    const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
+    const runtimeVersion = finalData.new_chain_state.trackedData.runtimeVersion.specVersion.replace(
+        /,/g,
+        '',
+    );
+    finalData.new_chain_state.trackedData.runtimeVersion.specVersion = runtimeVersion;
+    finalData.new_chain_state.blockHeight = blockHeight;
+    // create the extrinsic we need to witness (AssetHub chain tracking in this case)
+    const extrinsic = apiLatest.tx.assethubChainTracking.updateChainState(
+        finalData.new_chain_state,
+    );
+    // obtain the hash of the extrinsic call
+    const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
+    if (Number(blockHeight) > hubBlock) {
+        insertOrReplace(
+            witnessHash10,
+            JSON.stringify({
+                type: `${callData.section}:${callData.method}`,
+                hash: blakeHash,
+            }),
+            blockNumber,
+            `${callData.section}:${callData.method}`,
+        );
+        insertOrReplace(
+            witnessHash50,
+            JSON.stringify({
+                type: `${callData.section}:${callData.method}`,
+                hash: blakeHash,
+            }),
+            blockNumber,
+            `${callData.section}:${callData.method}`,
+        );
+        return Number(blockHeight || 0);
+    }
+    return hubBlock;
 }
 
 function bitcoinChainTracking(
