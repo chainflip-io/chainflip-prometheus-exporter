@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@chainflip/sdk':
-        specifier: ^1.8.2
-        version: 1.8.2(@trpc/server@10.45.2)(bufferutil@4.0.7)(typescript@5.1.3)(utf-8-validate@5.0.10)
+        specifier: ^1.9.1
+        version: 1.9.1(@trpc/server@10.45.2)(bufferutil@4.0.7)(typescript@5.1.3)(utf-8-validate@5.0.10)
       '@moralisweb3/common-evm-utils':
         specifier: ^2.13.0
         version: 2.22.2
@@ -121,33 +121,33 @@ packages:
     resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
     engines: {node: '>=6.9.0'}
 
-  '@chainflip/bitcoin@1.2.4':
-    resolution: {integrity: sha512-bAVP4GSPnAOLWc0XVMXV4Mn5bsOlaa2KKhQCd7XKCYy4+e8JawZFxECywGQFCg8ZVeJMqy54RFGyLsMIx74+Iw==}
+  '@chainflip/bitcoin@1.2.5':
+    resolution: {integrity: sha512-zgXdfvmuDXWkLCLwLerR3MSTkmMTCJ/rHIfAJ8w186dq66KZ7HSFtU13Ht/UQeoWolrKrw/3janmR0ahqDdkEA==}
 
-  '@chainflip/rpc@1.8.9':
-    resolution: {integrity: sha512-M6KMKuGarxtZTsliYOke+1Kl7hcJzY0lvbLd+aVlLfEWRYtZyRXzYYLbHqZNsEMzdExlU8xeD9eS0m2Of2IJpg==}
+  '@chainflip/rpc@1.9.7':
+    resolution: {integrity: sha512-e62W0qzucb9lrxS+c4EQluGbzxmJdqMPKemHzENHGqD0ZgsZLxhCc8RcIXZrspBujXO8jeCHyBY34jYGF0IVpg==}
 
   '@chainflip/scale@1.8.0':
     resolution: {integrity: sha512-66bT2DQi0kNFZRva0phBuMWCWKamOyfROlKovxcBd6wzZVGFxVqgi73iG1nExaUPlOLJnYc8gQ/blwHidgjvrg==}
 
-  '@chainflip/sdk@1.8.2':
-    resolution: {integrity: sha512-X8FQdmdKJzMLUudi2IWMSp/vQCZuwYGNBYyWMvKoZ3py5XAWRS2KHXP7SqvjjZglorIXq6dM1xXo05fcLHFZnQ==}
+  '@chainflip/sdk@1.9.1':
+    resolution: {integrity: sha512-jMTdruLOX4YN5v3AkuMvD7j5aXD0T+KajoB8xrLbfERxydcNfxzrGmZmxCLCIYBbYPcgRm6INFnG6DVNhccj7w==}
     engines: {node: ^18 || ^20 || ^22.3.0, pnpm: '>=9'}
 
-  '@chainflip/solana@2.1.4':
-    resolution: {integrity: sha512-v1ccjDPDci9QvtZeiBxf0Z8VIUFBWK6OC8eTA7AGibAYhOVB7FusmLl+dkCB5qdrpI8PfBz8gcwqgFFvkMDXTw==}
-
-  '@chainflip/utils@0.5.1':
-    resolution: {integrity: sha512-1Zjoib2oPQLQGh4uMEnaQvC5EKAPctGlnS83PoJNa8lYYsg+A0p8HkZBWrsVseSeeinmyk9+sjuHUStAziCXtA==}
+  '@chainflip/solana@2.1.7':
+    resolution: {integrity: sha512-OArHpxbHsbwW8wZhphsB0WX7a2zD9n2VGuG2K/aZmNbcMViz3USAmYrPHmVlNyHLWGAS39Kd64xI2Gl7wNsP0g==}
 
   '@chainflip/utils@0.6.0':
     resolution: {integrity: sha512-ZwyNKv3FVVJw5aOcRf/4rTxCclP+prerxPnTGBrFcBYEYSrPlyx4eI1dc7J35xmKD2yq+vQgwNjCx1h6oJuoPA==}
 
-  '@chainflip/utils@0.7.0':
-    resolution: {integrity: sha512-aTrtmpPkbqojP5wsrpfCgx8uskv9SD1gmq7hWwjfRQT1ucwYGAuUzL9LdREBtiMNB4pfS/J42dRWjbbLmx0j5w==}
+  '@chainflip/utils@0.8.3':
+    resolution: {integrity: sha512-MGj22hZ6IIBe5sUYnsLcnvNgPSyOR4PjzWRlyBPDXbtkNwW52NPSMmGo1LfoXbH3GB2BClFOTX3qU3kXN8e9Nw==}
 
-  '@chainflip/utils@0.7.2':
-    resolution: {integrity: sha512-DJ37gbbNVEy/YFcK9oQ19Ro83hUwCFyP2fA//Vatit1Z4nWPKgBmyQtYQLdjfcwrOhvQeYi7DcxfVU0YwOaP2g==}
+  '@chainflip/utils@0.8.6':
+    resolution: {integrity: sha512-g15TNn6Ab/XHfyQfHqNNjzxdaGGdUSOLrY/Caq1n1x6Wm6KspRp2Oy8Jl5VXd4M9wed1RJRsR9dKS1Z1uMtLvA==}
+
+  '@chainflip/utils@0.8.7':
+    resolution: {integrity: sha512-j0Yv32/NovqSOqz+31CIG1M4sb35Vl0ep8uhpPRXEPohhQuSy5SsUSk5DWdF8NYd429waOtL+oLKifglQcEvLw==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -954,8 +954,8 @@ packages:
   axios@1.4.0:
     resolution: {integrity: sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==}
 
-  axios@1.7.9:
-    resolution: {integrity: sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==}
+  axios@1.9.0:
+    resolution: {integrity: sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -988,8 +988,8 @@ packages:
   bignumber.js@9.1.1:
     resolution: {integrity: sha512-pHm4LsMJ6lzgNGVfZHjMoO8sdoRhOzOH4MLmY65Jg70bpxCKu5iOHNJyfF6OyvYw7t8Fpf35RuzUyqnQsj8Vig==}
 
-  bignumber.js@9.1.2:
-    resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
+  bignumber.js@9.3.0:
+    resolution: {integrity: sha512-EM7aMFTXbptt/wZdMlBv2t8IViwQL+h6SLHosp8Yf0dqJMTnY6iL32opnAB6kAdL0SZPuvcAzFr31o0c/R3/RA==}
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -2718,11 +2718,8 @@ packages:
   zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
 
-  zod@3.24.1:
-    resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
-
-  zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+  zod@3.24.4:
+    resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
 
 snapshots:
 
@@ -2732,38 +2729,38 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@chainflip/bitcoin@1.2.4(typescript@5.1.3)':
+  '@chainflip/bitcoin@1.2.5(typescript@5.1.3)':
     dependencies:
-      '@chainflip/utils': 0.7.2
-      bignumber.js: 9.1.2
+      '@chainflip/utils': 0.8.3
+      bignumber.js: 9.3.0
       bitcoinjs-lib: 7.0.0-rc.0(typescript@5.1.3)
       scale-ts: 1.6.1
-      zod: 3.24.2
+      zod: 3.24.4
     transitivePeerDependencies:
       - typescript
 
-  '@chainflip/rpc@1.8.9':
+  '@chainflip/rpc@1.9.7':
     dependencies:
-      '@chainflip/utils': 0.7.0
-      zod: 3.24.2
+      '@chainflip/utils': 0.8.6
+      zod: 3.24.4
 
   '@chainflip/scale@1.8.0':
     dependencies:
       '@chainflip/utils': 0.6.0
       scale-ts: 1.6.1
 
-  '@chainflip/sdk@1.8.2(@trpc/server@10.45.2)(bufferutil@4.0.7)(typescript@5.1.3)(utf-8-validate@5.0.10)':
+  '@chainflip/sdk@1.9.1(@trpc/server@10.45.2)(bufferutil@4.0.7)(typescript@5.1.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@chainflip/bitcoin': 1.2.4(typescript@5.1.3)
-      '@chainflip/rpc': 1.8.9
-      '@chainflip/solana': 2.1.4(bufferutil@4.0.7)(utf-8-validate@5.0.10)
-      '@chainflip/utils': 0.5.1
+      '@chainflip/bitcoin': 1.2.5(typescript@5.1.3)
+      '@chainflip/rpc': 1.9.7
+      '@chainflip/solana': 2.1.7(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+      '@chainflip/utils': 0.8.7
       '@trpc/client': 10.45.2(@trpc/server@10.45.2)
-      axios: 1.7.9
-      bignumber.js: 9.1.2
+      axios: 1.9.0
+      bignumber.js: 9.3.0
       ethers: 6.13.4(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       superjson: 1.13.3
-      zod: 3.24.1
+      zod: 3.24.4
     transitivePeerDependencies:
       - '@trpc/server'
       - bufferutil
@@ -2772,42 +2769,42 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@chainflip/solana@2.1.4(bufferutil@4.0.7)(utf-8-validate@5.0.10)':
+  '@chainflip/solana@2.1.7(bufferutil@4.0.7)(utf-8-validate@5.0.10)':
     dependencies:
       '@chainflip/scale': 1.8.0
-      '@chainflip/utils': 0.7.2
+      '@chainflip/utils': 0.8.3
       '@coral-xyz/anchor': 0.31.0(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@solana/web3.js': 1.98.0(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       bn.js: 5.2.1
       scale-ts: 1.6.1
-      zod: 3.24.2
+      zod: 3.24.4
     transitivePeerDependencies:
       - bufferutil
       - encoding
       - utf-8-validate
 
-  '@chainflip/utils@0.5.1':
-    dependencies:
-      '@date-fns/utc': 2.1.0
-      bignumber.js: 9.1.2
-      date-fns: 4.1.0
-
   '@chainflip/utils@0.6.0':
     dependencies:
       '@date-fns/utc': 2.1.0
-      bignumber.js: 9.1.2
+      bignumber.js: 9.3.0
       date-fns: 4.1.0
 
-  '@chainflip/utils@0.7.0':
+  '@chainflip/utils@0.8.3':
     dependencies:
       '@date-fns/utc': 2.1.0
-      bignumber.js: 9.1.2
+      bignumber.js: 9.3.0
       date-fns: 4.1.0
 
-  '@chainflip/utils@0.7.2':
+  '@chainflip/utils@0.8.6':
     dependencies:
       '@date-fns/utc': 2.1.0
-      bignumber.js: 9.1.2
+      bignumber.js: 9.3.0
+      date-fns: 4.1.0
+
+  '@chainflip/utils@0.8.7':
+    dependencies:
+      '@date-fns/utc': 2.1.0
+      bignumber.js: 9.3.0
       date-fns: 4.1.0
 
   '@colors/colors@1.5.0': {}
@@ -4067,7 +4064,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.7.9:
+  axios@1.9.0:
     dependencies:
       follow-redirects: 1.15.9
       form-data: 4.0.0
@@ -4101,7 +4098,7 @@ snapshots:
 
   bignumber.js@9.1.1: {}
 
-  bignumber.js@9.1.2: {}
+  bignumber.js@9.3.0: {}
 
   bindings@1.5.0:
     dependencies:
@@ -6090,6 +6087,4 @@ snapshots:
 
   zod@3.21.4: {}
 
-  zod@3.24.1: {}
-
-  zod@3.24.2: {}
+  zod@3.24.4: {}
