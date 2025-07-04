@@ -24,6 +24,7 @@ import {
     gaugeWitnessCount,
     gaugeSolanaNonces,
     gaugeBlockWeight,
+    gaugeBitcoinElections,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -112,6 +113,7 @@ async function startWatcher(context: Context) {
             gaugeValidatorStatus(context, data);
             gaugeBuildVersion(context, data);
             gaugePriceDelta(context, data);
+            gaugeBitcoinElections(context, data);
             metric.set(0);
         });
     } catch (e) {

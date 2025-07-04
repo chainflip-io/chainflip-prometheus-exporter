@@ -44,7 +44,6 @@ export const gaugeWitnessChainTracking = async (
             deleteOldHashes(currentBlockNumber);
             await processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
             await processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);
-            let btcBlock = 0;
             let ethBlock = 0;
             let dotBlock = 0;
             let arbBlock = 0;
@@ -58,14 +57,6 @@ export const gaugeWitnessChainTracking = async (
                             callData,
                             currentBlockNumber,
                             ethBlock,
-                            apiLatest,
-                        );
-                    }
-                    if (callData && callData.section === 'bitcoinChainTracking') {
-                        btcBlock = bitcoinChainTracking(
-                            callData,
-                            currentBlockNumber,
-                            btcBlock,
                             apiLatest,
                         );
                     }
@@ -249,51 +240,6 @@ function assetHubChainTracking(
         return Number(blockHeight || 0);
     }
     return hubBlock;
-}
-
-function bitcoinChainTracking(
-    callData: any,
-    blockNumber: number,
-    btcBlock: number,
-    apiLatest: any,
-): number {
-    const finalData = callData.args;
-    const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
-    // parse the data and removed useless comas (damn polkadot api)
-    finalData.new_chain_state.blockHeight = blockHeight;
-
-    // set the default value for the fees (we use these values to witness)
-    finalData.new_chain_state.trackedData.btcFeeInfo = {
-        satsPerKilobyte: '100000',
-    };
-
-    // create the extrinsic we need to witness (ETH chain tracking in this case)
-    const extrinsic = apiLatest.tx.bitcoinChainTracking.updateChainState(finalData.new_chain_state);
-
-    // obtain the hash of the extrinsic call
-    const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-    if (Number(blockHeight) > btcBlock) {
-        insertOrReplace(
-            witnessHash10,
-            JSON.stringify({
-                type: `${callData.section}:${callData.method}`,
-                hash: blakeHash,
-            }),
-            blockNumber,
-            `${callData.section}:${callData.method}`,
-        );
-        insertOrReplace(
-            witnessHash50,
-            JSON.stringify({
-                type: `${callData.section}:${callData.method}`,
-                hash: blakeHash,
-            }),
-            blockNumber,
-            `${callData.section}:${callData.method}`,
-        );
-        return Number(blockHeight || 0);
-    }
-    return btcBlock;
 }
 
 function arbitrumChainTracking(

@@ -32,6 +32,6 @@ export const gaugeBuildVersion = async (context: Context, data: ProtocolData): P
         metricFailure.labels('cf_build_version').set(0);
     } catch (e) {
         logger.error(e);
-        metricFailure.labels('cf_build_version').set(0);
+        metricFailure.labels('cf_build_version').set(1);
     }
 };
