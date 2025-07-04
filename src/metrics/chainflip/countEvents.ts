@@ -213,10 +213,21 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
                 }
             }
 
+            // Reorged events are custom event that not all eletions pallet instances have, if they do these are part of the ElectoralEvent
             if (event.method === 'ElectoralEvent') {
-                foundReorg = true;
-                const blocks = event.data.toJSON()[0].reorgDetected.reorgedBlocks;
-                metricReorgDetected.labels('bitcoin').set(blocks[1] - blocks[0] + 1);
+                const parsedEvent = event.data.toJSON()[0];
+                if (parsedEvent?.reorgDetected) {
+                    foundReorg = true;
+                    const blocks = event.data.toJSON()[0].reorgDetected.reorgedBlocks;
+                    logger.info('reorg_log', {
+                        event: `reorgDetected`,
+                        start_block: blocks[0],
+                        end_block: blocks[1],
+                        depth: blocks[1] - blocks[0] + 1,
+                        block: data.header,
+                    });
+                    metricReorgDetected.labels('bitcoin').set(blocks[1] - blocks[0] + 1);
+                }
             }
         }
         if (!foundReorg) {
