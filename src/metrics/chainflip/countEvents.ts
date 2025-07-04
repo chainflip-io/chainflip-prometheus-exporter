@@ -45,6 +45,14 @@ const metricBroadcastAborted: Gauge = new promClient.Gauge({
     registers: [],
 });
 
+const metricNameReorgDetected: string = 'cf_reorg_detected';
+const metricReorgDetected: Gauge = new promClient.Gauge({
+    name: metricNameReorgDetected,
+    help: 'Depth in block of a detected reorg',
+    labelNames: ['tracked_chain'],
+    registers: [],
+});
+
 const ccmBroadcasts: Set<number> = new Set<number>();
 
 export const countEvents = async (context: Context, data: ProtocolData): Promise<void> => {
@@ -118,8 +126,12 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metricBroadcastAborted.labels('polkadotBroadcaster').set(0);
         metricBroadcastAborted.labels('solanaBroadcaster').set(0);
     }
+    if (registry.getSingleMetric(metricNameReorgDetected) === undefined) {
+        registry.registerMetric(metricReorgDetected);
+    }
     try {
         const events = await api.query.system.events();
+        let foundReorg = false;
         eventsRotationInfo(context, data, events);
         for (const { event } of events) {
             let skip = false;
@@ -200,7 +212,17 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
                     }
                 }
             }
+
+            if (event.method === 'ElectoralEvent') {
+                foundReorg = true;
+                const blocks = event.data.toJSON()[0].reorgDetected.reorgedBlocks;
+                metricReorgDetected.labels('bitcoin').set(blocks[1] - blocks[0] + 1);
+            }
         }
+        if (!foundReorg) {
+            metricReorgDetected.labels('bitcoin').set(0);
+        }
+
         metricFailure.labels('events_metrics').set(0);
     } catch (e) {
         logger.error(e);
