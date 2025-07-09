@@ -9,3 +9,4 @@ config/ignore.json
 config/perseverance.json
 config/sisyphos.json
 alerts.yaml
+config/berghainJIT.json
