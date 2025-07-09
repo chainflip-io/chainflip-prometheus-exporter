@@ -90,8 +90,10 @@ export const gaugeBitcoinElections = async (
         // Block Height Witnesser
         logger.info('Bitcoin_BHW_state', {
             block: data.header,
-            message_bhw_witnessFrom: bhw_witnessFrom,
-            message_bhw_headers: unsync_state[0].phase.runningBitcoin.headers,
+            data: {
+                bhw_witnessFrom,
+                bhw_headers: unsync_state[0].phase.runningBitcoin.headers,
+            },
         });
 
         // Deposit channels
@@ -103,6 +105,9 @@ export const gaugeBitcoinElections = async (
         const bw_deposit_channels_queued_hash = bw_deposit_channels.elections.queuedHashElections;
         const bw_deposit_channels_queued_safe =
             bw_deposit_channels.elections.queuedSafeElections.elections;
+        const bw_deposit_channels_queued_safe_count = Object.entries(
+            bw_deposit_channels_queued_safe,
+        ).reduce((sum, [key, value]) => sum + (Number(value) - Number(key)), 0);
         const bw_deposit_channels_ongoing = bw_deposit_channels.elections.ongoing;
         metricSeenHeightsBelow
             .labels('bitcoin', 'deposit_channels')
@@ -115,7 +120,7 @@ export const gaugeBitcoinElections = async (
             .set(Object.keys(bw_deposit_channels_queued_hash).length);
         metricQueuedSafe
             .labels('bitcoin', 'deposit_channels')
-            .set(Object.keys(bw_deposit_channels_queued_safe).length);
+            .set(bw_deposit_channels_queued_safe_count);
         metricOngoing
             .labels('bitcoin', 'deposit_channels')
             .set(Object.keys(bw_deposit_channels_ongoing).length);
@@ -138,11 +143,17 @@ export const gaugeBitcoinElections = async (
         const bw_vaults_highest_ever_ongoing = bw_vaults.elections.highestEverOngoingElection;
         const bw_vaults_queued_hash = bw_vaults.elections.queuedHashElections;
         const bw_vaults_queued_safe = bw_vaults.elections.queuedSafeElections.elections;
+        const bw_vaults_queued_safe_count = Object.entries(bw_vaults_queued_safe).reduce(
+            (sum, [key, value]) => sum + (Number(value) - Number(key)),
+            0,
+        );
         const bw_vaults_ongoing = bw_vaults.elections.ongoing;
         metricSeenHeightsBelow.labels('bitcoin', 'vaults').set(bw_vaults_seen_heights_below);
         metricHighestEverOngoing.labels('bitcoin', 'vaults').set(bw_vaults_highest_ever_ongoing);
         metricQueuedHash.labels('bitcoin', 'vaults').set(Object.keys(bw_vaults_queued_hash).length);
-        metricQueuedSafe.labels('bitcoin', 'vaults').set(Object.keys(bw_vaults_queued_safe).length);
+        metricQueuedSafe
+            .labels('bitcoin', 'vaults')
+            .set(Object.keys(bw_vaults_queued_safe_count).length);
         metricOngoing.labels('bitcoin', 'vaults').set(Object.keys(bw_vaults_ongoing).length);
         logger.info('Bitcoin_BW_vaults_state', {
             block: data.header,
@@ -163,6 +174,10 @@ export const gaugeBitcoinElections = async (
         const bw_egresses_highest_ever_ongoing = bw_egresses.elections.highestEverOngoingElection;
         const bw_egresses_queued_hash = bw_egresses.elections.queuedHashElections;
         const bw_egresses_queued_safe = bw_egresses.elections.queuedSafeElections.elections;
+        const bw_egresses_queued_safe_count = Object.entries(bw_egresses_queued_safe).reduce(
+            (sum, [key, value]) => sum + (Number(value) - Number(key)),
+            0,
+        );
         const bw_egresses_ongoing = bw_egresses.elections.ongoing;
         metricSeenHeightsBelow.labels('bitcoin', 'egresses').set(bw_egresses_seen_heights_below);
         metricHighestEverOngoing
@@ -173,7 +188,7 @@ export const gaugeBitcoinElections = async (
             .set(Object.keys(bw_egresses_queued_hash).length);
         metricQueuedSafe
             .labels('bitcoin', 'egresses')
-            .set(Object.keys(bw_egresses_queued_safe).length);
+            .set(Object.keys(bw_egresses_queued_safe_count).length);
         metricOngoing.labels('bitcoin', 'egresses').set(Object.keys(bw_egresses_ongoing).length);
         logger.info('Bitcoin_BW_egresses_state', {
             block: data.header,
