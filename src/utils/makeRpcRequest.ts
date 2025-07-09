@@ -89,6 +89,7 @@ export const customRpcTypes = {
             polkadot: U32,
             arbitrum: U32,
             solana: U32,
+            assethub: U32,
         }),
         btc_utxos: z.object({
             total_balance: U128,
@@ -111,6 +112,7 @@ export const customRpcTypes = {
             polkadot: U32,
             arbitrum: U32,
             solana: U32,
+            assethub: U32,
         }),
         pending_tss: z.object({
             evm: U32,
@@ -124,6 +126,7 @@ export const customRpcTypes = {
             polkadot: U32,
             arbitrum: U32,
             solana: U32,
+            assethub: U32,
         }),
         fee_imbalance: z.object({
             ethereum: z.object({ Surplus: U128, Deficit: U128 }),
@@ -131,6 +134,7 @@ export const customRpcTypes = {
             polkadot: z.object({ Surplus: U128, Deficit: U128 }),
             arbitrum: z.object({ Surplus: U128, Deficit: U128 }),
             solana: z.object({ Surplus: U128, Deficit: U128 }),
+            assethub: z.object({ Surplus: U128, Deficit: U128 }),
         }),
         authorities: z.object({
             authorities: U32,
@@ -160,6 +164,7 @@ export const customRpcTypes = {
             bitcoin: z.optional(U32),
             polkadot: z.optional(U32),
             arbitrum: z.optional(U32),
+            assethub: z.optional(U32),
             solana: z.tuple([z.optional(U32), z.optional(string)]),
         }),
     }),
