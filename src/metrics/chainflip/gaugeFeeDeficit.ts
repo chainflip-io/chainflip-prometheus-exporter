@@ -56,6 +56,18 @@ export const gaugeFeeDeficit = async (context: Context, data: ProtocolData): Pro
         metric.labels('polkadot').set(metricValue);
     }
 
+    // HUB fees balance
+    const hub_fees = data.data.fee_imbalance.assethub;
+    if (Object.hasOwn(hub_fees, 'Deficit')) {
+        // Deficit case
+        const metricValue = -(Number(hub_fees.Deficit) / 1e10);
+        metric.labels('assethub').set(metricValue);
+    } else {
+        // Surplus case
+        const metricValue = Number(hub_fees.Surplus) / 1e10;
+        metric.labels('assethub').set(metricValue);
+    }
+
     // BTC fees balance
     const btc_fees = data.data.fee_imbalance.bitcoin;
     if (Object.hasOwn(btc_fees, 'Deficit')) {

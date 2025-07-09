@@ -57,6 +57,14 @@ export const gaugeKeyActivationBroadcast = async (
         metricKeyBroadcast.labels('polkadot').set(polkadotBroadcastId);
     }
 
+    // AssetHub
+    const assetHubBroadcastId = data.data.activating_key_broadcast_ids.assethub;
+    if (assetHubBroadcastId == null) {
+        metricKeyBroadcast.labels('assethub').set(0);
+    } else {
+        metricKeyBroadcast.labels('assethub').set(assetHubBroadcastId);
+    }
+
     // Solana
     // solana transaction are witnessed as succefull even if they revert!! We should also check that the signature contained in broadcast success
     // didn't revert on-chain

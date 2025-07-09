@@ -25,6 +25,9 @@ export const gaugePendingBroadcast = async (
     // Polkadot
     metric.labels('polkadot').set(data.data.pending_broadcasts.polkadot);
 
+    // Assethub
+    metric.labels('assethub').set(data.data.pending_broadcasts.assethub);
+
     // Bitcoin
     metric.labels('bitcoin').set(data.data.pending_broadcasts.bitcoin);
 

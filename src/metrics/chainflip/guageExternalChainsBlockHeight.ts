@@ -28,6 +28,9 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
     // Polkadot
     metric.labels('polkadot').set(data.data.external_chains_height.polkadot);
 
+    // Assethub
+    metric.labels('assethub').set(data.data.external_chains_height.assethub);
+
     // Arbitrum
     metric.labels('arbitrum').set(data.data.external_chains_height.arbitrum);
 
