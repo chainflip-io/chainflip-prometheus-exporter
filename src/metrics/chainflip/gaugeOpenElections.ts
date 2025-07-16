@@ -44,7 +44,7 @@ type election_count_btc = {
     C: number;
     D: number;
     EE: number;
-    FF: number; 
+    FF: number;
 };
 export const gaugeOpenElections = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_open_elections')) {
@@ -87,7 +87,7 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
                 countSolana[electoral_system] = countSolana[electoral_system] + 1;
             } else if (value !== null) {
                 countSolana[value.toUpperCase() as keyof election_count_sol] =
-                countSolana[value.toUpperCase() as keyof election_count_sol] + 1;
+                    countSolana[value.toUpperCase() as keyof election_count_sol] + 1;
             }
         });
 
@@ -95,8 +95,6 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
             const full_name = mapSolana.get(key) as string;
             metricOpenElection.labels('solana', key.concat('_', full_name)).set(value);
         }
-
-
 
         const result2 = await api.query.bitcoinElections.electionProperties.entries();
         result2.forEach(([_, election_properties]: any[]) => {
@@ -108,7 +106,7 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
                 countBitcoin[electoral_system] = countBitcoin[electoral_system] + 1;
             } else if (value !== null) {
                 countBitcoin[value.toUpperCase() as keyof election_count_btc] =
-                countBitcoin[value.toUpperCase() as keyof election_count_btc] + 1;
+                    countBitcoin[value.toUpperCase() as keyof election_count_btc] + 1;
             }
         });
 
