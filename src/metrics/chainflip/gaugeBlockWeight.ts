@@ -2,8 +2,6 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { ProtocolData } from '../../utils/utils';
 
-// Currently unused. Need to understand how to properly calculate the percentage.
-
 const metricName: string = 'cf_block_weight';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
