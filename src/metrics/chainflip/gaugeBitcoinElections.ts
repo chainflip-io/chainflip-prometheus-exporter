@@ -57,7 +57,10 @@ export const gaugeBitcoinElections = async (
     if (context.config.skipMetrics.includes('cf_bitcoin_elections')) {
         return;
     }
+
     const { logger, registry, metricFailure, apiLatest } = context;
+
+    logger.debug(`Scraping cf_bitcoin_elections`);
 
     if (registry.getSingleMetric(metricNameWitnessFrom) === undefined) {
         registry.registerMetric(metricWitnessFrom);
@@ -151,9 +154,7 @@ export const gaugeBitcoinElections = async (
         metricSeenHeightsBelow.labels('bitcoin', 'vaults').set(bw_vaults_seen_heights_below);
         metricHighestEverOngoing.labels('bitcoin', 'vaults').set(bw_vaults_highest_ever_ongoing);
         metricQueuedHash.labels('bitcoin', 'vaults').set(Object.keys(bw_vaults_queued_hash).length);
-        metricQueuedSafe
-            .labels('bitcoin', 'vaults')
-            .set(Object.keys(bw_vaults_queued_safe_count).length);
+        metricQueuedSafe.labels('bitcoin', 'vaults').set(bw_vaults_queued_safe_count);
         metricOngoing.labels('bitcoin', 'vaults').set(Object.keys(bw_vaults_ongoing).length);
         logger.info('Bitcoin_BW_vaults_state', {
             block: data.header,
@@ -186,9 +187,7 @@ export const gaugeBitcoinElections = async (
         metricQueuedHash
             .labels('bitcoin', 'egresses')
             .set(Object.keys(bw_egresses_queued_hash).length);
-        metricQueuedSafe
-            .labels('bitcoin', 'egresses')
-            .set(Object.keys(bw_egresses_queued_safe_count).length);
+        metricQueuedSafe.labels('bitcoin', 'egresses').set(bw_egresses_queued_safe_count);
         metricOngoing.labels('bitcoin', 'egresses').set(Object.keys(bw_egresses_ongoing).length);
         logger.info('Bitcoin_BW_egresses_state', {
             block: data.header,
