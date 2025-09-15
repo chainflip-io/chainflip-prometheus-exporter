@@ -22,9 +22,6 @@ export const gaugePendingBroadcast = async (
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    // Polkadot
-    metric.labels('polkadot').set(data.data.pending_broadcasts.polkadot);
-
     // Assethub
     metric.labels('assethub').set(data.data.pending_broadcasts.assethub);
 

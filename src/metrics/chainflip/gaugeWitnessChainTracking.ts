@@ -45,7 +45,6 @@ export const gaugeWitnessChainTracking = async (
             await processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
             await processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);
             let ethBlock = 0;
-            let dotBlock = 0;
             let arbBlock = 0;
             let hubBlock = 0;
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
@@ -57,14 +56,6 @@ export const gaugeWitnessChainTracking = async (
                             callData,
                             currentBlockNumber,
                             ethBlock,
-                            apiLatest,
-                        );
-                    }
-                    if (callData && callData.section === 'polkadotChainTracking') {
-                        dotBlock = polkadotChainTracking(
-                            callData,
-                            currentBlockNumber,
-                            dotBlock,
                             apiLatest,
                         );
                     }
@@ -115,7 +106,6 @@ function ethereumChainTracking(
     finalData.new_chain_state.trackedData.priorityFee = '0';
     const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
     const baseFee = finalData.new_chain_state.trackedData.baseFee.replace(/,/g, '');
-    // parse the data and removed useless comas (damn polkadot api)
     finalData.new_chain_state.trackedData.baseFee = baseFee;
     finalData.new_chain_state.blockHeight = blockHeight;
     // create the extrinsic we need to witness (ETH chain tracking in this case)
@@ -148,53 +138,6 @@ function ethereumChainTracking(
     return ethBlock;
 }
 
-function polkadotChainTracking(
-    callData: any,
-    blockNumber: number,
-    dotBlock: number,
-    apiLatest: any,
-): number {
-    const finalData = callData.args;
-    // set medianTip to 0, it is not kept into account for the chaintracking
-    finalData.new_chain_state.trackedData.medianTip = '0';
-    // parse the data and removed useless comas (damn polkadot api)
-    const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
-    const runtimeVersion = finalData.new_chain_state.trackedData.runtimeVersion.specVersion.replace(
-        /,/g,
-        '',
-    );
-    finalData.new_chain_state.trackedData.runtimeVersion.specVersion = runtimeVersion;
-    finalData.new_chain_state.blockHeight = blockHeight;
-    // create the extrinsic we need to witness (DOT chain tracking in this case)
-    const extrinsic = apiLatest.tx.polkadotChainTracking.updateChainState(
-        finalData.new_chain_state,
-    );
-    // obtain the hash of the extrinsic call
-    const blakeHash = blake2AsHex(extrinsic.method.toU8a(), 256);
-    if (Number(blockHeight) > dotBlock) {
-        insertOrReplace(
-            witnessHash10,
-            JSON.stringify({
-                type: `${callData.section}:${callData.method}`,
-                hash: blakeHash,
-            }),
-            blockNumber,
-            `${callData.section}:${callData.method}`,
-        );
-        insertOrReplace(
-            witnessHash50,
-            JSON.stringify({
-                type: `${callData.section}:${callData.method}`,
-                hash: blakeHash,
-            }),
-            blockNumber,
-            `${callData.section}:${callData.method}`,
-        );
-        return Number(blockHeight || 0);
-    }
-    return dotBlock;
-}
-
 function assetHubChainTracking(
     callData: any,
     blockNumber: number,
@@ -204,7 +147,6 @@ function assetHubChainTracking(
     const finalData = callData.args;
     // set medianTip to 0, it is not kept into account for the chaintracking
     finalData.new_chain_state.trackedData.medianTip = '0';
-    // parse the data and removed useless comas (damn polkadot api)
     const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
     const runtimeVersion = finalData.new_chain_state.trackedData.runtimeVersion.specVersion.replace(
         /,/g,
@@ -253,7 +195,6 @@ function arbitrumChainTracking(
     finalData.new_chain_state.trackedData.priorityFee = '0';
     const blockHeight = finalData.new_chain_state.blockHeight.replace(/,/g, '');
     const baseFee = finalData.new_chain_state.trackedData.baseFee.replace(/,/g, '');
-    // parse the data and removed useless comas (damn polkadot api)
     finalData.new_chain_state.trackedData = {
         // Use the floor value of 0.01 gwei for Arbitrum One
         baseFee: 10000000,

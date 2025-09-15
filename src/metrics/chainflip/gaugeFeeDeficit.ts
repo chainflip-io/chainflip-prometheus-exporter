@@ -44,18 +44,6 @@ export const gaugeFeeDeficit = async (context: Context, data: ProtocolData): Pro
         metric.labels('arbitrum').set(metricValue);
     }
 
-    // DOT fees balance
-    const dot_fees = data.data.fee_imbalance.polkadot;
-    if (Object.hasOwn(dot_fees, 'Deficit')) {
-        // Deficit case
-        const metricValue = -(Number(dot_fees.Deficit) / 1e10);
-        metric.labels('polkadot').set(metricValue);
-    } else {
-        // Surplus case
-        const metricValue = Number(dot_fees.Surplus) / 1e10;
-        metric.labels('polkadot').set(metricValue);
-    }
-
     // HUB fees balance
     const hub_fees = data.data.fee_imbalance.assethub;
     if (Object.hasOwn(hub_fees, 'Deficit')) {

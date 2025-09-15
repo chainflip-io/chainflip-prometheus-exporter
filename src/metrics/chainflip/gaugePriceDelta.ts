@@ -120,14 +120,6 @@ const USDT: asset = {
     chainAsset: 'ETH',
     chainAssetPriceId: ETHPriceId,
 };
-const DOT: asset = {
-    asset: 'DOT',
-    absoluteAsset: 'DOT',
-    priceId: DOTPriceId,
-    chain: 'Polkadot',
-    chainAsset: 'DOT',
-    chainAssetPriceId: DOTPriceId,
-};
 const ARBETH: asset = {
     asset: 'ETH',
     absoluteAsset: 'ARBETH',
@@ -240,7 +232,6 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateToUsdc(BTC, oneBtc);
         calculateRateToUsdc(ETH, fiveEth);
         calculateRateToUsdc(ETH, twentyEth);
-        calculateRateToUsdc(DOT, oneKDot);
         calculateRateToUsdc(FLIP, fiveKFlip);
         calculateRateToUsdc(FLIP, tenKFlip);
         calculateRateToUsdc(ARBETH, fiveEth);
@@ -261,7 +252,6 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateFromUsdc(BTC, fiftyKUsdc);
         calculateRateFromUsdc(ETH, fiftyKUsdc);
         // calculateRateFromUsdc(FLIP, fiftyKUsdc);
-        calculateRateFromUsdc(DOT, tenKUsdc);
         calculateRateFromUsdc(ARBETH, tenKUsdc);
         calculateRateFromUsdc(ARBETH, fiftyKUsdc);
         calculateRateFromUsdc(ARBUSDC, tenKUsdc);

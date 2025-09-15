@@ -26,9 +26,6 @@ export const gaugeTssRetryQueues = async (context: Context, data: ProtocolData):
     // Bitcoin
     metricPendingTss.labels('bitcoin').set(data.data.pending_tss.bitcoin);
 
-    // Polkadot
-    metricPendingTss.labels('polkadot').set(data.data.pending_tss.polkadot);
-
     // Solana
     metricPendingTss.labels('solana').set(data.data.pending_tss.solana);
 };
