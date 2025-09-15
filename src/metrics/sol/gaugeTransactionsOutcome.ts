@@ -25,7 +25,10 @@ export const gaugeTxOutcome = async (context: Context) => {
     try {
         if (global.solanaRotationTx) {
             lastRotationTx = global.solanaRotationTx;
-            const txResult = await connection.getTransaction(global.solanaRotationTx);
+            const txResult = await connection.getTransaction(global.solanaRotationTx, {
+                commitment: 'finalized',
+                maxSupportedTransactionVersion: 0,
+            });
             if (txResult !== null) {
                 // tx reverted:
                 if (txResult.meta.err !== null) {

@@ -18,13 +18,6 @@ const metricAuthority: Gauge = new promClient.Gauge({
     registers: [],
     labelNames: ['ss58Address', 'alias'],
 });
-const metricNameValidatorBackup: string = 'cf_validator_backup';
-const metricBackup: Gauge = new promClient.Gauge({
-    name: metricNameValidatorBackup,
-    help: 'Tracked validator is backup',
-    registers: [],
-    labelNames: ['ss58Address', 'alias'],
-});
 const metricNameValidatorQualified: string = 'cf_validator_qualified';
 const metricQualified: Gauge = new promClient.Gauge({
     name: metricNameValidatorQualified,
@@ -65,15 +58,13 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
     }
 
     logger.debug(
-        `Scraping ${metricNameValidatorOnline}, ${metricNameValidatorAuthority}, ${metricNameValidatorBackup}, ${metricNameValidatorQualified}, ${metricNameReputation}`,
+        `Scraping ${metricNameValidatorOnline}, ${metricNameValidatorAuthority}, ${metricNameValidatorQualified}, ${metricNameReputation}`,
     );
 
     if (registry.getSingleMetric(metricNameValidatorOnline) === undefined)
         registry.registerMetric(metricAuthorityOnline);
     if (registry.getSingleMetric(metricNameValidatorAuthority) === undefined)
         registry.registerMetric(metricAuthority);
-    if (registry.getSingleMetric(metricNameValidatorBackup) === undefined)
-        registry.registerMetric(metricBackup);
     if (registry.getSingleMetric(metricNameValidatorQualified) === undefined)
         registry.registerMetric(metricQualified);
     if (registry.getSingleMetric(metricNameValidatorBidding) === undefined)
@@ -85,7 +76,6 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
 
     metricFailure.labels({ metric: metricNameValidatorOnline }).set(0);
     metricFailure.labels({ metric: metricNameValidatorAuthority }).set(0);
-    metricFailure.labels({ metric: metricNameValidatorBackup }).set(0);
     metricFailure.labels({ metric: metricNameValidatorQualified }).set(0);
     metricFailure.labels({ metric: metricNameValidatorBidding }).set(0);
     metricFailure.labels({ metric: metricNameValidatorBalance }).set(0);
@@ -113,7 +103,6 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
                 const {
                     balance,
                     is_current_authority,
-                    is_current_backup,
                     is_online,
                     is_bidding,
                     is_qualified,
@@ -126,9 +115,6 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
                 metricAuthority
                     .labels(chunk[i], vanityNamesChunked[j][i])
                     .set(is_current_authority ? 1 : 0);
-                metricBackup
-                    .labels(chunk[i], vanityNamesChunked[j][i])
-                    .set(is_current_backup ? 1 : 0);
                 metricQualified
                     .labels(chunk[i], vanityNamesChunked[j][i])
                     .set(is_qualified ? 1 : 0);
@@ -143,7 +129,6 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
         logger.error(e);
         metricFailure.labels({ metric: metricNameValidatorOnline }).set(1);
         metricFailure.labels({ metric: metricNameValidatorAuthority }).set(1);
-        metricFailure.labels({ metric: metricNameValidatorBackup }).set(1);
         metricFailure.labels({ metric: metricNameValidatorQualified }).set(1);
         metricFailure.labels({ metric: metricNameValidatorBidding }).set(1);
         metricFailure.labels({ metric: metricNameValidatorBalance }).set(1);

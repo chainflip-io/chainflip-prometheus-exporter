@@ -103,7 +103,7 @@ export const customRpcTypes = {
             rotation_phase: string,
         }),
         pending_redemptions: z.object({
-            total_balance: U128, // maybe u128
+            total_balance: U128,
             count: U32,
         }),
         pending_broadcasts: z.object({
@@ -176,10 +176,22 @@ export const customRpcTypes = {
             reputation_points: I32,
             keyholder_epochs: z.array(U32),
             is_current_authority: boolean,
-            is_current_backup: boolean,
             is_qualified: boolean,
             is_online: boolean,
             is_bidding: boolean,
+            bound_redeem_address: z.optional(string),
+            apy_bp: z.optional(U32),
+            estimated_redeemable_balance: U128,
+            operator: z.optional(string),
+        }),
+    ),
+    oracle_prices: z.array(
+        z.object({
+            price: U128,
+            updated_at_oracle_timestamp: U128,
+            updated_at_statechain_block: U32,
+            base_asset: string,
+            quote_asset: string,
         }),
     ),
 } as const;
@@ -200,6 +212,7 @@ type RpcParamsMap = {
     monitoring_data: [at?: string];
     monitoring_accounts_info: [accounts: string[], at?: string];
     safe_mode_statuses: [];
+    oracle_prices: [asset_pair?: string, at?: string];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof customRpcTypes & keyof typeof customRpcs.cf;
