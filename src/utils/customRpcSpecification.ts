@@ -143,5 +143,10 @@ export const customRpcs = {
             type: 'RpcMonitoringAccountInfo',
             description: '',
         },
+        oracle_prices: {
+            params: [],
+            type: 'RpcOraclePrices',
+            description: '',
+        },
     },
 };

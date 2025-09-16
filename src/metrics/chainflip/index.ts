@@ -23,3 +23,4 @@ export * from './gaugePriceDelta';
 export * from './gaugeDepositChannels';
 export * from './gaugeSolanaDurableNonces';
 export * from './gaugeBitcoinElections';
+export * from './gaugeOraclePrices';

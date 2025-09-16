@@ -25,6 +25,7 @@ import {
     gaugeSolanaNonces,
     gaugeBlockWeight,
     gaugeBitcoinElections,
+    gaugeOraclePrices,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -64,6 +65,7 @@ async function startWatcher(context: Context) {
     if (registry.getSingleMetric(metricFailureName) === undefined)
         registry.registerMetric(metricFailure);
     global.currentBlock = 0;
+    global.prices = new Map();
     try {
         const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
         provider.on('disconnected', async (err) => {
@@ -113,6 +115,7 @@ async function startWatcher(context: Context) {
             gaugeValidatorStatus(context, data);
             gaugeBuildVersion(context, data);
             gaugePriceDelta(context, data);
+            gaugeOraclePrices(context, data);
             gaugeBitcoinElections(context, data);
             metric.set(0);
         });

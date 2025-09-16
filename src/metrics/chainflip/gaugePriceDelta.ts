@@ -232,6 +232,7 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         formattedData.forEach((element: any) => {
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
         });
+        setGlobalPrices(prices);
 
         /// ... -> USDC
         calculateRateToUsdc(BTC, pointOneBtc);
@@ -349,3 +350,30 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         }
     }
 };
+
+function setGlobalPrices(prices: Map<string, number>) {
+    const BtcPrice = prices.get(BTC.priceId);
+    if (BtcPrice) {
+        global.prices.set('Btc', BtcPrice);
+    }
+
+    const EthPrice = prices.get(ETH.priceId);
+    if (EthPrice) {
+        global.prices.set('Eth', EthPrice);
+    }
+
+    const SolPrice = prices.get(SOL.priceId);
+    if (SolPrice) {
+        global.prices.set('Sol', SolPrice);
+    }
+
+    const UsdcPrice = prices.get(USDCPriceId);
+    if (UsdcPrice) {
+        global.prices.set('Usdc', UsdcPrice);
+    }
+
+    const UsdtPrice = prices.get(USDT.priceId);
+    if (UsdtPrice) {
+        global.prices.set('Usdt', UsdtPrice);
+    }
+}
