@@ -8,6 +8,7 @@ declare global {
     var rotationInProgress: boolean;
     var epochIndex: number;
     var solAggKeyAddress: string;
+    var dotAggKeyAddress: string;
     var currentBlock: number;
     var currentAuthorities: number;
     var availableSolanaNonces: SolanaNonce[];

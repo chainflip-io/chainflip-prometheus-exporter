@@ -3,12 +3,14 @@
 		"enabled": true,
 		"network": "pdot",
 		"defaultMetrics": [],
-		"accounts": [
-			{
-				"alias": "vault",
-				"publicKey": "0x9deb6fe44723040e8bac68dbff3cede4777ecdbd733a95a5f9ecf09efe848c1f"
-			}
-		],
+		"accounts": [],
+		"skipMetrics": []
+	},
+	"hub": {
+		"enabled": true,
+		"network": "pAssetHub",
+		"defaultMetrics": [],
+		"accounts": [],
 		"skipMetrics": []
 	},
 	"flip": {

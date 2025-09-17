@@ -68,6 +68,11 @@ export interface DotConfig extends ConfigBase {
     accounts: DotAccountConfig[];
 }
 
+export interface HubConfig extends ConfigBase {
+    defaultMetrics: DefaultMetrics[];
+    accounts: DotAccountConfig[];
+}
+
 interface DefaultMetrics {
     name: string;
     value: number;
@@ -84,6 +89,7 @@ export interface Config {
     eth: EthConfig;
     btc: BtcConfig;
     dot: DotConfig;
+    hub: HubConfig;
     flip: FlipConfig;
     arb: ArbConfig;
     sol: SolConfig;
