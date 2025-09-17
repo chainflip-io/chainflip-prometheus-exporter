@@ -86,7 +86,6 @@ export const customRpcTypes = {
         external_chains_height: z.object({
             bitcoin: U32,
             ethereum: U32,
-            polkadot: U32,
             arbitrum: U32,
             solana: U32,
             assethub: U32,
@@ -109,7 +108,6 @@ export const customRpcTypes = {
         pending_broadcasts: z.object({
             ethereum: U32,
             bitcoin: U32,
-            polkadot: U32,
             arbitrum: U32,
             solana: U32,
             assethub: U32,
@@ -117,13 +115,11 @@ export const customRpcTypes = {
         pending_tss: z.object({
             evm: U32,
             bitcoin: U32,
-            polkadot: U32,
             solana: U32,
         }),
         open_deposit_channels: z.object({
             ethereum: U32,
             bitcoin: U32,
-            polkadot: U32,
             arbitrum: U32,
             solana: U32,
             assethub: U32,
@@ -131,7 +127,6 @@ export const customRpcTypes = {
         fee_imbalance: z.object({
             ethereum: z.object({ Surplus: U128, Deficit: U128 }),
             bitcoin: z.object({ Surplus: U128, Deficit: U128 }),
-            polkadot: z.object({ Surplus: U128, Deficit: U128 }),
             arbitrum: z.object({ Surplus: U128, Deficit: U128 }),
             solana: z.object({ Surplus: U128, Deficit: U128 }),
             assethub: z.object({ Surplus: U128, Deficit: U128 }),
@@ -148,7 +143,6 @@ export const customRpcTypes = {
         }),
         suspended_validators: z.array(Offence, U32),
         pending_swaps: U32,
-        dot_aggkey: string,
         flip_supply: z.object({
             total_supply: U128,
             offchain_supply: U128,
@@ -162,7 +156,6 @@ export const customRpcTypes = {
         activating_key_broadcast_ids: z.object({
             ethereum: z.optional(U32),
             bitcoin: z.optional(U32),
-            polkadot: z.optional(U32),
             arbitrum: z.optional(U32),
             assethub: z.optional(U32),
             solana: z.tuple([z.optional(U32), z.optional(string)]),

@@ -49,14 +49,6 @@ export const gaugeKeyActivationBroadcast = async (
         metricKeyBroadcast.labels('bitcoin').set(bitcoinBroadcastId);
     }
 
-    // Polkadot
-    const polkadotBroadcastId = data.data.activating_key_broadcast_ids.polkadot;
-    if (polkadotBroadcastId == null) {
-        metricKeyBroadcast.labels('polkadot').set(0);
-    } else {
-        metricKeyBroadcast.labels('polkadot').set(polkadotBroadcastId);
-    }
-
     // AssetHub
     const assetHubBroadcastId = data.data.activating_key_broadcast_ids.assethub;
     if (assetHubBroadcastId == null) {

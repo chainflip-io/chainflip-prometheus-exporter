@@ -7,7 +7,6 @@ import { RpcReturnValue } from './makeRpcRequest';
 declare global {
     var rotationInProgress: boolean;
     var epochIndex: number;
-    var dotAggKeyAddress: string;
     var solAggKeyAddress: string;
     var currentBlock: number;
     var currentAuthorities: number;

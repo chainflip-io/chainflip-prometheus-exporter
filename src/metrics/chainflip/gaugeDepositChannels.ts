@@ -23,10 +23,6 @@ export const gaugeDepositChannels = async (context: Context, data: ProtocolData)
     const btcChannels = data.data.open_deposit_channels.bitcoin;
     metric.labels('bitcoin').set(btcChannels);
 
-    // DOT
-    const dotChannels = data.data.open_deposit_channels.polkadot;
-    metric.labels('polkadot').set(dotChannels);
-
     // ASSETHUB
     const hubChannels = data.data.open_deposit_channels.assethub;
     metric.labels('assethub').set(hubChannels);

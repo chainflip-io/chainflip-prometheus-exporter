@@ -1,5 +1,5 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { countEvents, gaugeBlockHeight, gaugeDotBalance } from '../metrics/polkadot';
+import { countEvents, gaugeBlockHeight } from '../metrics/polkadot';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import { pollEndpoint } from '../utils/utils';
@@ -47,7 +47,6 @@ async function startWatcher(context: Context) {
         pollEndpoint(gaugeBlockHeight, context, 5);
 
         await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
-            await gaugeDotBalance(context);
             await countEvents({ ...context, header });
             metric.set(0);
         });

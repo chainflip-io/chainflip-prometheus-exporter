@@ -1,7 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { DotConfig, FlipConfig } from '../../config/interfaces';
-import { decodeAddress } from '@polkadot/util-crypto';
+import { DotConfig } from '../../config/interfaces';
 
 const metricName: string = 'dot_events_count_total';
 const metric: Gauge = new promClient.Gauge({

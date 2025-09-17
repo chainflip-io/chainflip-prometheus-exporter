@@ -72,32 +72,26 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metric.labels('governance:Executed').set(0);
         metric.labels('governance:Proposed').set(0);
         metric.labels('ethereumBroadcaster:BroadcastAborted').set(0);
-        metric.labels('polkadotBroadcaster:BroadcastAborted').set(0);
         metric.labels('arbitrumBroadcaster:BroadcastAborted').set(0);
         metric.labels('bitcoinBroadcaster:BroadcastAborted').set(0);
         metric.labels('solanaBroadcaster:BroadcastAborted').set(0);
         metric.labels('bitcoinBroadcaster:BroadcastTimeout').set(0);
         metric.labels('ethereumBroadcaster:BroadcastTimeout').set(0);
-        metric.labels('polkadotBroadcaster:BroadcastTimeout').set(0);
         metric.labels('arbitrumBroadcaster:BroadcastTimeout').set(0);
         metric.labels('solanaBroadcaster:BroadcastTimeout').set(0);
         metric.labels('evmThresholdSigner:RetryRequested').set(0);
         metric.labels('bitcoinThresholdSigner:RetryRequested').set(0);
-        metric.labels('polkadotThresholdSigner:RetryRequested').set(0);
         metric.labels('solanaThresholdSigner:RetryRequested').set(0);
         metric.labels('evmThresholdSigner:KeygenFailure').set(0);
         metric.labels('bitcoinThresholdSigner:KeygenFailure').set(0);
-        metric.labels('polkadotThresholdSigner:KeygenFailure').set(0);
         metric.labels('solanaThresholdSigner:KeygenFailure').set(0);
         metric.labels('solanaIngressEgress:ChannelOpeningFeePaid').set(0);
         metric.labels('bitcoinIngressEgress:ChannelOpeningFeePaid').set(0);
         metric.labels('ethereumIngressEgress:ChannelOpeningFeePaid').set(0);
-        metric.labels('polkadotIngressEgress:ChannelOpeningFeePaid').set(0);
         metric.labels('arbitrumIngressEgress:ChannelOpeningFeePaid').set(0);
         metric.labels('flip:SlashingPerformed').set(0);
         metric.labels('ethereumChainTracking:ChainStateUpdated').set(0);
         metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
-        metric.labels('polkadotChainTracking:ChainStateUpdated').set(0);
         metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
         metric.labels('bitcoinIngressEgress:BoostedDepositLost').set(0);
     }
@@ -115,7 +109,6 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metricCcmBroadcastAborted.labels('arbitrumBroadcaster').set(0);
         metricCcmBroadcastAborted.labels('bitcoinBroadcaster').set(0);
         metricCcmBroadcastAborted.labels('ethereumBroadcaster').set(0);
-        metricCcmBroadcastAborted.labels('polkadotBroadcaster').set(0);
         metricCcmBroadcastAborted.labels('solanaBroadcaster').set(0);
     }
     if (registry.getSingleMetric(metricNameBroadcastAborted) === undefined) {
@@ -123,7 +116,6 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metricBroadcastAborted.labels('arbitrumBroadcaster').set(0);
         metricBroadcastAborted.labels('bitcoinBroadcaster').set(0);
         metricBroadcastAborted.labels('ethereumBroadcaster').set(0);
-        metricBroadcastAborted.labels('polkadotBroadcaster').set(0);
         metricBroadcastAborted.labels('solanaBroadcaster').set(0);
     }
     if (registry.getSingleMetric(metricNameReorgDetected) === undefined) {
