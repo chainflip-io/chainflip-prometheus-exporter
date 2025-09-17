@@ -45,7 +45,7 @@ async function startWatcher(context: Context) {
         });
         context.api = api;
         pollEndpoint(gaugeBlockHeight, context, 6);
-        pollEndpoint(gaugeBalance, { ...context}, 6);
+        pollEndpoint(gaugeBalance, { ...context }, 6);
 
         await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
             await countEvents({ ...context, header });
