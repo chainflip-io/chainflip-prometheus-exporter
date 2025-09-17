@@ -39,7 +39,7 @@ polkadotRegistry.setDefaultLabels({
 
 const assetHubRegistry = new promClient.Registry();
 assetHubRegistry.setDefaultLabels({
-    chain: 'assetHub',
+    chain: 'assethub',
     network: config.hub.network,
 });
 
