@@ -8,7 +8,7 @@
   },
   "hub": {
 		"enabled": true,
-		"network": "AssetHub",
+		"network": "assethub",
 		"defaultMetrics": [],
 		"accounts": [],
 		"skipMetrics": []

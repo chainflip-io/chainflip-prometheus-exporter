@@ -8,7 +8,7 @@
 	},
 	"hub": {
 		"enabled": true,
-		"network": "pAssetHub",
+		"network": "passethub",
 		"defaultMetrics": [],
 		"accounts": [],
 		"skipMetrics": []
