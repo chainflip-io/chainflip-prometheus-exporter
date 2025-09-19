@@ -191,7 +191,7 @@ const fiftySol = '50000000000';
 
 let swapSDK: SwapSDK | undefined;
 export const gaugePriceDelta = async (context: Context, data: ProtocolData): Promise<void> => {
-    if (context.config.skipMetrics.includes('cf_price_delta')) {
+    if (context.config.skipMetrics.includes('cf_prices')) {
         return;
     }
     const { logger, apiLatest, registry, metricFailure } = context;
@@ -225,6 +225,10 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
         });
         setGlobalPrices(prices);
+
+        if (context.config.skipMetrics.includes('cf_price_delta')) {
+            return;
+        }
 
         /// ... -> USDC
         calculateRateToUsdc(BTC, pointOneBtc);

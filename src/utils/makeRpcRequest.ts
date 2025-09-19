@@ -181,7 +181,7 @@ export const customRpcTypes = {
     oracle_prices: z.array(
         z.object({
             price: U128,
-            updated_at_oracle_timestamp: U128,
+            updated_at_oracle_timestamp: U32,
             updated_at_statechain_block: U32,
             base_asset: string,
             quote_asset: string,

@@ -12,6 +12,22 @@ const metricOraclePrices: Gauge = new promClient.Gauge({
     labelNames: ['asset'],
 });
 
+const metricNameOraclePricesTimestamp: string = 'cf_oracle_price_timestamp';
+const metricOraclePricesTimestamp: Gauge = new promClient.Gauge({
+    name: metricNameOraclePricesTimestamp,
+    help: 'Unix Timestamp of the last update of the asset price',
+    registers: [],
+    labelNames: ['asset'],
+});
+
+const metricNameOraclePricesBlock: string = 'cf_oracle_price_block';
+const metricOraclePricesBlock: Gauge = new promClient.Gauge({
+    name: metricNameOraclePricesBlock,
+    help: 'Statechain block of the last update of the asset price',
+    registers: [],
+    labelNames: ['asset'],
+});
+
 const metricNameOraclePricesDelta: string = 'cf_oracle_price_delta';
 const metricOraclePricesDelta: Gauge = new promClient.Gauge({
     name: metricNameOraclePricesDelta,
@@ -54,6 +70,10 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
         registry.registerMetric(metricOraclePrices);
     if (registry.getSingleMetric(metricNameOraclePricesDelta) === undefined)
         registry.registerMetric(metricOraclePricesDelta);
+    if (registry.getSingleMetric(metricNameOraclePricesTimestamp) === undefined)
+        registry.registerMetric(metricOraclePricesTimestamp);
+    if (registry.getSingleMetric(metricNameOraclePricesBlock) === undefined)
+        registry.registerMetric(metricOraclePricesBlock);
 
     metricFailure.labels({ metric: metricNameOraclePrices }).set(0);
     metricFailure.labels({ metric: metricNameOraclePricesDelta }).set(0);
@@ -68,6 +88,12 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
             const typedBase = baseAsset as BaseAsset;
             const price = hexPriceToPrice(asset.price, 6, decimals[typedBase]);
             metricOraclePrices.labels(asset.base_asset).set(price);
+
+            metricOraclePricesTimestamp
+                .labels(asset.base_asset)
+                .set(asset.updated_at_oracle_timestamp);
+
+            metricOraclePricesBlock.labels(asset.base_asset).set(asset.updated_at_statechain_block);
 
             if (global.prices) {
                 const globalPrice = global.prices.get(typedBase);
