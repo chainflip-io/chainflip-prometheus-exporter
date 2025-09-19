@@ -5,7 +5,7 @@ import { HubConfig } from '../../config/interfaces';
 const metricNameAggKeyBalance: string = 'hub_agg_key_balance';
 const metricAggKeyBalance: Gauge = new promClient.Gauge({
     name: metricNameAggKeyBalance,
-    help: 'aggKey balance in DOT',
+    help: 'aggKey balance in HubDOT',
     registers: [],
     labelNames: ['aggKey'],
 });
