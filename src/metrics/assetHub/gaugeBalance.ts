@@ -33,6 +33,7 @@ export const gaugeBalance = async (context: Context) => {
             const metricValue = Number(hubAccount.data.free) / 10000000000;
             metricAggKeyBalance.set(metricValue);
         }
+        // We are using the dotAggKey since it is shared between polkadot and assetHub
         if (global.dotAggKeyAddress) {
             if (!lastAggKey) {
                 lastAggKey = global.dotAggKeyAddress;
