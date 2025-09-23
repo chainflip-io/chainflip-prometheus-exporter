@@ -1,15 +1,15 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 
-const metricName: string = 'dot_block_height';
+const metricName: string = 'hub_block_height';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
-    help: 'Polkadot network block height',
+    help: 'AssetHub network block height',
     registers: [],
 });
 
 export const gaugeBlockHeight = async (context: Context) => {
-    if (context.config.skipMetrics.includes('dot_block_height')) {
+    if (context.config.skipMetrics.includes('hub_block_height')) {
         return;
     }
     const { logger, api, registry, header } = context;

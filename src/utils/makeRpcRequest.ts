@@ -148,6 +148,7 @@ export const customRpcTypes = {
             offchain_supply: U128,
         }),
         sol_aggkey: string,
+        dot_aggkey: string,
         sol_onchain_key: string,
         sol_nonces: z.object({
             available: z.array(z.tuple([string, string])),

@@ -12,6 +12,7 @@ import loadDefaultMetrics from './lib/loadDefaultMetrics';
 import startBitcoinService from './watchers/bitcoin';
 import startArbitrumService from './watchers/arbitrum';
 import startSolanaService from './watchers/solana';
+import startAssetHubService from './watchers/assetHub';
 
 const logger: Logger = winston.createLogger();
 logger.add(
@@ -34,6 +35,12 @@ const polkadotRegistry = new promClient.Registry();
 polkadotRegistry.setDefaultLabels({
     chain: 'polkadot',
     network: config.dot.network,
+});
+
+const assetHubRegistry = new promClient.Registry();
+assetHubRegistry.setDefaultLabels({
+    chain: 'assethub',
+    network: config.hub.network,
 });
 
 const ethereumRegistry = new promClient.Registry();
@@ -90,6 +97,20 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
             config.dot,
         );
         startPolkadotService(polkadotContext);
+    }
+
+    if (config.hub.enabled) {
+        const assetHubLogger: Logger = logger.child({
+            chain: 'assetHub',
+            network: config.hub.network,
+        });
+        const assetHubContext: Context = createContext(
+            assetHubLogger,
+            assetHubRegistry,
+            env,
+            config.hub,
+        );
+        startAssetHubService(assetHubContext);
     }
 
     if (config.eth.enabled) {
@@ -153,7 +174,8 @@ app.get('/metrics', async (req, res) => {
             (await polkadotRegistry.metrics()) +
             (await bitcoinRegistry.metrics()) +
             (await arbitrumRegistry.metrics()) +
-            (await solanaRegistry.metrics()),
+            (await solanaRegistry.metrics()) +
+            (await assetHubRegistry.metrics()),
     );
 });
 

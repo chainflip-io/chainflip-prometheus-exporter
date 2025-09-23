@@ -6,6 +6,13 @@
     "accounts": [],
     "skipMetrics": []
   },
+  "hub": {
+		"enabled": true,
+		"network": "assethub",
+		"defaultMetrics": [],
+		"accounts": [],
+		"skipMetrics": []
+	},
   "flip": {
     "enabled": true,
     "network": "berghain",

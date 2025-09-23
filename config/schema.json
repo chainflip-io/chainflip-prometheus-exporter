@@ -170,6 +170,9 @@
         "flip": {
           "$ref": "#/definitions/FlipConfig"
         },
+        "hub": {
+          "$ref": "#/definitions/HubConfig"
+        },
         "sol": {
           "$ref": "#/definitions/SolConfig"
         }
@@ -178,6 +181,7 @@
         "eth",
         "btc",
         "dot",
+        "hub",
         "flip",
         "arb",
         "sol"
@@ -435,6 +439,67 @@
         "eventLog",
         "network",
         "skipEvents",
+        "skipMetrics"
+      ],
+      "type": "object"
+    },
+    "HubConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "accounts": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "alias": {
+                "type": "string"
+              },
+              "publicKey": {}
+            },
+            "required": [
+              "alias",
+              "publicKey"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "defaultMetrics": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "network": {
+          "type": "string"
+        },
+        "skipMetrics": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "accounts",
+        "defaultMetrics",
+        "enabled",
+        "network",
         "skipMetrics"
       ],
       "type": "object"
