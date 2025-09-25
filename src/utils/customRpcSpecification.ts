@@ -148,5 +148,10 @@ export const customRpcs = {
             type: 'RpcOraclePrices',
             description: '',
         },
+        monitoring_simulate_auction: {
+            params: [],
+            type: 'RpcMonitoringSimulateAuction',
+            description: '',
+        },
     },
 };
