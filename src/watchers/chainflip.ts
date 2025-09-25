@@ -26,6 +26,7 @@ import {
     gaugeBlockWeight,
     gaugeBitcoinElections,
     gaugeOraclePrices,
+    gaugeDelegation,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -106,6 +107,7 @@ async function startWatcher(context: Context) {
             gaugeKeyActivationBroadcast(context, data);
             gaugeSolanaNonces(context, data);
 
+            gaugeDelegation(context, data);
             gaugeSafeMode(context, data);
             gaugeOpenElections(context, data);
             gaugeBlockWeight(context, data);

@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import stateChainTypes from './chainTypes';
 import { customRpcs } from './customRpcSpecification';
-import axios from 'axios';
-import { env } from '../config/getConfig';
 
 const boolean = z.boolean();
 const string = z.string();
@@ -188,6 +186,29 @@ export const customRpcTypes = {
             quote_asset: string,
         }),
     ),
+    monitoring_simulate_auction: z.object({
+        auction_outcome: z.object({
+            winners: z.array(z.string()),
+            bond: U128,
+        }),
+        operators_info: z.record(
+            z.string(), // key: operator id
+            z.object({
+                operator: z.string(),
+                validators: z.record(
+                    z.string(), // key: validator id
+                    U128,
+                ),
+                delegators: z.record(
+                    z.string(), // key: delegator id
+                    U128,
+                ),
+                delegation_fee_bps: z.number(),
+            }),
+        ),
+        new_validators: z.array(z.unknown()),
+        current_mab: U128,
+    }),
 } as const;
 
 type RpcParamsMap = {
@@ -207,6 +228,7 @@ type RpcParamsMap = {
     monitoring_accounts_info: [accounts: string[], at?: string];
     safe_mode_statuses: [];
     oracle_prices: [asset_pair?: string, at?: string];
+    monitoring_simulate_auction: [at?: string];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof customRpcTypes & keyof typeof customRpcs.cf;
@@ -233,21 +255,3 @@ export async function makeUncheckedRpcRequest(
     const result: any = await apiPromise.rpc(`cf_${method}`, ...args);
     return result;
 }
-// export async function customRpc<M extends RpcCall>(
-//     apiPromise: CustomApiPromise,
-//     method: M,
-//     ...args: RpcParamsMap[M]
-// ): Promise<RpcReturnValue[M]> {
-//     const url = env.CF_WS_ENDPOINT.split('wss');
-
-//     const { data } = await axios.post(`https${url[1]}`, {
-//         id: 1,
-//         jsonrpc: '2.0',
-//         method: `cf_${method}`,
-//         params: args,
-//     });
-
-//     const parsed = validators[method].parse(data.result);
-
-//     return parsed as RpcReturnValue[M];
-// }
