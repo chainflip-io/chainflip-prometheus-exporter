@@ -225,6 +225,7 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
         });
         setGlobalPrices(prices);
+        metricFailure.labels('cf_price_delta').set(0);
 
         if (context.config.skipMetrics.includes('cf_price_delta')) {
             return;
@@ -267,7 +268,6 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateFromUsdc(HUBDOT, tenKUsdc);
         calculateRateFromUsdc(HUBUSDC, tenKUsdc);
         calculateRateFromUsdc(HUBUSDT, tenKUsdc);
-        metricFailure.labels('cf_price_delta').set(0);
     } catch (e) {
         logger.error(e);
         metricFailure.labels('cf_price_delta').set(1);

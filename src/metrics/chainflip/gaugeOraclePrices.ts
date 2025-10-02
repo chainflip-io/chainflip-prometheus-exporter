@@ -17,7 +17,7 @@ const metricOraclePricesTimestamp: Gauge = new promClient.Gauge({
     name: metricNameOraclePricesTimestamp,
     help: 'Unix Timestamp of the last update of the asset price',
     registers: [],
-    labelNames: ['asset'],
+    labelNames: ['asset', 'source'],
 });
 
 const metricNameOraclePricesBlock: string = 'cf_oracle_price_block';
@@ -25,7 +25,7 @@ const metricOraclePricesBlock: Gauge = new promClient.Gauge({
     name: metricNameOraclePricesBlock,
     help: 'Statechain block of the last update of the asset price',
     registers: [],
-    labelNames: ['asset'],
+    labelNames: ['asset', 'source'],
 });
 
 const metricNameOraclePricesDelta: string = 'cf_oracle_price_delta';
@@ -34,6 +34,14 @@ const metricOraclePricesDelta: Gauge = new promClient.Gauge({
     help: 'Delta of the price of the asset in % compared to coingecko prices',
     registers: [],
     labelNames: ['asset'],
+});
+
+const metricNameOraclePricesStaleness: string = 'cf_oracle_price_staleness';
+const metricOraclePricesStaleness: Gauge = new promClient.Gauge({
+    name: metricNameOraclePricesStaleness,
+    help: 'Is the price stale? (2 = Stale, 1 = MaybeStale, 0 = UpToDate)',
+    registers: [],
+    labelNames: ['asset', 'source'],
 });
 
 const decimals = {
@@ -74,9 +82,12 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
         registry.registerMetric(metricOraclePricesTimestamp);
     if (registry.getSingleMetric(metricNameOraclePricesBlock) === undefined)
         registry.registerMetric(metricOraclePricesBlock);
+    if (registry.getSingleMetric(metricNameOraclePricesStaleness) === undefined)
+        registry.registerMetric(metricOraclePricesStaleness);
 
     metricFailure.labels({ metric: metricNameOraclePrices }).set(0);
     metricFailure.labels({ metric: metricNameOraclePricesDelta }).set(0);
+    metricFailure.labels({ metric: metricNameOraclePricesStaleness }).set(0);
 
     try {
         const result = await makeRpcRequest(apiLatest, 'oracle_prices', undefined, data.blockHash);
@@ -90,10 +101,12 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
             metricOraclePrices.labels(asset.base_asset).set(price);
 
             metricOraclePricesTimestamp
-                .labels(asset.base_asset)
+                .labels(asset.base_asset, 'PriceFeedApi')
                 .set(asset.updated_at_oracle_timestamp);
 
-            metricOraclePricesBlock.labels(asset.base_asset).set(asset.updated_at_statechain_block);
+            metricOraclePricesBlock
+                .labels(asset.base_asset, 'PriceFeedApi')
+                .set(asset.updated_at_statechain_block);
 
             if (global.prices) {
                 const globalPrice = global.prices.get(typedBase);
@@ -102,14 +115,114 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
                     metricOraclePricesDelta.labels(asset.base_asset).set(delta);
                 }
             }
+
+            const api = await apiLatest.at(data.blockHash);
+            const unsync_state = (
+                await api.query.genericElections.electoralUnsynchronisedState()
+            ).toJSON();
+
+            const arbitrumPrices: Record<
+                string,
+                { timestamp: number; updatedAtStatechainBlock: number; priceStatus: string }
+            > = simplify(unsync_state.chainStates.arbitrum);
+            const ethereumPrices: Record<
+                string,
+                { timestamp: number; updatedAtStatechainBlock: number; priceStatus: string }
+            > = simplify(unsync_state.chainStates.ethereum);
+            const latestPrices: Record<string, string> = mergeAndSelectLatest(
+                unsync_state.chainStates.arbitrum,
+                unsync_state.chainStates.ethereum,
+            );
+
+            for (const asset in latestPrices) {
+                if (latestPrices[asset] === 'Stale') {
+                    metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(2);
+                } else if (latestPrices[asset] === 'MaybeStale') {
+                    metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(1);
+                } else {
+                    metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(0);
+                }
+            }
+            for (const asset in arbitrumPrices) {
+                if (arbitrumPrices[asset].priceStatus === 'Stale') {
+                    metricOraclePricesStaleness.labels(asset, 'arbitrum').set(2);
+                } else if (latestPrices[asset] === 'MaybeStale') {
+                    metricOraclePricesStaleness.labels(asset, 'arbitrum').set(1);
+                } else {
+                    metricOraclePricesStaleness.labels(asset, 'arbitrum').set(0);
+                }
+                metricOraclePricesTimestamp
+                    .labels(asset, 'arbitrum')
+                    .set(arbitrumPrices[asset].timestamp);
+                metricOraclePricesBlock
+                    .labels(asset, 'arbitrum')
+                    .set(arbitrumPrices[asset].updatedAtStatechainBlock);
+            }
+            for (const asset in ethereumPrices) {
+                if (ethereumPrices[asset].priceStatus === 'Stale') {
+                    metricOraclePricesStaleness.labels(asset, 'ethereum').set(2);
+                } else if (latestPrices[asset] === 'MaybeStale') {
+                    metricOraclePricesStaleness.labels(asset, 'ethereum').set(1);
+                } else {
+                    metricOraclePricesStaleness.labels(asset, 'ethereum').set(0);
+                }
+                metricOraclePricesTimestamp
+                    .labels(asset, 'ethereum')
+                    .set(ethereumPrices[asset].timestamp);
+                metricOraclePricesBlock
+                    .labels(asset, 'ethereum')
+                    .set(ethereumPrices[asset].updatedAtStatechainBlock);
+            }
         }
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricNameOraclePrices }).set(1);
         metricFailure.labels({ metric: metricNameOraclePricesDelta }).set(1);
+        metricFailure.labels({ metric: metricNameOraclePricesStaleness }).set(1);
     }
 };
 
 function percentageDifference(price: number, globalPrice: number) {
     return ((price - globalPrice) / globalPrice) * 100;
+}
+
+function simplify(data: any) {
+    const simplified: Record<
+        string,
+        { timestamp: number; updatedAtStatechainBlock: number; priceStatus: string }
+    > = {};
+    for (const key in data.price) {
+        const asset = key.replace(/Usd$/i, ''); // remove 'Usd'
+        simplified[asset] = {
+            priceStatus: data.price[key].priceStatus,
+            timestamp: Number(data.price[key].timestamp.median.seconds),
+            updatedAtStatechainBlock: Number(data.price[key].updatedAtStatechainBlock),
+        };
+    }
+    return simplified;
+}
+
+function mergeAndSelectLatest(data1: any, data2: any) {
+    const merged: Record<string, string> = {};
+
+    const allKeys = new Set([...Object.keys(data1.price), ...Object.keys(data2.price)]);
+
+    for (const key of allKeys) {
+        const a = data1.price[key];
+        const b = data2.price[key];
+
+        // Get timestamps safely (default to 0 if missing)
+        const tsA = a?.timestamp?.median?.seconds ?? 0;
+        const tsB = b?.timestamp?.median?.seconds ?? 0;
+
+        // Pick the newer entry
+        const latest = tsA >= tsB ? a : b;
+
+        if (latest) {
+            const asset = key.replace(/Usd$/i, ''); // remove 'Usd'
+            merged[asset] = latest.priceStatus;
+        }
+    }
+
+    return merged;
 }
