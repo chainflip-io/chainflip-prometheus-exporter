@@ -46,6 +46,8 @@ const metricReputation: Gauge = new promClient.Gauge({
     labelNames: ['ss58', 'alias'],
     registers: [],
 });
+
+let oldAuthorities: string[];
 export const gaugeValidatorStatus = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_validator')) {
         return;
@@ -124,6 +126,39 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
                 metricBalance.labels(chunk[i], vanityNamesChunked[j][i]).set(balanceValue || 0);
             }
             j++;
+        }
+
+        // Gathering metrics about all the active set
+        const api = await apiLatest.at(data.blockHash);
+        const authorities = (await api.query.validator.currentAuthorities()).toJSON();
+
+        if (!oldAuthorities) {
+            oldAuthorities = authorities;
+        } else {
+            const difference = oldAuthorities.filter((old) => !authorities.includes(old));
+            for (const oldAuthority of difference) {
+                metricReputation.remove(oldAuthority);
+                metricAuthorityOnline.remove(oldAuthority);
+                metricQualified.remove(oldAuthority);
+            }
+            oldAuthorities = authorities;
+        }
+
+        const chunkedAuthorities = chunk(authorities, 10);
+        for (const chunk of chunkedAuthorities) {
+            const result = await makeRpcRequest(
+                apiLatest,
+                'monitoring_accounts_info',
+                chunk,
+                data.blockHash,
+            );
+            for (const [i, validatorInfo] of result.entries()) {
+                const { is_online, is_qualified, reputation_points } = validatorInfo;
+
+                metricReputation.labels(chunk[i], '').set(reputation_points);
+                metricAuthorityOnline.labels(chunk[i], '').set(is_online ? 1 : 0);
+                metricQualified.labels(chunk[i], '').set(is_qualified ? 1 : 0);
+            }
         }
     } catch (e) {
         logger.error(e);
