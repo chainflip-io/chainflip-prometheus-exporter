@@ -44,12 +44,19 @@ const metricOperatorDelegatedBalance: Gauge = new promClient.Gauge({
     labelNames: ['operator'],
 });
 
+const metricNameNextAuthoritySize: string = 'cf_next_authorities';
+const metricNextAuthoritySize: Gauge = new promClient.Gauge({
+    name: metricNameNextAuthoritySize,
+    help: 'The number of validator in the next epoch active set',
+    registers: [],
+    labelNames: [],
+});
+
 export const gaugeDelegation = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_simulate_auction')) {
         return;
     }
     const { logger, apiLatest, registry, metricFailure } = context;
-    const config = context.config as FlipConfig;
 
     logger.debug(
         `Scraping ${metricNameBondDifference}, ${metricNameCurrentBond}, ${metricNameNextBond}, ${metricNameNewValidators}, ${metricNameOperatorDelegatedBalance}`,
@@ -65,6 +72,8 @@ export const gaugeDelegation = async (context: Context, data: ProtocolData): Pro
         registry.registerMetric(metricOperatorDelegatedBalance);
     if (registry.getSingleMetric(metricNameCurrentBond) === undefined)
         registry.registerMetric(metricCurrentBond);
+    if (registry.getSingleMetric(metricNameNextAuthoritySize) === undefined)
+        registry.registerMetric(metricNextAuthoritySize);
 
     metricFailure.labels({ metric: metricNameBondDifference }).set(0);
     metricFailure.labels({ metric: metricNameNewValidators }).set(0);
@@ -80,6 +89,7 @@ export const gaugeDelegation = async (context: Context, data: ProtocolData): Pro
         );
 
         metricNewValidators.set(result.new_validators.length);
+        metricNextAuthoritySize.set(result.auction_outcome.winners.length);
 
         const bondDifference = Number(
             (BigInt(result.auction_outcome.bond) - BigInt(result.current_mab)) / BigInt(1e18),
