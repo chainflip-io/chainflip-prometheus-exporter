@@ -32,11 +32,10 @@ const metricPriceDeltaNotWorking: Gauge = new promClient.Gauge({
 const metricIndexPriceName: string = 'cf_index_price';
 const metricIndexPrice: Gauge = new promClient.Gauge({
     name: metricIndexPriceName,
-    help: "Index price of a give asset",
+    help: 'Index price of a give asset',
     labelNames: ['asset'],
     registers: [],
 });
-
 
 const axios = new Axios({
     baseURL: env.CACHE_ENDPOINT,
@@ -214,7 +213,7 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         registry.registerMetric(metricPriceDeltaNotWorking);
     if (registry.getSingleMetric(metricIndexPriceName) === undefined) {
         registry.registerMetric(metricIndexPrice);
-    } 
+    }
 
     if (swapSDK === undefined) {
         const options: SwapSDKOptions = {
