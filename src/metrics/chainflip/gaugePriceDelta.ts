@@ -29,6 +29,14 @@ const metricPriceDeltaNotWorking: Gauge = new promClient.Gauge({
     registers: [],
 });
 
+const metricIndexPriceName: string = 'cf_index_price';
+const metricIndexPrice: Gauge = new promClient.Gauge({
+    name: metricIndexPriceName,
+    help: 'Index price of a give asset',
+    labelNames: ['asset'],
+    registers: [],
+});
+
 const axios = new Axios({
     baseURL: env.CACHE_ENDPOINT,
     timeout: 6000,
@@ -203,6 +211,9 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         registry.registerMetric(metricFromUsdc);
     if (registry.getSingleMetric(metricPriceDeltaNotWorkingName) === undefined)
         registry.registerMetric(metricPriceDeltaNotWorking);
+    if (registry.getSingleMetric(metricIndexPriceName) === undefined) {
+        registry.registerMetric(metricIndexPrice);
+    }
 
     if (swapSDK === undefined) {
         const options: SwapSDKOptions = {
@@ -225,6 +236,7 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
         });
         setGlobalPrices(prices);
+        metricFailure.labels('cf_price_delta').set(0);
 
         if (context.config.skipMetrics.includes('cf_price_delta')) {
             return;
@@ -267,7 +279,6 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         calculateRateFromUsdc(HUBDOT, tenKUsdc);
         calculateRateFromUsdc(HUBUSDC, tenKUsdc);
         calculateRateFromUsdc(HUBUSDT, tenKUsdc);
-        metricFailure.labels('cf_price_delta').set(0);
     } catch (e) {
         logger.error(e);
         metricFailure.labels('cf_price_delta').set(1);
@@ -349,25 +360,30 @@ function setGlobalPrices(prices: Map<string, number>) {
     const BtcPrice = prices.get(BTC.priceId);
     if (BtcPrice) {
         global.prices.set('Btc', BtcPrice);
+        metricIndexPrice.labels('Btc').set(BtcPrice);
     }
 
     const EthPrice = prices.get(ETH.priceId);
     if (EthPrice) {
         global.prices.set('Eth', EthPrice);
+        metricIndexPrice.labels('Eth').set(EthPrice);
     }
 
     const SolPrice = prices.get(SOL.priceId);
     if (SolPrice) {
         global.prices.set('Sol', SolPrice);
+        metricIndexPrice.labels('Sol').set(SolPrice);
     }
 
     const UsdcPrice = prices.get(USDCPriceId);
     if (UsdcPrice) {
         global.prices.set('Usdc', UsdcPrice);
+        metricIndexPrice.labels('Usdc').set(UsdcPrice);
     }
 
     const UsdtPrice = prices.get(USDT.priceId);
     if (UsdtPrice) {
         global.prices.set('Usdt', UsdtPrice);
+        metricIndexPrice.labels('Usdt').set(UsdtPrice);
     }
 }
