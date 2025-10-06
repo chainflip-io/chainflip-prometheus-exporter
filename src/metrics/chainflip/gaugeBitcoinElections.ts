@@ -50,6 +50,13 @@ const metricOngoing: Gauge = new promClient.Gauge({
     registers: [],
 });
 
+const metricNameBtcFees: string = 'cf_btc_fee_info';
+const metricBtcFees: Gauge = new promClient.Gauge({
+    name: metricNameBtcFees,
+    help: 'Tracked Fee value for BTC in sats/KB',
+    registers: [],
+});
+
 export const gaugeBitcoinElections = async (
     context: Context,
     data: ProtocolData,
@@ -79,6 +86,9 @@ export const gaugeBitcoinElections = async (
     }
     if (registry.getSingleMetric(metricNameOngoing) === undefined) {
         registry.registerMetric(metricOngoing);
+    }
+    if (registry.getSingleMetric(metricNameBtcFees) === undefined) {
+        registry.registerMetric(metricBtcFees);
     }
 
     try {
@@ -201,6 +211,10 @@ export const gaugeBitcoinElections = async (
                 bw_processed_events: bw_egresses.blockProcessor.processedEvents,
             },
         });
+
+        // Btc Fees
+        const chainState = (await api.query.bitcoinChainTracking.currentChainState()).toJSON();
+        metricBtcFees.set(Number(chainState.trackedData.btcFeeInfo.satsPerKilobyte));
 
         metricFailure.labels('cf_bitcoin_elections').set(0);
     } catch (e) {
