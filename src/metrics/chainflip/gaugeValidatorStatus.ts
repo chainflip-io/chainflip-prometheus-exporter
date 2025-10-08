@@ -137,9 +137,9 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
         } else {
             const difference = oldAuthorities.filter((old) => !authorities.includes(old));
             for (const oldAuthority of difference) {
-                metricReputation.remove(oldAuthority);
-                metricAuthorityOnline.remove(oldAuthority);
-                metricQualified.remove(oldAuthority);
+                metricReputation.remove(oldAuthority, '');
+                metricAuthorityOnline.remove(oldAuthority, '');
+                metricQualified.remove(oldAuthority, '');
             }
             oldAuthorities = authorities;
         }
