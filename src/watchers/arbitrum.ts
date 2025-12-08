@@ -112,12 +112,7 @@ async function startWatcher(context: Context) {
         context.provider = wsProvider;
         context.httpProvider = httpProvider;
         pollEndpoint(gaugeBlockHeight, context, 6);
-
-        wsProvider.on('block', async (blockNumber: number) => {
-            if (blockNumber % 20 === 0) {
-                gaugeEthBalance(context);
-            }
-        });
+        pollEndpoint(gaugeEthBalance, context, 6);
 
         keyManagerContract.deployed().then(() => logger.info('Key Manager contract added'));
         keyManagerContract.on('*', async (event: any) => {
