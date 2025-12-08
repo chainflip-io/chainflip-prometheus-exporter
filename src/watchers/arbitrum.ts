@@ -109,7 +109,6 @@ async function startWatcher(context: Context) {
             wsProvider,
         );
 
-        context.provider = wsProvider;
         context.httpProvider = httpProvider;
         pollEndpoint(gaugeBlockHeight, context, 6);
         pollEndpoint(gaugeEthBalance, context, 6);
