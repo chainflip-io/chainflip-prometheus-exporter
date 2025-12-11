@@ -15,7 +15,7 @@ export const gaugeEthBalance = async (context: Context) => {
     if (context.config.skipMetrics.includes('eth_balance')) {
         return;
     }
-    const { logger, provider, registry, metricFailure } = context;
+    const { logger, httpProvider, registry, metricFailure } = context;
     const config = context.config as EthConfig;
     const { wallets } = config;
     try {
@@ -24,7 +24,7 @@ export const gaugeEthBalance = async (context: Context) => {
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
         for (const { address, alias } of wallets) {
-            const weiBalance = await provider.getBalance(address);
+            const weiBalance = await httpProvider.getBalance(address);
             const ethBalance = ethers.utils.formatEther(weiBalance);
             metric.labels({ address, alias }).set(Number(ethBalance));
         }
