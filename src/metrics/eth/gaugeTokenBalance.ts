@@ -26,7 +26,10 @@ export const gaugeTokenBalance = async (context: Context, symbol: string) => {
 
         for (const { address, alias } of wallets) {
             const rawBalance = await contract.balanceOf(address);
-            const tokenBalance = ethers.utils.formatUnits(rawBalance, 18);
+            const tokenBalance =
+                symbol === 'FLIP'
+                    ? ethers.utils.formatUnits(rawBalance, 18)
+                    : ethers.utils.formatUnits(rawBalance, 6);
             const contractAddress = contract.address;
             metric
                 .labels({

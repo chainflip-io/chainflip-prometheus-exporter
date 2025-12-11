@@ -19,7 +19,7 @@ export const gaugeBlockHeight = async (context: Context) => {
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     try {
-        const blockNumber = await httpProvider.send('eth_blockNumber');
+        const blockNumber = await httpProvider.getBlockNumber();
         metric.set(Number(blockNumber));
     } catch (e) {
         logger.error(e);
