@@ -25,3 +25,4 @@ export * from './gaugeSolanaDurableNonces';
 export * from './gaugeBitcoinElections';
 export * from './gaugeOraclePrices';
 export * from './gaugeDelegation';
+export * from './gaugeLending';

@@ -27,6 +27,7 @@ import {
     gaugeBitcoinElections,
     gaugeOraclePrices,
     gaugeDelegation,
+    gaugeLending,
 } from '../metrics/chainflip';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { customRpcs } from '../utils/customRpcSpecification';
@@ -119,6 +120,7 @@ async function startWatcher(context: Context) {
             gaugePriceDelta(context, data);
             gaugeOraclePrices(context, data);
             gaugeBitcoinElections(context, data);
+            gaugeLending(context, data);
             metric.set(0);
         });
     } catch (e) {

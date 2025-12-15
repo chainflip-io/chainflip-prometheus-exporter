@@ -17,6 +17,7 @@ declare global {
     var solanaCurrentOnChainKey: string;
     var solanaBlockHeight: number;
     var prices: Map<string, number>;
+    var oraclePrices: Map<string, number>;
 
     interface CustomApiPromise extends ApiPromise {
         rpc: ApiPromise['rpc'] & {

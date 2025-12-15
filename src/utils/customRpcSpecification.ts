@@ -153,5 +153,38 @@ export const customRpcs = {
             type: 'RpcMonitoringSimulateAuction',
             description: '',
         },
+        lending_pools: {
+            params: [
+                {
+                    name: 'at',
+                    type: 'Option<String>',
+                    isOptional: true,
+                },
+            ],
+            type: 'RpcLendingPools',
+            description: '',
+        },
+        loan_accounts: {
+            params: [
+                {
+                    name: 'at',
+                    type: 'Option<String>',
+                    isOptional: true,
+                },
+            ],
+            type: 'RpcLoanAccounts',
+            description: '',
+        },
+        lending_pool_supply_balances: {
+            params: [
+                {
+                    name: 'at',
+                    type: 'Option<String>',
+                    isOptional: true,
+                },
+            ],
+            type: 'RpcLendingPoolSupplyBalances',
+            description: '',
+        },
     },
 };

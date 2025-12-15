@@ -18,6 +18,14 @@ const U128 = z
     ])
     .transform((n: any) => BigInt(n));
 
+// Flexible hex string that accepts any length (for lending amounts)
+const flexibleHexString = z
+    .union([
+        hexString, // any hex string
+        number, // or a number
+    ])
+    .transform((n: any) => BigInt(n));
+
 const Amount = U128;
 
 const Offence = z.enum(stateChainTypes.Offence._enum);
@@ -32,6 +40,22 @@ const UnformattedEthereumAddress = z
 const AuctionParameters = z.tuple([U32, U32]);
 const CurrentEpochStartedAt = U32;
 const EpochDuration = U32;
+
+// Helper function to get decimals for an asset
+function getAssetDecimals(chain: string, asset: string): number {
+    if (asset === 'BTC') return 1e8;
+    if (asset === 'ETH') return 1e18;
+    if (asset === 'SOL') return 1e9;
+    if (asset === 'USDT' || asset === 'USDC') return 1e6;
+    // Default fallback
+    return 1e18;
+}
+
+// Helper to convert hex string to number with decimals
+function hexToNumber(hexValue: string | bigint, decimals: number): number {
+    const bigIntValue = typeof hexValue === 'string' ? BigInt(hexValue) : hexValue;
+    return Number(bigIntValue) / decimals;
+}
 
 export const customRpcTypes = {
     account_info_v2: z.object({
@@ -209,6 +233,103 @@ export const customRpcTypes = {
         new_validators: z.array(z.unknown()),
         current_mab: U128,
     }),
+    lending_pools: z.array(
+        z
+            .object({
+                asset: z.object({
+                    chain: string,
+                    asset: string,
+                }),
+                total_amount: flexibleHexString,
+                available_amount: flexibleHexString,
+                utilisation_rate: number,
+                current_interest_rate: number,
+                origination_fee: number,
+                liquidation_fee: number,
+                interest_rate_curve: z.object({
+                    interest_at_zero_utilisation: number,
+                    junction_utilisation: number,
+                    interest_at_junction_utilisation: number,
+                    interest_at_max_utilisation: number,
+                }),
+            })
+            .transform((data) => {
+                const decimals = getAssetDecimals(data.asset.chain, data.asset.asset);
+                return {
+                    ...data,
+                    total_amount: hexToNumber(data.total_amount, decimals),
+                    available_amount: hexToNumber(data.available_amount, decimals),
+                };
+            }),
+    ),
+    loan_accounts: z.array(
+        z.object({
+            account: string,
+            collateral_topup_asset: z.object({
+                chain: string,
+                asset: string,
+            }),
+            ltv_ratio: z.union([string, z.null()]),
+            collateral: z.array(
+                z
+                    .object({
+                        chain: string,
+                        asset: string,
+                        amount: flexibleHexString,
+                    })
+                    .transform((data) => {
+                        const decimals = getAssetDecimals(data.chain, data.asset);
+                        return {
+                            ...data,
+                            amount: hexToNumber(data.amount, decimals),
+                        };
+                    }),
+            ),
+            loans: z.array(
+                z
+                    .object({
+                        loan_id: number,
+                        asset: z.object({
+                            chain: string,
+                            asset: string,
+                        }),
+                        created_at: number,
+                        principal_amount: flexibleHexString,
+                    })
+                    .transform((data) => {
+                        const decimals = getAssetDecimals(data.asset.chain, data.asset.asset);
+                        return {
+                            ...data,
+                            principal_amount: hexToNumber(data.principal_amount, decimals),
+                        };
+                    }),
+            ),
+            liquidation_status: z.union([z.unknown(), z.null()]),
+        }),
+    ),
+    lending_pool_supply_balances: z.array(
+        z
+            .object({
+                chain: string,
+                asset: string,
+                positions: z.array(
+                    z.object({
+                        lp_id: string,
+                        total_amount: flexibleHexString,
+                    }),
+                ),
+            })
+            .transform((data) => {
+                const decimals = getAssetDecimals(data.chain, data.asset);
+                return {
+                    ...data,
+                    positions: data.positions.map((pos) => ({
+                        ...pos,
+                        total_amount: hexToNumber(pos.total_amount, decimals),
+                    })),
+                };
+            }),
+    ),
 } as const;
 
 type RpcParamsMap = {
@@ -229,6 +350,9 @@ type RpcParamsMap = {
     safe_mode_statuses: [];
     oracle_prices: [asset_pair?: string, at?: string];
     monitoring_simulate_auction: [at?: string];
+    lending_pools: [at?: string];
+    loan_accounts: [at?: string];
+    lending_pool_supply_balances: [at?: string];
 };
 
 type RpcCall = keyof RpcParamsMap & keyof typeof customRpcTypes & keyof typeof customRpcs.cf;
@@ -243,7 +367,16 @@ export default async function makeRpcRequest<M extends RpcCall>(
     ...args: RpcParamsMap[M]
 ): Promise<RpcReturnValue[M]> {
     const result: any = await apiPromise.rpc(`cf_${method}`, ...args);
-    // const parsed = validators[method].parse(result.toJSON());
+    // Only parse lending-related RPC calls to apply hex-to-number transformations
+    const lendingMethods: RpcCall[] = [
+        'lending_pools',
+        'loan_accounts',
+        'lending_pool_supply_balances',
+    ];
+    if (lendingMethods.includes(method)) {
+        const parsed = customRpcTypes[method].parse(result.toJSON ? result.toJSON() : result);
+        return parsed as RpcReturnValue[M];
+    }
     return result as RpcReturnValue[M];
 }
 
