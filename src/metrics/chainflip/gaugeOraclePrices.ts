@@ -100,6 +100,12 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
             const price = hexPriceToPrice(asset.price, 6, decimals[typedBase]);
             metricOraclePrices.labels(asset.base_asset).set(price);
 
+            // Store oracle prices in global object for reuse by other metrics
+            if (!global.oraclePrices) {
+                global.oraclePrices = new Map<string, number>();
+            }
+            global.oraclePrices.set(baseAsset.toUpperCase(), price);
+
             metricOraclePricesTimestamp
                 .labels(asset.base_asset, 'PriceFeedApi')
                 .set(asset.updated_at_oracle_timestamp);
