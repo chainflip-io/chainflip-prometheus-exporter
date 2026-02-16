@@ -3,6 +3,7 @@ import { countEvents, gaugeBlockHeight } from '../metrics/polkadot';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import { pollEndpoint } from '../utils/utils';
+import { clearApiAtCache } from '../utils/cleanupApiAtCache';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -47,7 +48,10 @@ async function startWatcher(context: Context) {
         pollEndpoint(gaugeBlockHeight, context, 5);
 
         await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
-            await countEvents({ ...context, header });
+            const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
+            const apiAt = await api.at(blockHash);
+            await countEvents({ ...context, header, apiAt });
+            clearApiAtCache(api);
             metric.set(0);
         });
     } catch (e) {

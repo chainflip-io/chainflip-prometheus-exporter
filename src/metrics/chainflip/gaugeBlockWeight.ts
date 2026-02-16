@@ -11,13 +11,12 @@ const metric: Gauge = new promClient.Gauge({
 
 export const gaugeBlockWeight = async (context: Context, data: ProtocolData): Promise<void> => {
     const { logger, apiLatest, registry, metricFailure } = context;
-    const api = await apiLatest.at(data.blockHash);
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     logger.debug(`Scraping ${metricName}`);
 
     try {
-        const currentBlockWeight = (await api.query.system.blockWeight()).toJSON();
+        const currentBlockWeight = (await data.apiAt.query.system.blockWeight()).toJSON();
         const totalWeight: number =
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             currentBlockWeight.mandatory.refTime +

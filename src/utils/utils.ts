@@ -36,6 +36,7 @@ export type ProtocolData = {
     blockHash: string;
     header: number;
     data: RpcReturnValue['monitoring_data'];
+    apiAt: any;
 };
 
 export type SolanaNonce = {

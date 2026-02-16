@@ -92,9 +92,8 @@ export const gaugeBitcoinElections = async (
     }
 
     try {
-        const api = await apiLatest.at(data.blockHash);
         const unsync_state = (
-            await api.query.bitcoinElections.electoralUnsynchronisedState()
+            await data.apiAt.query.bitcoinElections.electoralUnsynchronisedState()
         ).toJSON();
 
         const bhw_witnessFrom = unsync_state[0].phase.runningBitcoin.witnessFrom;
@@ -213,7 +212,7 @@ export const gaugeBitcoinElections = async (
         });
 
         // Btc Fees
-        const chainState = (await api.query.bitcoinChainTracking.currentChainState()).toJSON();
+        const chainState = (await data.apiAt.query.bitcoinChainTracking.currentChainState()).toJSON();
         metricBtcFees.set(Number(chainState.trackedData.btcFeeInfo.satsPerKilobyte));
 
         metricFailure.labels('cf_bitcoin_elections').set(0);

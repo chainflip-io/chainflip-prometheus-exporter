@@ -60,7 +60,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         return;
     }
     const { logger, registry, apiLatest, metricFailure } = context;
-    const api = await apiLatest.at(data.blockHash);
+    const api = data.apiAt;
     const config = context.config as FlipConfig;
     const { accounts, skipEvents } = config;
 

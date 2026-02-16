@@ -24,8 +24,7 @@ export const gaugeBuildVersion = async (context: Context, data: ProtocolData): P
     let node = '';
     try {
         node = await apiLatest.rpc.system.version();
-        const api = await apiLatest.at(data.blockHash);
-        const getRuntime = await api.query.system.lastRuntimeUpgrade();
+        const getRuntime = await data.apiAt.query.system.lastRuntimeUpgrade();
         runtime = getRuntime.toJSON().specVersion;
 
         metric.set({ runtime, node }, 1);

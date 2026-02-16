@@ -76,8 +76,7 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
         FF: 0,
     };
     try {
-        const api = await apiLatest.at(data.blockHash);
-        const result = await api.query.solanaElections.electionProperties.entries();
+        const result = await data.apiAt.query.solanaElections.electionProperties.entries();
         result.forEach(([_, election_properties]: any[]) => {
             const value = election_properties.toJSON();
             if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
@@ -96,7 +95,7 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
             metricOpenElection.labels('solana', key.concat('_', full_name)).set(value);
         }
 
-        const result2 = await api.query.bitcoinElections.electionProperties.entries();
+        const result2 = await data.apiAt.query.bitcoinElections.electionProperties.entries();
         result2.forEach(([_, election_properties]: any[]) => {
             const value = election_properties.toJSON();
             if (typeof value === 'object' && !Array.isArray(value) && value !== null) {

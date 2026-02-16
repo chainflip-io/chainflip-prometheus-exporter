@@ -35,6 +35,7 @@ import stateChainTypes from '../utils/chainTypes';
 import makeRpcRequest from '../utils/makeRpcRequest';
 import { gaugeKeyActivationBroadcast } from '../metrics/chainflip/gaugeKeyActivationBroadcast';
 import { ProtocolData } from '../utils/utils';
+import { clearApiAtCache } from '../utils/cleanupApiAtCache';
 import { gaugeOpenElections } from '../metrics/chainflip/gaugeOpenElections';
 import { gaugeSafeMode } from '../metrics/chainflip/gaugeSafeMode';
 
@@ -85,10 +86,12 @@ async function startWatcher(context: Context) {
         await api.rpc.chain.subscribeFinalizedHeads(async (header: any) => {
             const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
             const stateChainData = await makeRpcRequest(api, 'monitoring_data', context.blockHash);
+            const apiAt = await api.at(blockHash);
             const data: ProtocolData = {
                 header: header.toJSON().number,
                 blockHash: blockHash.toJSON(),
                 data: stateChainData,
+                apiAt,
             };
             gatherGlobalValues(data);
             gaugeBlockHeight(context, data);
@@ -121,6 +124,7 @@ async function startWatcher(context: Context) {
             gaugeOraclePrices(context, data);
             gaugeBitcoinElections(context, data);
             gaugeLending(context, data);
+            clearApiAtCache(api);
             metric.set(0);
         });
     } catch (e) {

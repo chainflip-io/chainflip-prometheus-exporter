@@ -25,9 +25,7 @@ export const countEvents = async (context: Context): Promise<void> => {
     }
 
     try {
-        const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
-        const apiAt = await api.at(blockHash);
-        const events = await apiAt.query.system.events();
+        const events = await context.apiAt.query.system.events();
 
         for (const { event } of events) {
             metric.labels(`${event.section}:${event.method}`).inc();
