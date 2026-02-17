@@ -25,18 +25,18 @@ export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promi
     metricFailure.labels({ metric: metricNameSafeMode }).set(0);
 
     try {
-        const safe_mode = await makeUncheckedRpcRequest(
+        const safeModeResponse = await makeUncheckedRpcRequest(
             apiLatest,
             'safe_mode_statuses',
-            context.blockHash,
+            data.blockHash,
         );
-        const flatten = flattenObject(safe_mode);
-        for (const elem of flatten) {
-            if (elem[0] === 'witnesser') {
-                const status = elem[1] === 'CodeGreen' ? 0 : 1;
-                metricSafeMode.labels(elem[0]).set(status);
-            } else {
-                metricSafeMode.labels(elem[0]).set(elem[1] === 'true' ? 1 : 0);
+
+        const flattenedStatuses = flattenObject(safeModeResponse);
+        console.log(flattenedStatuses);
+        for (const [name, value] of flattenedStatuses) {
+            const safeModeEnabled = getSafeModeStatus(name, value);
+            if (safeModeEnabled !== null) {
+                metricSafeMode.labels(name).set(safeModeEnabled);
             }
         }
     } catch (e) {
@@ -44,19 +44,33 @@ export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promi
     }
 };
 
-function flattenObject(obj: Record<string, unknown>, parentKey = ''): any[] {
-    let result: any[] = [];
-    for (const key in obj) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (obj.hasOwnProperty(key)) {
-            const newKey = parentKey ? `${parentKey}.${key}` : key;
-            if (typeof obj[key] === 'object' && obj[key] !== null) {
-                // @ts-expect-error Ingore
-                result = result.concat(flattenObject(obj[key], newKey));
-            } else {
-                result.push([newKey, obj[key]]);
-            }
+function flattenObject(
+    obj: Record<string, unknown>,
+    parentKey = '',
+): Array<[name: string, value: unknown]> {
+    let result: Array<[name: string, value: unknown]> = [];
+
+    for (const [key, value] of Object.entries(obj)) {
+        const newKey = parentKey ? `${parentKey}.${key}` : key;
+
+        if (Array.isArray(value)) {
+            continue;
+        }
+
+        if (value !== null && typeof value === 'object') {
+            result = result.concat(flattenObject(value as Record<string, unknown>, newKey));
+        } else {
+            result.push([newKey, value]);
         }
     }
+
     return result;
+}
+
+function getSafeModeStatus(name: string, value: unknown): number | null {
+    if (name === 'witnesser') {
+        return value === 'CodeGreen' ? 0 : 1;
+    }
+
+    return value ? 0 : 1;
 }
