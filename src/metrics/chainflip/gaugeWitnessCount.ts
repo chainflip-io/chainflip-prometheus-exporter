@@ -1,6 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { hex2bin, insertOrReplace, ProtocolData } from '../../utils/utils';
+import { hex2bin, insertOrReplace, logStructureSize, ProtocolData } from '../../utils/utils';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const witnessExtrinsicHash10 = new Map<number, Set<string>>();
@@ -38,6 +38,23 @@ export const gaugeWitnessCount = async (context: Context, data: ProtocolData): P
         try {
             const signedBlock = await apiLatest.rpc.chain.getBlock(data.blockHash);
             const currentBlockNumber = data.blockNumber;
+            logStructureSize(
+                logger,
+                'witnessCount.witnessExtrinsicHash10',
+                witnessExtrinsicHash10.size,
+                currentBlockNumber,
+                { everyBlocks: 50 },
+            );
+            logStructureSize(
+                logger,
+                'witnessCount.witnessExtrinsicHash50',
+                witnessExtrinsicHash50.size,
+                currentBlockNumber,
+                { everyBlocks: 50 },
+            );
+            logStructureSize(logger, 'witnessCount.toDelete', toDelete.size, currentBlockNumber, {
+                everyBlocks: 50,
+            });
             deleteOldHashes(currentBlockNumber);
             processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
             processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);

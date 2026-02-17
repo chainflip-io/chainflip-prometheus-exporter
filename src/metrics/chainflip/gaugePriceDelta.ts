@@ -2,7 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { Axios } from 'axios';
 import { env } from '../../config/getConfig';
-import { ProtocolData } from '../../utils/utils';
+import { logStructureSize, ProtocolData } from '../../utils/utils';
 import { SwapSDK, Chains, Assets, SwapSDKOptions, ChainflipNetworks } from '@chainflip/sdk/swap';
 
 const metricToUsdcName: string = 'cf_price_delta_to_usdc';
@@ -234,6 +234,9 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         const formattedData = JSON.parse(dataPrices.data).data.tokenPrices;
         formattedData.forEach((element: any) => {
             prices.set(element.chainId.toString().concat(element.address), element.usdPrice);
+        });
+        logStructureSize(logger, 'priceDelta.pricesMap', prices.size, data.blockNumber, {
+            everyBlocks: 100,
         });
         setGlobalPrices(prices);
         metricFailure.labels('cf_price_delta').set(0);

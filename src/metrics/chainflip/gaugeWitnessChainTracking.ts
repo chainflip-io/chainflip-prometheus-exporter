@@ -1,7 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { blake2AsHex } from '@polkadot/util-crypto';
-import { hex2bin, insertOrReplace, ProtocolData } from '../../utils/utils';
+import { hex2bin, insertOrReplace, logStructureSize, ProtocolData } from '../../utils/utils';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const witnessHash10 = new Map<number, Set<string>>();
@@ -41,6 +41,27 @@ export const gaugeWitnessChainTracking = async (
         try {
             const signedBlock = await apiLatest.rpc.chain.getBlock(data.blockHash);
             const currentBlockNumber = data.blockNumber;
+            logStructureSize(
+                logger,
+                'witnessChainTracking.witnessHash10',
+                witnessHash10.size,
+                currentBlockNumber,
+                { everyBlocks: 50 },
+            );
+            logStructureSize(
+                logger,
+                'witnessChainTracking.witnessHash50',
+                witnessHash50.size,
+                currentBlockNumber,
+                { everyBlocks: 50 },
+            );
+            logStructureSize(
+                logger,
+                'witnessChainTracking.toDelete',
+                toDelete.size,
+                currentBlockNumber,
+                { everyBlocks: 50 },
+            );
             deleteOldHashes(currentBlockNumber);
             await processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
             await processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);

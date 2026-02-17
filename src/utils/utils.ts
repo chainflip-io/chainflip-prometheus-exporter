@@ -61,6 +61,42 @@ export function chunk(arr: any[], n: number) {
     return r.map((e, i) => arr.slice(i * n, i * n + n));
 }
 
+type LogStructureSizeOptions = {
+    everyBlocks?: number;
+};
+
+const structureSizeLogState = new Map<string, { lastBlock: number; maxSize: number }>();
+
+export function logStructureSize(
+    logger: { debug: (msg: string) => void; warn?: (msg: string) => void },
+    key: string,
+    size: number,
+    blockNumber: number,
+    options: LogStructureSizeOptions = {},
+) {
+    const everyBlocks = options.everyBlocks ?? 120;
+    const normalizedSize = Number.isFinite(size) ? size : 0;
+    const normalizedBlock = Number.isFinite(blockNumber) ? blockNumber : 0;
+
+    const state = structureSizeLogState.get(key) ?? {
+        lastBlock: Number.NEGATIVE_INFINITY,
+        maxSize: 0,
+    };
+    const hasNewPeak = normalizedSize > state.maxSize;
+    const shouldLog = hasNewPeak || normalizedBlock - state.lastBlock >= everyBlocks;
+    const maxSize = Math.max(state.maxSize, normalizedSize);
+
+    if (shouldLog) {
+        logger.debug(
+            `[growth] ${key}: size=${normalizedSize}, max=${maxSize}, block=${normalizedBlock}`,
+        );
+        state.lastBlock = normalizedBlock;
+    }
+
+    state.maxSize = maxSize;
+    structureSizeLogState.set(key, state);
+}
+
 export function insertOrReplace(
     map: Map<number, Set<string>>,
     elem: string,

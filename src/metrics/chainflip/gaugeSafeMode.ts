@@ -32,7 +32,6 @@ export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promi
         );
 
         const flattenedStatuses = flattenObject(safeModeResponse);
-        console.log(flattenedStatuses);
         for (const [name, value] of flattenedStatuses) {
             const safeModeEnabled = getSafeModeStatus(name, value);
             if (safeModeEnabled !== null) {

@@ -2,7 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
-import { getStateChainError, parseEvent, ProtocolData } from '../../utils/utils';
+import { getStateChainError, logStructureSize, parseEvent, ProtocolData } from '../../utils/utils';
 import { eventsRotationInfo } from './eventsRotationInfo';
 
 const metricName: string = 'cf_events_count_total';
@@ -134,6 +134,15 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
     }
     try {
         cleanupStaleCcmBroadcasts(data.blockNumber, logger);
+        logStructureSize(
+            logger,
+            'countEvents.ccmBroadcasts',
+            ccmBroadcasts.size,
+            data.blockNumber,
+            {
+                everyBlocks: 100,
+            },
+        );
 
         const events = await api.query.system.events();
         let foundReorg = false;
