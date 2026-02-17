@@ -53,14 +53,25 @@ const metricReorgDetected: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-const ccmBroadcasts: Set<number> = new Set<number>();
+// Track CCM broadcasts with their block numbers for TTL cleanup
+const ccmBroadcasts: Map<number, number> = new Map<number, number>();
+const CCM_BROADCAST_TTL_BLOCKS = 1000; // Clean up after 1000 blocks (~2 hours)
+
+function cleanupStaleCcmBroadcasts(currentBlock: number, logger: any) {
+    const sizeBefore = ccmBroadcasts.size;
+    for (const [broadcastId, blockNumber] of ccmBroadcasts.entries()) {
+        if (currentBlock - blockNumber > CCM_BROADCAST_TTL_BLOCKS) {
+            ccmBroadcasts.delete(broadcastId);
+        }
+    }
+}
 
 export const countEvents = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_events_count_total')) {
         return;
     }
     const { logger, registry, apiLatest, metricFailure } = context;
-    const api = await apiLatest.at(data.blockHash);
+    const api = data.blockApi;
     const config = context.config as FlipConfig;
     const { accounts, skipEvents } = config;
 
@@ -122,6 +133,8 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         registry.registerMetric(metricReorgDetected);
     }
     try {
+        cleanupStaleCcmBroadcasts(data.blockNumber, logger);
+
         const events = await api.query.system.events();
         let foundReorg = false;
         eventsRotationInfo(context, data, events);
@@ -138,10 +151,10 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
             }
             metric.labels(`${event.section}:${event.method}`).inc(1);
 
-            // Save the list of broadcastId for CCM
+            // Save the list of broadcastId for CCM with current block number
             if (event.method === 'CcmBroadcastRequested') {
                 const broacastId = event.data.toJSON()[0];
-                ccmBroadcasts.add(broacastId);
+                ccmBroadcasts.set(broacastId, data.blockNumber);
             }
 
             // Whenever a broadcast aborted is received we check if the broadcastId is in the list and if so we remove it
@@ -179,7 +192,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
                         error,
                         event: `${event.section}:${event.method}`,
                         data: event.data.toHuman(),
-                        block: data.header,
+                        block: data.blockNumber,
                     });
                 } else {
                     const eventHumanized = event.data.toHuman();
@@ -192,7 +205,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
                     logger.info('event_log', {
                         event: `${event.section}:${event.method}`,
                         data: eventHumanized,
-                        block: data.header,
+                        block: data.blockNumber,
                     });
                 }
             }
@@ -216,7 +229,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
                         start_block: blocks[0],
                         end_block: blocks[1],
                         depth: blocks[1] - blocks[0] + 1,
-                        block: data.header,
+                        block: data.blockNumber,
                     });
                     metricReorgDetected.labels('bitcoin').set(blocks[1] - blocks[0] + 1);
                 }
