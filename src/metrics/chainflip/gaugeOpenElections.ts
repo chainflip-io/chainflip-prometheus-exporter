@@ -76,7 +76,7 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
         FF: 0,
     };
     try {
-        const api = await apiLatest.at(data.blockHash);
+        const api = data.blockApi;
         const result = await api.query.solanaElections.electionProperties.entries();
         result.forEach(([_, election_properties]: any[]) => {
             const value = election_properties.toJSON();

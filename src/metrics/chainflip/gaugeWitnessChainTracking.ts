@@ -40,7 +40,7 @@ export const gaugeWitnessChainTracking = async (
             registry.registerMetric(metricWitnessFailure);
         try {
             const signedBlock = await apiLatest.rpc.chain.getBlock(data.blockHash);
-            const currentBlockNumber = data.header;
+            const currentBlockNumber = data.blockNumber;
             deleteOldHashes(currentBlockNumber);
             await processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
             await processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);

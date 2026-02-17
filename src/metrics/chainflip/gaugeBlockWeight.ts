@@ -11,7 +11,7 @@ const metric: Gauge = new promClient.Gauge({
 
 export const gaugeBlockWeight = async (context: Context, data: ProtocolData): Promise<void> => {
     const { logger, apiLatest, registry, metricFailure } = context;
-    const api = await apiLatest.at(data.blockHash);
+    const api = data.blockApi;
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     logger.debug(`Scraping ${metricName}`);

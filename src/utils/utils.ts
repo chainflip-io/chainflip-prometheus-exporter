@@ -34,8 +34,9 @@ declare global {
 
 export type ProtocolData = {
     blockHash: string;
-    header: number;
+    blockNumber: number;
     data: RpcReturnValue['monitoring_data'];
+    blockApi: any;
 };
 
 export type SolanaNonce = {

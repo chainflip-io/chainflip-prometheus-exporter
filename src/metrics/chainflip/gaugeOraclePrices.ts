@@ -122,7 +122,7 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
                 }
             }
 
-            const api = await apiLatest.at(data.blockHash);
+            const api = data.blockApi;
             const unsync_state = (
                 await api.query.genericElections.electoralUnsynchronisedState()
             ).toJSON();
