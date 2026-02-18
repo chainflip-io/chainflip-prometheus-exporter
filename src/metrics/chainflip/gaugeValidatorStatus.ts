@@ -129,7 +129,7 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
         }
 
         // Gathering metrics about all the active set
-        const api = await apiLatest.at(data.blockHash);
+        const api = data.blockApi;
         const authorities = (await api.query.validator.currentAuthorities()).toJSON();
 
         if (!oldAuthorities) {

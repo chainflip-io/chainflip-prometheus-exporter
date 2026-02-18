@@ -53,7 +53,7 @@ export const gaugeEpoch = async (context: Context, data: ProtocolData): Promise<
     metricMAB.set(MAB);
 
     const currentEpochDurationBlocks: number =
-        data.header - data.data.epoch.current_epoch_started_at;
+        data.blockNumber - data.data.epoch.current_epoch_started_at;
     metricEpochDuration.set(currentEpochDurationBlocks);
 
     let metricValue: number;

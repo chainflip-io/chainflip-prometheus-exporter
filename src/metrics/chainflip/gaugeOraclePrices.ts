@@ -2,7 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 import { FlipConfig } from '../../config/interfaces';
-import { ProtocolData } from '../../utils/utils';
+import { logStructureSize, ProtocolData } from '../../utils/utils';
 
 const metricNameOraclePrices: string = 'cf_oracle_price';
 const metricOraclePrices: Gauge = new promClient.Gauge({
@@ -122,7 +122,7 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
                 }
             }
 
-            const api = await apiLatest.at(data.blockHash);
+            const api = data.blockApi;
             const unsync_state = (
                 await api.query.genericElections.electoralUnsynchronisedState()
             ).toJSON();
@@ -180,6 +180,13 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
                     .set(ethereumPrices[asset].updatedAtStatechainBlock);
             }
         }
+        logStructureSize(
+            logger,
+            'oraclePrices.global.oraclePrices',
+            global.oraclePrices?.size ?? 0,
+            data.blockNumber,
+            { everyBlocks: 100 },
+        );
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricNameOraclePrices }).set(1);

@@ -37,6 +37,10 @@ jobs:
         id: check_metrics
         run: curl -sSfo $METRICS_FILE_NAME --retry 5 --retry-all-errors http://localhost:9000/metrics
 
+      - name: Dump service logs on failure
+        if: failure()
+        run: docker logs $(docker ps -aq --filter "ancestor=ghcr.io/chainflip-io/chainflip-prometheus-exporter:dev-${{ github.sha }}") 2>&1 || true
+
       - name: Check metrics output
         run: |
           cat $METRICS_FILE_NAME | grep btc_

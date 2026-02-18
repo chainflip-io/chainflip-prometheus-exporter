@@ -18,6 +18,6 @@ export const gaugeBlockHeight = async (context: Context, data: ProtocolData) => 
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.set(data.header);
+    metric.set(data.blockNumber);
     registry.registerMetric(metric);
 };

@@ -1,6 +1,6 @@
 import promClient, { Gauge, Histogram } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { ProtocolData } from '../../utils/utils';
+import { logStructureSize, ProtocolData } from '../../utils/utils';
 import makeRpcRequest from '../../utils/makeRpcRequest';
 import util from 'util';
 
@@ -200,6 +200,13 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
         if (shouldObserveHistogram) {
             lastHistogramObservation = now;
         }
+        logStructureSize(
+            logger,
+            'lending.previousAccounts',
+            previousAccounts.size,
+            data.blockNumber,
+            { everyBlocks: 100 },
+        );
 
         metricFailure.labels('cf_lending').set(0);
     } catch (e) {

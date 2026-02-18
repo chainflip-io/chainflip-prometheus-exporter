@@ -92,7 +92,7 @@ export const gaugeBitcoinElections = async (
     }
 
     try {
-        const api = await apiLatest.at(data.blockHash);
+        const api = data.blockApi;
         const unsync_state = (
             await api.query.bitcoinElections.electoralUnsynchronisedState()
         ).toJSON();
@@ -102,7 +102,7 @@ export const gaugeBitcoinElections = async (
 
         // Block Height Witnesser
         logger.info('Bitcoin_BHW_state', {
-            block: data.header,
+            block: data.blockNumber,
             data: {
                 bhw_witnessFrom,
                 bhw_headers: unsync_state[0].phase.runningBitcoin.headers,
@@ -138,7 +138,7 @@ export const gaugeBitcoinElections = async (
             .labels('bitcoin', 'deposit_channels')
             .set(Object.keys(bw_deposit_channels_ongoing).length);
         logger.info('Bitcoin_BW_deposit_channels_state', {
-            block: data.header,
+            block: data.blockNumber,
             data: {
                 bw_deposit_channels_seen_heights_below,
                 bw_deposit_channels_highest_ever_ongoing,
@@ -167,7 +167,7 @@ export const gaugeBitcoinElections = async (
         metricQueuedSafe.labels('bitcoin', 'vaults').set(bw_vaults_queued_safe_count);
         metricOngoing.labels('bitcoin', 'vaults').set(Object.keys(bw_vaults_ongoing).length);
         logger.info('Bitcoin_BW_vaults_state', {
-            block: data.header,
+            block: data.blockNumber,
             data: {
                 bw_vaults_seen_heights_below,
                 bw_vaults_highest_ever_ongoing,
@@ -200,7 +200,7 @@ export const gaugeBitcoinElections = async (
         metricQueuedSafe.labels('bitcoin', 'egresses').set(bw_egresses_queued_safe_count);
         metricOngoing.labels('bitcoin', 'egresses').set(Object.keys(bw_egresses_ongoing).length);
         logger.info('Bitcoin_BW_egresses_state', {
-            block: data.header,
+            block: data.blockNumber,
             data: {
                 bw_egresses_seen_heights_below,
                 bw_egresses_highest_ever_ongoing,
