@@ -242,6 +242,7 @@ export const customRpcTypes = {
                 }),
                 total_amount: flexibleHexString,
                 available_amount: flexibleHexString,
+                owed_to_network: flexibleHexString,
                 utilisation_rate: number,
                 current_interest_rate: number,
                 origination_fee: number,
@@ -259,16 +260,19 @@ export const customRpcTypes = {
                     ...data,
                     total_amount: hexToNumber(data.total_amount, decimals),
                     available_amount: hexToNumber(data.available_amount, decimals),
+                    owed_to_network: hexToNumber(data.owed_to_network, decimals),
                 };
             }),
     ),
     loan_accounts: z.array(
         z.object({
             account: string,
-            collateral_topup_asset: z.object({
-                chain: string,
-                asset: string,
-            }),
+            collateral_topup_asset: z
+                .object({
+                    chain: string,
+                    asset: string,
+                })
+                .nullable(),
             ltv_ratio: z.union([string, z.null()]),
             collateral: z.array(
                 z

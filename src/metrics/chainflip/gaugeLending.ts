@@ -102,6 +102,9 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
                 .labels(pool.asset.asset, 'available_amount')
                 .set(pool.available_amount);
             metricLendingPools
+                .labels(pool.asset.asset, 'owed_to_network')
+                .set(pool.owed_to_network);
+            metricLendingPools
                 .labels(pool.asset.asset, 'utilisation_rate')
                 .set(pool.utilisation_rate / 10000);
             metricLendingPools
@@ -116,6 +119,9 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
                     metricLendingPools
                         .labels(pool.asset.asset, 'available_amount_usd')
                         .set(pool.available_amount * price);
+                    metricLendingPools
+                        .labels(pool.asset.asset, 'owed_to_network_usd')
+                        .set(pool.owed_to_network * price);
                 }
             }
         }
