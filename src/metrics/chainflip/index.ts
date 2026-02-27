@@ -22,7 +22,7 @@ export * from './guageExternalChainsBlockHeight';
 export * from './gaugePriceDelta';
 export * from './gaugeDepositChannels';
 export * from './gaugeSolanaDurableNonces';
-export * from './gaugeBitcoinElections';
+export * from './gaugeElections';
 export * from './gaugeOraclePrices';
 export * from './gaugeDelegation';
 export * from './gaugeLending';
