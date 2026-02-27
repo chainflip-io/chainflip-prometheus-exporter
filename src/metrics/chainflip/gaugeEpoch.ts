@@ -49,8 +49,10 @@ export const gaugeEpoch = async (context: Context, data: ProtocolData): Promise<
 
     metricBlocksPerEpoch.set(data.data.epoch.epoch_duration);
 
-    const MAB: number = Number(Number(data.data.epoch.min_active_bid) / 10 ** 18);
-    metricMAB.set(MAB);
+    if (data.data.epoch.min_active_bid != null) {
+        const MAB: number = Number(data.data.epoch.min_active_bid) / 10 ** 18;
+        metricMAB.set(MAB);
+    }
 
     const currentEpochDurationBlocks: number =
         data.blockNumber - data.data.epoch.current_epoch_started_at;

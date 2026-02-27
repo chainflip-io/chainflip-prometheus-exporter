@@ -135,7 +135,7 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
         for (const account of loanAccounts) {
             currentAccounts.add(account.account);
 
-            if (account.ltv_ratio !== null) {
+            if (account.ltv_ratio != null) {
                 // Convert LTV ratio to 0-100 scale (assuming it's in basis points or similar)
                 // Adjust this calculation based on your actual LTV ratio format
                 const ltv = parseFloat(account.ltv_ratio) / 10000000;

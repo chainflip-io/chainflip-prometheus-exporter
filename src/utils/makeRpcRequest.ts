@@ -13,18 +13,12 @@ const U32 = number;
 const hexString = string.regex(/^0x[0-9a-fA-F]*$/);
 const U128 = z
     .union([
-        hexString.length(34), // if it's too large to be safe in JS, it's a hex-encoded string
-        number, // otherwise it's a number
+        hexString, // hex-encoded string of any length
+        number, // or a number (for smaller values)
     ])
     .transform((n: any) => BigInt(n));
 
-// Flexible hex string that accepts any length (for lending amounts)
-const flexibleHexString = z
-    .union([
-        hexString, // any hex string
-        number, // or a number
-    ])
-    .transform((n: any) => BigInt(n));
+const flexibleHexString = U128;
 
 const Amount = U128;
 
@@ -40,6 +34,7 @@ const UnformattedEthereumAddress = z
 const AuctionParameters = z.tuple([U32, U32]);
 const CurrentEpochStartedAt = U32;
 const EpochDuration = U32;
+const VaultImbalance = z.union([z.object({ Surplus: U128 }), z.object({ Deficit: U128 })]);
 
 // Helper function to get decimals for an asset
 function getAssetDecimals(chain: string, asset: string): number {
@@ -108,6 +103,7 @@ export const customRpcTypes = {
         external_chains_height: z.object({
             bitcoin: U32,
             ethereum: U32,
+            polkadot: U32,
             arbitrum: U32,
             solana: U32,
             assethub: U32,
@@ -120,7 +116,7 @@ export const customRpcTypes = {
             epoch_duration: U32,
             current_epoch_started_at: U32,
             current_epoch_index: U32,
-            min_active_bid: z.optional(U128),
+            min_active_bid: U128.nullish(),
             rotation_phase: string,
         }),
         pending_redemptions: z.object({
@@ -130,6 +126,7 @@ export const customRpcTypes = {
         pending_broadcasts: z.object({
             ethereum: U32,
             bitcoin: U32,
+            polkadot: U32,
             arbitrum: U32,
             solana: U32,
             assethub: U32,
@@ -137,21 +134,24 @@ export const customRpcTypes = {
         pending_tss: z.object({
             evm: U32,
             bitcoin: U32,
+            polkadot: U32,
             solana: U32,
         }),
         open_deposit_channels: z.object({
             ethereum: U32,
             bitcoin: U32,
+            polkadot: U32,
             arbitrum: U32,
             solana: U32,
             assethub: U32,
         }),
         fee_imbalance: z.object({
-            ethereum: z.object({ Surplus: U128, Deficit: U128 }),
-            bitcoin: z.object({ Surplus: U128, Deficit: U128 }),
-            arbitrum: z.object({ Surplus: U128, Deficit: U128 }),
-            solana: z.object({ Surplus: U128, Deficit: U128 }),
-            assethub: z.object({ Surplus: U128, Deficit: U128 }),
+            ethereum: VaultImbalance,
+            polkadot: VaultImbalance,
+            bitcoin: VaultImbalance,
+            arbitrum: VaultImbalance,
+            solana: VaultImbalance,
+            assethub: VaultImbalance,
         }),
         authorities: z.object({
             authorities: U32,
@@ -163,7 +163,7 @@ export const customRpcTypes = {
             spec_version: U32,
             spec_name: string,
         }),
-        suspended_validators: z.array(Offence, U32),
+        suspended_validators: z.array(z.tuple([Offence, U32])),
         pending_swaps: U32,
         flip_supply: z.object({
             total_supply: U128,
@@ -177,11 +177,12 @@ export const customRpcTypes = {
             unavailable: z.array(string),
         }),
         activating_key_broadcast_ids: z.object({
-            ethereum: z.optional(U32),
-            bitcoin: z.optional(U32),
-            arbitrum: z.optional(U32),
-            assethub: z.optional(U32),
-            solana: z.tuple([z.optional(U32), z.optional(string)]),
+            ethereum: U32.nullish(),
+            bitcoin: U32.nullish(),
+            polkadot: U32.nullish(),
+            arbitrum: U32.nullish(),
+            assethub: U32.nullish(),
+            solana: z.tuple([U32.nullish(), string.nullish()]),
         }),
     }),
     monitoring_accounts_info: z.array(
@@ -195,10 +196,11 @@ export const customRpcTypes = {
             is_qualified: boolean,
             is_online: boolean,
             is_bidding: boolean,
-            bound_redeem_address: z.optional(string),
-            apy_bp: z.optional(U32),
+            bound_redeem_address: string.nullish(),
+            apy_bp: U32.nullish(),
+            restricted_balances: z.record(z.string(), U128).nullish(),
             estimated_redeemable_balance: U128,
-            operator: z.optional(string),
+            operator: string.nullish(),
         }),
     ),
     oracle_prices: z.array(
@@ -265,11 +267,13 @@ export const customRpcTypes = {
     loan_accounts: z.array(
         z.object({
             account: string,
-            collateral_topup_asset: z.object({
-                chain: string,
-                asset: string,
-            }),
-            ltv_ratio: z.union([string, z.null()]),
+            collateral_topup_asset: z
+                .object({
+                    chain: string,
+                    asset: string,
+                })
+                .nullish(),
+            ltv_ratio: string.nullish(),
             collateral: z.array(
                 z
                     .object({
@@ -367,17 +371,17 @@ export default async function makeRpcRequest<M extends RpcCall>(
     ...args: RpcParamsMap[M]
 ): Promise<RpcReturnValue[M]> {
     const result: any = await apiPromise.rpc(`cf_${method}`, ...args);
-    // Only parse lending-related RPC calls to apply hex-to-number transformations
-    const lendingMethods: RpcCall[] = [
-        'lending_pools',
-        'loan_accounts',
-        'lending_pool_supply_balances',
-    ];
-    if (lendingMethods.includes(method)) {
-        const parsed = customRpcTypes[method].parse(result.toJSON ? result.toJSON() : result);
-        return parsed as RpcReturnValue[M];
+    const jsonResult = result.toJSON ? result.toJSON() : result;
+    const parsed = customRpcTypes[method].safeParse(jsonResult);
+    if (!parsed.success) {
+        console.error(
+            `Zod parsing failed for RPC method '${method}':`,
+            JSON.stringify(parsed.error.issues, null, 2),
+        );
+        console.error(`Raw data for '${method}':`, JSON.stringify(jsonResult).slice(0, 3000));
+        throw new Error(`Zod parsing failed for RPC method '${method}'`);
     }
-    return result as RpcReturnValue[M];
+    return parsed.data as RpcReturnValue[M];
 }
 
 export async function makeUncheckedRpcRequest(
