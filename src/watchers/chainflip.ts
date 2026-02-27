@@ -24,7 +24,7 @@ import {
     gaugeWitnessCount,
     gaugeSolanaNonces,
     gaugeBlockWeight,
-    gaugeBitcoinElections,
+    gaugeElections,
     gaugeOraclePrices,
     gaugeDelegation,
     gaugeLending,
@@ -122,7 +122,7 @@ async function startWatcher(context: Context) {
             gaugeBuildVersion(context, data);
             gaugePriceDelta(context, data);
             gaugeOraclePrices(context, data);
-            gaugeBitcoinElections(context, data);
+            gaugeElections(context, data);
             gaugeLending(context, data);
             metric.set(0);
         });
