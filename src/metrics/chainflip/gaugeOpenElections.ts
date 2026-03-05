@@ -10,47 +10,71 @@ const metricOpenElection: Gauge = new promClient.Gauge({
     registers: [],
 });
 
-const mapSolana = new Map([
-    ['A', 'SolanaBlockHeightTracking'],
-    ['B', 'SolanaIngressTracking'],
-    ['C', 'SolanaNonceTracking'],
-    ['D', 'SolanaEgressWitnessing'],
-    ['EE', 'SolanaLiveness'],
-    ['FF', 'SolanaVaultSwapTracking'],
-    ['G', 'SolanaAltWitnessing'],
-]);
-
-const mapBitcoin = new Map([
-    ['A', 'BitcoinBlockHeightWitnesserES'],
-    ['B', 'BitcoinDepositChannelWitnessingES'],
-    ['C', 'BitcoinVaultDepositWitnessingES'],
-    ['D', 'BitcoinEgressWitnessingES'],
-    ['EE', 'BitcoinFeeTracking'],
-    ['FF', 'BitcoinLiveness'],
-]);
-
-type election_count_sol = {
-    A: number;
-    B: number;
-    C: number;
-    D: number;
-    EE: number;
-    FF: number;
-    G: number;
+type ChainElectionOpenConfig = {
+    chainName: string;
+    palletName: string;
+    electoralSystems: Map<string, string>;
 };
-type election_count_btc = {
-    A: number;
-    B: number;
-    C: number;
-    D: number;
-    EE: number;
-    FF: number;
-};
+
+const CHAIN_CONFIGS: ChainElectionOpenConfig[] = [
+    {
+        chainName: 'solana',
+        palletName: 'solanaElections',
+        electoralSystems: new Map([
+            ['A', 'SolanaBlockHeightTracking'],
+            ['B', 'SolanaIngressTracking'],
+            ['C', 'SolanaNonceTracking'],
+            ['D', 'SolanaEgressWitnessing'],
+            ['EE', 'SolanaLiveness'],
+            ['FF', 'SolanaVaultSwapTracking'],
+            ['G', 'SolanaAltWitnessing'],
+        ]),
+    },
+    {
+        chainName: 'bitcoin',
+        palletName: 'bitcoinElections',
+        electoralSystems: new Map([
+            ['A', 'BitcoinBlockHeightWitnesser'],
+            ['B', 'BitcoinDepositChannelWitnessing'],
+            ['C', 'BitcoinVaultDepositWitnessing'],
+            ['D', 'BitcoinEgressWitnessing'],
+            ['EE', 'BitcoinFeeTracking'],
+            ['FF', 'BitcoinLiveness'],
+        ]),
+    },
+    {
+        chainName: 'ethereum',
+        palletName: 'ethereumElections',
+        electoralSystems: new Map([
+            ['A', 'EthereumBlockHeightWitnesser'],
+            ['B', 'EthereumDepositChannelWitnessing'],
+            ['C', 'EthereumVaultDepositWitnessing'],
+            ['D', 'EthereumKeyManagerWitnessing'],
+            ['EE', 'EthereumFeeTracking'],
+            ['FF', 'EthereumLiveness'],
+            ['G', 'EthereumStateChainGatewayWitnessing'],
+            ['HH', 'EthereumScUtilsWitnessing'],
+        ]),
+    },
+    {
+        chainName: 'arbitrum',
+        palletName: 'arbitrumElections',
+        electoralSystems: new Map([
+            ['A', 'ArbitrumBlockHeightWitnesser'],
+            ['B', 'ArbitrumDepositChannelWitnessing'],
+            ['C', 'ArbitrumVaultDepositWitnessing'],
+            ['D', 'ArbitrumKeyManagerWitnessing'],
+            ['EE', 'ArbitrumFeeTracking'],
+            ['FF', 'ArbitrumLiveness'],
+        ]),
+    },
+];
+
 export const gaugeOpenElections = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_open_elections')) {
         return;
     }
-    const { logger, apiLatest, registry, metricFailure } = context;
+    const { logger, registry, metricFailure } = context;
 
     logger.debug(`Scraping ${metricNameOpenElection}`);
 
@@ -58,61 +82,38 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
         registry.registerMetric(metricOpenElection);
 
     metricFailure.labels({ metric: metricNameOpenElection }).set(0);
-    const countSolana: election_count_sol = {
-        A: 0,
-        B: 0,
-        C: 0,
-        D: 0,
-        EE: 0,
-        FF: 0,
-        G: 0,
-    };
-    const countBitcoin: election_count_btc = {
-        A: 0,
-        B: 0,
-        C: 0,
-        D: 0,
-        EE: 0,
-        FF: 0,
-    };
+
     try {
         const api = data.blockApi;
-        const result = await api.query.solanaElections.electionProperties.entries();
-        result.forEach(([_, election_properties]: any[]) => {
-            const value = election_properties.toJSON();
-            if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-                const electoral_system = Object.keys(
-                    value,
-                )[0].toUpperCase() as keyof election_count_sol;
-                countSolana[electoral_system] = countSolana[electoral_system] + 1;
-            } else if (value !== null) {
-                countSolana[value.toUpperCase() as keyof election_count_sol] =
-                    countSolana[value.toUpperCase() as keyof election_count_sol] + 1;
+
+        for (const chainConfig of CHAIN_CONFIGS) {
+            const counts: Record<string, number> = {};
+            for (const key of chainConfig.electoralSystems.keys()) {
+                counts[key] = 0;
             }
-        });
 
-        for (const [key, value] of Object.entries(countSolana)) {
-            const full_name = mapSolana.get(key) as string;
-            metricOpenElection.labels('solana', key.concat('_', full_name)).set(value);
-        }
+            const result = await api.query[chainConfig.palletName].electionProperties.entries();
+            result.forEach(([_, election_properties]: any[]) => {
+                const value = election_properties.toJSON();
+                if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+                    const electoral_system = Object.keys(value)[0].toUpperCase();
+                    if (electoral_system in counts) {
+                        counts[electoral_system] = counts[electoral_system] + 1;
+                    }
+                } else if (value !== null) {
+                    const key = value.toUpperCase();
+                    if (key in counts) {
+                        counts[key] = counts[key] + 1;
+                    }
+                }
+            });
 
-        const result2 = await api.query.bitcoinElections.electionProperties.entries();
-        result2.forEach(([_, election_properties]: any[]) => {
-            const value = election_properties.toJSON();
-            if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-                const electoral_system = Object.keys(
-                    value,
-                )[0].toUpperCase() as keyof election_count_btc;
-                countBitcoin[electoral_system] = countBitcoin[electoral_system] + 1;
-            } else if (value !== null) {
-                countBitcoin[value.toUpperCase() as keyof election_count_btc] =
-                    countBitcoin[value.toUpperCase() as keyof election_count_btc] + 1;
+            for (const [key, count] of Object.entries(counts)) {
+                const full_name = chainConfig.electoralSystems.get(key) as string;
+                metricOpenElection
+                    .labels(chainConfig.chainName, key.concat('_', full_name))
+                    .set(count);
             }
-        });
-
-        for (const [key, value] of Object.entries(countBitcoin)) {
-            const full_name = mapBitcoin.get(key) as string;
-            metricOpenElection.labels('bitcoin', key.concat('_', full_name)).set(value);
         }
     } catch (e) {
         metricFailure.labels({ metric: metricNameOpenElection }).set(1);

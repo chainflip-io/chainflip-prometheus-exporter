@@ -2,7 +2,13 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { FlipConfig } from '../../config/interfaces';
 import { decodeAddress } from '@polkadot/util-crypto';
-import { getStateChainError, logStructureSize, parseEvent, ProtocolData } from '../../utils/utils';
+import {
+    getStateChainError,
+    logStructureSize,
+    parseEvent,
+    ProtocolData,
+    toNumber,
+} from '../../utils/utils';
 import { eventsRotationInfo } from './eventsRotationInfo';
 
 const metricName: string = 'cf_events_count_total';
@@ -52,6 +58,9 @@ const metricReorgDetected: Gauge = new promClient.Gauge({
     labelNames: ['tracked_chain'],
     registers: [],
 });
+
+// Track which chains have had reorg events so we can reset them to 0 when no reorg is detected
+let activeReorgChains: Set<string> = new Set<string>();
 
 // Track CCM broadcasts with their block numbers for TTL cleanup
 const ccmBroadcasts: Map<number, number> = new Map<number, number>();
@@ -145,7 +154,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         );
 
         const events = await api.query.system.events();
-        let foundReorg = false;
+        const reorgChains: Set<string> = new Set<string>();
         eventsRotationInfo(context, data, events);
         for (const { event } of events) {
             let skip = false;
@@ -231,22 +240,29 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
             if (event.method === 'ElectoralEvent') {
                 const parsedEvent = event.data.toJSON()[0];
                 if (parsedEvent?.reorgDetected) {
-                    foundReorg = true;
-                    const blocks = event.data.toJSON()[0].reorgDetected.reorgedBlocks;
+                    const chain = event.section.replace('Elections', '');
+                    reorgChains.add(chain);
+                    const blocks = parsedEvent.reorgDetected.reorgedBlocks;
+                    const startBlock = toNumber(blocks[0]);
+                    const endBlock = toNumber(blocks[1]);
                     logger.info('reorg_log', {
                         event: `reorgDetected`,
-                        start_block: blocks[0],
-                        end_block: blocks[1],
-                        depth: blocks[1] - blocks[0] + 1,
+                        chain,
+                        start_block: startBlock,
+                        end_block: endBlock,
+                        depth: endBlock - startBlock + 1,
                         block: data.blockNumber,
                     });
-                    metricReorgDetected.labels('bitcoin').set(blocks[1] - blocks[0] + 1);
+                    metricReorgDetected.labels(chain).set(endBlock - startBlock + 1);
                 }
             }
         }
-        if (!foundReorg) {
-            metricReorgDetected.labels('bitcoin').set(0);
+        for (const chain of activeReorgChains) {
+            if (!reorgChains.has(chain)) {
+                metricReorgDetected.labels(chain).set(0);
+            }
         }
+        activeReorgChains = reorgChains;
 
         metricFailure.labels('events_metrics').set(0);
     } catch (e) {
