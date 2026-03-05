@@ -218,6 +218,13 @@ export const getStateChainError = async (
     };
 };
 
+export function toNumber(value: any): number {
+    if (typeof value === 'object' && value !== null && 'root' in value) {
+        return Number(value.root);
+    }
+    return Number(value);
+}
+
 // Used to remove the commas from numbers
 export function parseEvent(event: JSON) {
     if (event === null || event === undefined) return;
