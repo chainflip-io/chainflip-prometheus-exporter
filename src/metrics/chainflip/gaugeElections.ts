@@ -1,6 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
-import { ProtocolData } from '../../utils/utils';
+import { ProtocolData, toNumber } from '../../utils/utils';
 
 type ElectionInstance = {
     index: number;
@@ -111,13 +111,6 @@ const metricBtcFees: Gauge = new promClient.Gauge({
     help: 'Tracked Fee value for BTC in sats/KB',
     registers: [],
 });
-
-function toNumber(value: any): number {
-    if (typeof value === 'object' && value !== null && 'root' in value) {
-        return Number(value.root);
-    }
-    return Number(value);
-}
 
 function processBHW(
     unsyncState: any,
