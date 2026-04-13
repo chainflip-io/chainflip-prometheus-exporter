@@ -114,6 +114,11 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
         metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
         metric.labels('bitcoinIngressEgress:BoostedDepositLost').set(0);
+        metric.labels('arbitrumIngressEgress:TransferFallbackRequested').set(0);
+        metric.labels('ethereumIngressEgress:TransferFallbackRequested').set(0);
+        metric.labels('solanaIngressEgress:TransferFallbackRequested').set(0);
+        metric.labels('assethubIngressEgress:TransferFallbackRequested').set(0);
+        metric.labels('bitcoinIngressEgress:TransferFallbackRequested').set(0);
     }
     if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
         registry.registerMetric(metricExtrinsicFailed);
