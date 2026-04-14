@@ -25,6 +25,7 @@ let mainRegistry: promClient.Registry;
 let mainContext: Context;
 let isWatcherRunning: boolean = false;
 let isExceptionCaught: boolean = false;
+let activeIntervals: Array<ReturnType<typeof setInterval>> = [];
 
 export default async function startArbitrumService(context: Context) {
     const { logger, registry } = context;
@@ -79,10 +80,14 @@ async function startWatcher(context: Context) {
         metric.set(0);
 
         context.httpProvider = httpProvider;
-        pollEndpoint(gaugeBlockHeight, context, 6);
-        pollEndpoint(gaugeEthBalance, context, 6);
+        activeIntervals.push(await pollEndpoint(gaugeBlockHeight, context, 6));
+        activeIntervals.push(await pollEndpoint(gaugeEthBalance, context, 6));
     } catch (e) {
         logger.error(`ARB catch: ${e}`);
+        for (const interval of activeIntervals) {
+            clearInterval(interval);
+        }
+        activeIntervals = [];
         isWatcherRunning = false;
         metric.set(1);
         setTimeout(() => {

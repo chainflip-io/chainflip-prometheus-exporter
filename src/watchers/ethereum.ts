@@ -33,6 +33,7 @@ let mainRegistry: promClient.Registry;
 let mainContext: Context;
 let isWatcherRunning: boolean = false;
 let isExceptionCaught: boolean = false;
+let activeInterval: ReturnType<typeof setInterval> | null = null;
 
 export default async function startEthereumService(context: Context) {
     const { logger, registry } = context;
@@ -100,7 +101,7 @@ async function startWatcher(context: Context) {
 
         context.httpProvider = httpProvider;
 
-        pollEndpoint(
+        activeInterval = await pollEndpoint(
             () => {
                 gaugeBlockHeight(context);
                 gaugeEthBalance(context);
@@ -113,6 +114,10 @@ async function startWatcher(context: Context) {
         );
     } catch (e) {
         logger.error(`ETH catch: ${e}`);
+        if (activeInterval) {
+            clearInterval(activeInterval);
+            activeInterval = null;
+        }
         isWatcherRunning = false;
         metric.set(1);
         setTimeout(() => {

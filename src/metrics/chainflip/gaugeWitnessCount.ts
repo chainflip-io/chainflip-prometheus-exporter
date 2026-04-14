@@ -56,8 +56,14 @@ export const gaugeWitnessCount = async (context: Context, data: ProtocolData): P
                 everyBlocks: 50,
             });
             deleteOldHashes(currentBlockNumber);
-            processHash10(currentBlockNumber, apiLatest, logger, data.blockHash);
-            processHash50(currentBlockNumber, apiLatest, logger, data.blockHash);
+            await processHash10(
+                currentBlockNumber,
+                apiLatest,
+                logger,
+                data.blockHash,
+                data.blockApi,
+            );
+            await processHash50(currentBlockNumber, logger, data.blockApi);
             // chech the witnessAtEpoch extrinsics in a block and save the encoded callHash to check later
             signedBlock.block.extrinsics.forEach((ex: any, index: any) => {
                 if (ex.toHuman().method.method === 'witnessAtEpoch') {
@@ -108,6 +114,7 @@ async function processHash10(
     apiLatest: any,
     logger: any,
     blockHash: string,
+    blockApi: any,
 ) {
     for (const [blockNumber, set] of witnessExtrinsicHash10) {
         if (currentBlockNumber - blockNumber > 10) {
@@ -120,6 +127,7 @@ async function processHash10(
                     currentBlockNumber,
                     apiLatest,
                     blockHash,
+                    blockApi,
                 );
                 if (total > 0) {
                     metric.labels(parsedObj.type, '10').set(total);
@@ -137,6 +145,7 @@ async function countWitnesses(
     currentBlockNumber: number,
     apiLatest: any,
     blockHash: string,
+    blockApi: any,
 ) {
     const result: any = await makeRpcRequest(
         apiLatest,
@@ -150,9 +159,8 @@ async function countWitnesses(
         total = global.currentAuthorities - result.failing_count;
         // check the previous epoch as well! could be a false positive after rotation!
         if (total < global.currentAuthorities * 0.1) {
-            const api = await apiLatest.at(blockHash);
             const previousEpochVote = (
-                await api.query.witnesser.votes(global.epochIndex - 1, parsedObj.hash)
+                await blockApi.query.witnesser.votes(global.epochIndex - 1, parsedObj.hash)
             )?.toJSON();
             if (previousEpochVote) {
                 total += hex2bin(previousEpochVote).match(/1/g)?.length || 0;
@@ -199,41 +207,36 @@ function log(
     }
 }
 
-async function processHash50(
-    currentBlockNumber: number,
-    apiLatest: any,
-    logger: any,
-    blockHash: string,
-) {
+async function processHash50(currentBlockNumber: number, logger: any, blockApi: any) {
     for (const [blockNumber, set] of witnessExtrinsicHash50) {
         if (currentBlockNumber - blockNumber > 50) {
             const tmpSet = new Set(set);
             witnessExtrinsicHash50.delete(blockNumber);
             for (const hash of tmpSet) {
                 const parsedObj = JSON.parse(hash);
-                const api = await apiLatest.at(blockHash);
-                api.query.witnesser
-                    .votes(global.epochIndex, parsedObj.hash)
-                    .then((votes: { toJSON: () => any }) => {
-                        if (global.currentBlock === currentBlockNumber) {
-                            const vote = votes.toJSON();
-                            if (vote) {
-                                const binary = hex2bin(vote);
-                                const number = binary.match(/1/g)?.length || 0;
+                try {
+                    const votes: { toJSON: () => any } = await blockApi.query.witnesser.votes(
+                        global.epochIndex,
+                        parsedObj.hash,
+                    );
+                    if (global.currentBlock === currentBlockNumber) {
+                        const vote = votes.toJSON();
+                        if (vote) {
+                            const binary = hex2bin(vote);
+                            const number = binary.match(/1/g)?.length || 0;
 
-                                metric.labels(parsedObj.type, '50').set(number);
-                                // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                                if (number < global.currentAuthorities) {
-                                    logger.info(
-                                        `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnessed by ${number} validators after 50 blocks!`,
-                                    );
-                                }
+                            metric.labels(parsedObj.type, '50').set(number);
+                            // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
+                            if (number < global.currentAuthorities) {
+                                logger.info(
+                                    `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnessed by ${number} validators after 50 blocks!`,
+                                );
                             }
                         }
-                    })
-                    .catch((err: any) => {
-                        logger.warn(`Promise rejected ${err}`);
-                    });
+                    }
+                } catch (err) {
+                    logger.warn(`Promise rejected ${err}`);
+                }
             }
         }
     }

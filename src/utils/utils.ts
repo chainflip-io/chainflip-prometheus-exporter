@@ -50,10 +50,10 @@ export async function pollEndpoint(
     func: any,
     context: Context,
     intervalSeconds: number,
-): Promise<void> {
+): Promise<ReturnType<typeof setInterval>> {
     func(context);
 
-    setInterval(() => func(context), intervalSeconds * 1000);
+    return setInterval(() => func(context), intervalSeconds * 1000);
 }
 
 export function chunk(arr: any[], n: number) {
@@ -182,12 +182,6 @@ export function hex2bin(hex: string) {
     return out;
 }
 
-const getMetadata = async (api: ApiPromise, blockHash: any) => {
-    const metadataString = await api.rpc.state.getMetadata(blockHash);
-    return metadataString;
-};
-
-let metadata: any;
 export const getStateChainError = async (
     api: ApiPromise,
     value: { error: `0x${string}`; index: number },
@@ -196,12 +190,11 @@ export const getStateChainError = async (
     // convert LE hex encoded number (e.g. "0x06000000") to BN (6)
     const error = new BN(value.error.slice(2), 'hex', 'le');
     const errorIndex = error.toNumber();
-    // const specVersion = parseSpecNumber(block.specId);
     const palletIndex = value.index;
 
-    if (!metadata) {
-        metadata = await getMetadata(api, blockHash);
-    }
+    // Always use metadata for the current block to handle runtime upgrades correctly.
+    // The polkadot API internally caches metadata per runtime version, so this is cheap.
+    const metadata = await api.rpc.state.getMetadata(blockHash);
 
     const registryError = metadata.registry.findMetaError({
         index: new BN(palletIndex),
