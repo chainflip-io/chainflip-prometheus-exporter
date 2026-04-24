@@ -119,6 +119,9 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metric.labels('solanaIngressEgress:TransferFallbackRequested').set(0);
         metric.labels('assethubIngressEgress:TransferFallbackRequested').set(0);
         metric.labels('bitcoinIngressEgress:TransferFallbackRequested').set(0);
+        metricReorgDetected.labels('bitcoin').set(0);
+        metricReorgDetected.labels('ethereum').set(0);
+        metricReorgDetected.labels('arbitrum').set(0);
     }
     if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
         registry.registerMetric(metricExtrinsicFailed);
