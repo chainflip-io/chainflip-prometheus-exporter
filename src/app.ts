@@ -393,7 +393,7 @@ app.get('/health/block-lag', async (req, res) => {
 
     const chains = Object.keys(blockLagHealthSources) as BlockLagHealthChain[];
     const results = await Promise.all(
-        chains.map((chain) => evaluateBlockLagHealth(chain, parsedMaxLag ?? undefined)),
+        chains.map(async (chain) => await evaluateBlockLagHealth(chain, parsedMaxLag ?? undefined)),
     );
 
     const healthy = results.every((result) => result.healthy);
