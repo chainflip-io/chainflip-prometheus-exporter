@@ -15,7 +15,6 @@ declare global {
     var availableSolanaNonces: SolanaNonce[];
     var solanaRotationTx: string;
     var solanaCurrentOnChainKey: string;
-    var solanaBlockHeight: number;
     var prices: Map<string, number>;
     var oraclePrices: Map<string, number>;
 

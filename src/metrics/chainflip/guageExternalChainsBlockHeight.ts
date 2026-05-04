@@ -1,6 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { ProtocolData } from '../../utils/utils';
+import { blockHeightStore } from '../../lib/blockHeightStore';
 
 const metricName: string = 'cf_external_chain_block_height';
 const metric: Gauge = new promClient.Gauge({
@@ -21,20 +22,21 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
 
     // Ethereum
     metric.labels('ethereum').set(data.data.external_chains_height.ethereum);
+    blockHeightStore.setTracked('ethereum', data.data.external_chains_height.ethereum);
 
     // Bitcoin
     metric.labels('bitcoin').set(data.data.external_chains_height.bitcoin);
-
-    // Polkadot
-    metric.labels('polkadot').set(data.data.external_chains_height.polkadot);
+    blockHeightStore.setTracked('bitcoin', data.data.external_chains_height.bitcoin);
 
     // Assethub
     metric.labels('assethub').set(data.data.external_chains_height.assethub);
+    blockHeightStore.setTracked('assethub', data.data.external_chains_height.assethub);
 
     // Arbitrum
     metric.labels('arbitrum').set(data.data.external_chains_height.arbitrum);
+    blockHeightStore.setTracked('arbitrum', data.data.external_chains_height.arbitrum);
 
     // Solana
     metric.labels('solana').set(data.data.external_chains_height.solana);
-    global.solanaBlockHeight = data.data.external_chains_height.solana;
+    blockHeightStore.setTracked('solana', data.data.external_chains_height.solana);
 };
