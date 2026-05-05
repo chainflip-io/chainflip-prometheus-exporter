@@ -150,11 +150,11 @@ app.get('/metrics', async (req, res) => {
     res.set('Content-Type', chainflipRegistry.contentType); // It doesn't matter which registry we use here
     res.end(
         (await chainflipRegistry.metrics()) +
-        (await ethereumRegistry.metrics()) +
-        (await bitcoinRegistry.metrics()) +
-        (await arbitrumRegistry.metrics()) +
-        (await solanaRegistry.metrics()) +
-        (await assetHubRegistry.metrics()),
+            (await ethereumRegistry.metrics()) +
+            (await bitcoinRegistry.metrics()) +
+            (await arbitrumRegistry.metrics()) +
+            (await solanaRegistry.metrics()) +
+            (await assetHubRegistry.metrics()),
     );
 });
 

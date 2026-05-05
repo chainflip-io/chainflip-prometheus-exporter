@@ -1,9 +1,4 @@
-export type BlockLagChain =
-    | 'bitcoin'
-    | 'ethereum'
-    | 'arbitrum'
-    | 'solana'
-    | 'assethub';
+export type BlockLagChain = 'bitcoin' | 'ethereum' | 'arbitrum' | 'solana' | 'assethub';
 
 type Heights = { tracked: number | null; external: number | null };
 
