@@ -2,9 +2,8 @@ import express, { Express } from 'express';
 import winston, { Logger } from 'winston';
 import startChainflipService from './watchers/chainflip';
 import startEthereumService from './watchers/ethereum';
-import startPolkadotService from './watchers/polkadot';
 import getConfig, { env } from './config/getConfig';
-import { Config, Network } from './config/interfaces';
+import { Config } from './config/interfaces';
 import promClient from 'prom-client';
 import { Context } from './lib/interfaces';
 import createContext from './lib/createContext';
@@ -13,6 +12,7 @@ import startBitcoinService from './watchers/bitcoin';
 import startArbitrumService from './watchers/arbitrum';
 import startSolanaService from './watchers/solana';
 import startAssetHubService from './watchers/assetHub';
+import { createBlockLagHealthRouter } from './routes/blockLagHealth';
 
 const logger: Logger = winston.createLogger();
 logger.add(
@@ -29,12 +29,6 @@ const chainflipRegistry = new promClient.Registry();
 chainflipRegistry.setDefaultLabels({
     chain: 'chainflip',
     network: config.flip.network,
-});
-
-const polkadotRegistry = new promClient.Registry();
-polkadotRegistry.setDefaultLabels({
-    chain: 'polkadot',
-    network: config.dot.network,
 });
 
 const assetHubRegistry = new promClient.Registry();
@@ -83,20 +77,6 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
         );
         loadDefaultMetrics(chainflipContext);
         startChainflipService(chainflipContext);
-    }
-
-    if (config.dot.enabled) {
-        const polkadotLogger: Logger = logger.child({
-            chain: 'polkadot',
-            network: config.dot.network,
-        });
-        const polkadotContext: Context = createContext(
-            polkadotLogger,
-            polkadotRegistry,
-            env,
-            config.dot,
-        );
-        startPolkadotService(polkadotContext);
     }
 
     if (config.hub.enabled) {
@@ -171,7 +151,6 @@ app.get('/metrics', async (req, res) => {
     res.end(
         (await chainflipRegistry.metrics()) +
             (await ethereumRegistry.metrics()) +
-            (await polkadotRegistry.metrics()) +
             (await bitcoinRegistry.metrics()) +
             (await arbitrumRegistry.metrics()) +
             (await solanaRegistry.metrics()) +
@@ -183,3 +162,5 @@ app.get('/health', async (req, res) => {
     res.set('Content-Type', 'application/json');
     res.end('Online');
 });
+
+app.use('/health', createBlockLagHealthRouter(config));

@@ -88,16 +88,16 @@ async function startWatcher(context: Context) {
         isWatcherRunning = true;
         metric.set(0);
 
-        const flipContract: ethers.Contract = new ethers.Contract(
-            config.contracts.find((c: any) => c.alias === 'flip')!.address,
-            FlipABI,
-            httpProvider,
-        );
-        const usdcContract: ethers.Contract = new ethers.Contract(
-            config.contracts.find((c: any) => c.alias === 'usdc')!.address,
-            USDCABI,
-            httpProvider,
-        );
+        const flipContractConfig = config.contracts.find((c: any) => c.alias === 'flip');
+        const usdcContractConfig = config.contracts.find((c: any) => c.alias === 'usdc');
+        const flipContract =
+            flipContractConfig !== undefined
+                ? new ethers.Contract(flipContractConfig.address, FlipABI, httpProvider)
+                : null;
+        const usdcContract =
+            usdcContractConfig !== undefined
+                ? new ethers.Contract(usdcContractConfig.address, USDCABI, httpProvider)
+                : null;
 
         context.httpProvider = httpProvider;
 
@@ -105,9 +105,18 @@ async function startWatcher(context: Context) {
             () => {
                 gaugeBlockHeight(context);
                 gaugeEthBalance(context);
-                gaugeTokenBalance({ ...context, contract: flipContract }, 'FLIP');
-                gaugeTokenBalance({ ...context, contract: usdcContract }, 'USDC');
-                gaugeFlipBalance({ ...context, contract: flipContract });
+                if (flipContract !== null) {
+                    gaugeTokenBalance({ ...context, contract: flipContract }, 'FLIP');
+                    gaugeFlipBalance({ ...context, contract: flipContract });
+                } else {
+                    logger.debug('Skipping FLIP contract metrics: missing flip contract config');
+                }
+
+                if (usdcContract !== null) {
+                    gaugeTokenBalance({ ...context, contract: usdcContract }, 'USDC');
+                } else {
+                    logger.debug('Skipping USDC contract metrics: missing usdc contract config');
+                }
             },
             context,
             12,

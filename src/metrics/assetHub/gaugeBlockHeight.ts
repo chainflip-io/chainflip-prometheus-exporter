@@ -1,5 +1,6 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
+import { blockHeightStore } from '../../lib/blockHeightStore';
 
 const metricName: string = 'hub_block_height';
 const metric: Gauge = new promClient.Gauge({
@@ -21,6 +22,7 @@ export const gaugeBlockHeight = async (context: Context) => {
     try {
         const block = await api.query.system.number();
         metric.set(block.toJSON());
+        blockHeightStore.setExternal('assethub', Number(block.toJSON()));
     } catch (e) {
         logger.error(e);
     }

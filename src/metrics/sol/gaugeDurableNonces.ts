@@ -1,6 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import { PublicKey, NonceAccount } from '@solana/web3.js';
+import { blockHeightStore } from '../../lib/blockHeightStore';
 
 const metricAvailableNoncesNotMatchingName: string = 'sol_available_nonce_not_matching';
 const metricAvailableNoncesNotMatching: Gauge = new promClient.Gauge({
@@ -23,13 +24,14 @@ export const gaugeSolNonces = async (context: Context) => {
 
     try {
         // only scrape the metric if we have some values for the nonces and also for the latest solana block height as seen from the state-chain
-        if (global.availableSolanaNonces && global.solanaBlockHeight) {
+        const solanaTrackedHeight = blockHeightStore.getTracked('solana');
+        if (global.availableSolanaNonces && solanaTrackedHeight != null) {
             const accounts = global.availableSolanaNonces.map(
                 (elem) => new PublicKey(elem.base58address),
             );
             // in case our solana node is behind we don't want the result, this can cause false positive otherwise
             const accountsInfo = await connection.getMultipleAccountsInfo(accounts, {
-                minContextSlot: global.solanaBlockHeight,
+                minContextSlot: solanaTrackedHeight,
             });
 
             for (let i = 0; i < accountsInfo?.length || 0; i++) {

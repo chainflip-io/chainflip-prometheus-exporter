@@ -1,6 +1,7 @@
 import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import axios from 'axios';
+import { blockHeightStore } from '../../lib/blockHeightStore';
 
 const metricName: string = 'btc_block_height';
 const metric: Gauge = new promClient.Gauge({
@@ -40,6 +41,7 @@ export const gaugeBlockHeight = async (context: Context) => {
             result = blockChainInfo.blocks;
         }
         metric.set(Number(result));
+        blockHeightStore.setExternal('bitcoin', Number(result));
     } catch (err) {
         logger.error(err);
         metricFailure.labels({ metric: metricName }).set(1);
