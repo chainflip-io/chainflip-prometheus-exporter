@@ -19,7 +19,7 @@ const sourcesFor = (config: Config): Record<BlockLagChain, BlockLagSource> => ({
     ethereum: { enabled: config.eth.enabled, defaultMaxLag: 300 },
     arbitrum: { enabled: config.arb.enabled, defaultMaxLag: 14400 },
     solana: { enabled: config.sol.enabled, defaultMaxLag: 9000 },
-    assethub: { enabled: config.hub.enabled, defaultMaxLag: 600 },
+    assethub: { enabled: config.hub.enabled, defaultMaxLag: 1800 },
 });
 
 const parseMaxLag = (value: unknown): number | null => {
