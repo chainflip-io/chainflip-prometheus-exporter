@@ -15,11 +15,11 @@ type BlockLagHealthResult = {
 };
 
 const sourcesFor = (config: Config): Record<BlockLagChain, BlockLagSource> => ({
-    bitcoin: { enabled: config.btc.enabled, defaultMaxLag: 8 },
-    ethereum: { enabled: config.eth.enabled, defaultMaxLag: 64 },
-    arbitrum: { enabled: config.arb.enabled, defaultMaxLag: 120 },
-    solana: { enabled: config.sol.enabled, defaultMaxLag: 600 },
-    assethub: { enabled: config.hub.enabled, defaultMaxLag: 20 },
+    bitcoin: { enabled: config.btc.enabled, defaultMaxLag: 6 },
+    ethereum: { enabled: config.eth.enabled, defaultMaxLag: 300 },
+    arbitrum: { enabled: config.arb.enabled, defaultMaxLag: 14400 },
+    solana: { enabled: config.sol.enabled, defaultMaxLag: 9000 },
+    assethub: { enabled: config.hub.enabled, defaultMaxLag: 600 },
 });
 
 const parseMaxLag = (value: unknown): number | null => {
