@@ -46,6 +46,14 @@ export interface ArbConfig extends ConfigBase {
     wallets: ConfigWallet[];
 }
 
+export interface TronConfig extends ConfigBase {
+    defaultMetrics: DefaultMetrics[];
+    network: string;
+    contracts: ConfigContract[];
+    wallets: ConfigWallet[];
+    tokens: ConfigToken[];
+}
+
 export interface SolConfig extends ConfigBase {
     defaultMetrics: DefaultMetrics[];
     network: string;
@@ -93,7 +101,18 @@ export interface Config {
     flip: FlipConfig;
     arb: ArbConfig;
     sol: SolConfig;
+    tron: TronConfig;
 }
+
+export type ChainConfig =
+    | EthConfig
+    | BtcConfig
+    | DotConfig
+    | HubConfig
+    | FlipConfig
+    | ArbConfig
+    | SolConfig
+    | TronConfig;
 
 export enum Network {
     Perseverance = 'perseverance',

@@ -119,9 +119,15 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metric.labels('solanaIngressEgress:TransferFallbackRequested').set(0);
         metric.labels('assethubIngressEgress:TransferFallbackRequested').set(0);
         metric.labels('bitcoinIngressEgress:TransferFallbackRequested').set(0);
+        metric.labels('tronBroadcaster:BroadcastAborted').set(0);
+        metric.labels('tronBroadcaster:BroadcastTimeout').set(0);
+        metric.labels('tronIngressEgress:ChannelOpeningFeePaid').set(0);
+        metric.labels('tronChainTracking:ChainStateUpdated').set(0);
+        metric.labels('tronIngressEgress:TransferFallbackRequested').set(0);
         metricReorgDetected.labels('bitcoin').set(0);
         metricReorgDetected.labels('ethereum').set(0);
         metricReorgDetected.labels('arbitrum').set(0);
+        metricReorgDetected.labels('tron').set(0);
     }
     if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
         registry.registerMetric(metricExtrinsicFailed);
@@ -138,6 +144,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metricCcmBroadcastAborted.labels('bitcoinBroadcaster').set(0);
         metricCcmBroadcastAborted.labels('ethereumBroadcaster').set(0);
         metricCcmBroadcastAborted.labels('solanaBroadcaster').set(0);
+        metricCcmBroadcastAborted.labels('tronBroadcaster').set(0);
     }
     if (registry.getSingleMetric(metricNameBroadcastAborted) === undefined) {
         registry.registerMetric(metricBroadcastAborted);
@@ -145,6 +152,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         metricBroadcastAborted.labels('bitcoinBroadcaster').set(0);
         metricBroadcastAborted.labels('ethereumBroadcaster').set(0);
         metricBroadcastAborted.labels('solanaBroadcaster').set(0);
+        metricBroadcastAborted.labels('tronBroadcaster').set(0);
     }
     if (registry.getSingleMetric(metricNameReorgDetected) === undefined) {
         registry.registerMetric(metricReorgDetected);

@@ -1,4 +1,4 @@
-export type BlockLagChain = 'bitcoin' | 'ethereum' | 'arbitrum' | 'solana' | 'assethub';
+export type BlockLagChain = 'bitcoin' | 'ethereum' | 'arbitrum' | 'solana' | 'assethub' | 'tron';
 
 type Heights = { tracked: number | null; external: number | null };
 
@@ -8,6 +8,7 @@ const state: Record<BlockLagChain, Heights> = {
     arbitrum: { tracked: null, external: null },
     solana: { tracked: null, external: null },
     assethub: { tracked: null, external: null },
+    tron: { tracked: null, external: null },
 };
 
 export const blockHeightStore = {

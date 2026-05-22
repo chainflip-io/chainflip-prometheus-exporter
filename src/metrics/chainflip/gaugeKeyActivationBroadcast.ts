@@ -74,4 +74,12 @@ export const gaugeKeyActivationBroadcast = async (
         metricKeyBroadcast.labels('solana').set(solanaBroadcastInfo[0]);
         global.solanaRotationTx = solanaBroadcastInfo[1];
     }
+
+    // Tron
+    const tronBroadcastId = data.data.activating_key_broadcast_ids.tron;
+    if (tronBroadcastId == null) {
+        metricKeyBroadcast.labels('tron').set(0);
+    } else {
+        metricKeyBroadcast.labels('tron').set(tronBroadcastId);
+    }
 };

@@ -39,4 +39,8 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
     // Solana
     metric.labels('solana').set(data.data.external_chains_height.solana);
     blockHeightStore.setTracked('solana', data.data.external_chains_height.solana);
+
+    // Tron
+    metric.labels('tron').set(data.data.external_chains_height.tron);
+    blockHeightStore.setTracked('tron', data.data.external_chains_height.tron);
 };

@@ -132,5 +132,14 @@
     "contracts": [],
     "wallets": [],
     "skipMetrics": []
+  },
+  "tron": {
+    "enabled": true,
+    "network": "nile",
+    "defaultMetrics": [],
+    "contracts": [],
+    "wallets": [],
+    "tokens": [],
+    "skipMetrics": []
   }
 }

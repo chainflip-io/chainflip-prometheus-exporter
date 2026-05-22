@@ -31,6 +31,8 @@ const CACHE_ENDPOINT: string = process.env.CACHE_ENDPOINT || '';
 
 const HUB_WS_ENDPOINT: string = process.env.HUB_WS_ENDPOINT || 'ws://localhost:9955';
 
+const TRON_HTTP_ENDPOINT: string = process.env.TRON_HTTP_ENDPOINT || 'http://localhost:8090';
+
 export interface Env {
     CONFIG_PATH: string;
     BTC_HTTP_ENDPOINT: string;
@@ -44,6 +46,7 @@ export interface Env {
     SOL_HTTP_ENDPOINT: string;
     SOL_WS_ENDPOINT: string;
     HUB_WS_ENDPOINT: string;
+    TRON_HTTP_ENDPOINT: string;
 }
 
 export const env: Env = {
@@ -59,6 +62,7 @@ export const env: Env = {
     SOL_HTTP_ENDPOINT,
     SOL_WS_ENDPOINT,
     HUB_WS_ENDPOINT,
+    TRON_HTTP_ENDPOINT,
 };
 
 export default function getConfig(logger: Logger): any {
@@ -99,6 +103,11 @@ export default function getConfig(logger: Logger): any {
         result = jsonvalidator.validate(config.hub, schema.definitions.HubConfig);
         if (!result.valid) {
             logger.error(`Invalid Hub config: ${result.errors}`);
+            process.exit(1);
+        }
+        result = jsonvalidator.validate(config.tron, schema.definitions.TronConfig);
+        if (!result.valid) {
+            logger.error(`Invalid Tron config: ${result.errors}`);
             process.exit(1);
         }
         return config;

@@ -107,6 +107,7 @@ export const customRpcTypes = {
             arbitrum: U32,
             solana: U32,
             assethub: U32,
+            tron: U32,
         }),
         btc_utxos: z.object({
             total_balance: U128,
@@ -130,6 +131,7 @@ export const customRpcTypes = {
             arbitrum: U32,
             solana: U32,
             assethub: U32,
+            tron: U32,
         }),
         pending_tss: z.object({
             evm: U32,
@@ -144,6 +146,7 @@ export const customRpcTypes = {
             arbitrum: U32,
             solana: U32,
             assethub: U32,
+            tron: U32,
         }),
         fee_imbalance: z.object({
             ethereum: VaultImbalance,
@@ -152,6 +155,7 @@ export const customRpcTypes = {
             arbitrum: VaultImbalance,
             solana: VaultImbalance,
             assethub: VaultImbalance,
+            tron: VaultImbalance,
         }),
         authorities: z.object({
             authorities: U32,
@@ -183,6 +187,7 @@ export const customRpcTypes = {
             arbitrum: U32.nullish(),
             assethub: U32.nullish(),
             solana: z.tuple([U32.nullish(), string.nullish()]),
+            tron: U32.nullish(),
         }),
     }),
     monitoring_accounts_info: z.array(

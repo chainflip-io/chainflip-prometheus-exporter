@@ -36,4 +36,7 @@ export const gaugePendingBroadcast = async (
 
     // Solana
     metric.labels('solana').set(data.data.pending_broadcasts.solana);
+
+    // Tron
+    metric.labels('tron').set(data.data.pending_broadcasts.tron);
 };
