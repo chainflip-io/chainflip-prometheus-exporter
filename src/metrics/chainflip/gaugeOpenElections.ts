@@ -68,6 +68,17 @@ const CHAIN_CONFIGS: ChainElectionOpenConfig[] = [
             ['FF', 'ArbitrumLiveness'],
         ]),
     },
+    {
+        chainName: 'tron',
+        palletName: 'tronElections',
+        electoralSystems: new Map([
+            ['A', 'TronBlockHeightWitnesser'],
+            ['B', 'TronDepositChannelWitnessing'],
+            ['C', 'TronVaultDepositWitnessing'],
+            ['D', 'TronKeyManagerWitnessing'],
+            ['EE', 'TronLiveness'],
+        ]),
+    },
 ];
 
 export const gaugeOpenElections = async (context: Context, data: ProtocolData): Promise<void> => {

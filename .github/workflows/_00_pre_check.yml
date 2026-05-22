@@ -11,7 +11,7 @@ jobs:
         run: echo "nodeVersion=$(jq -r .engines.node ./package.json)" >> $GITHUB_OUTPUT
 
       - name: Install pnpm 💿
-        run: npm install -g pnpm@8
+        run: npm install -g pnpm@9
 
       - name: Setup Node 🎮
         uses: actions/setup-node@v3
@@ -35,7 +35,7 @@ jobs:
         run: echo "nodeVersion=$(jq -r .engines.node ./package.json)" >> $GITHUB_OUTPUT
 
       - name: Install pnpm 💿
-        run: npm install -g pnpm@8
+        run: npm install -g pnpm@9
 
       - name: Setup Node 🎮
         uses: actions/setup-node@v3

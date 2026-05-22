@@ -152,6 +152,34 @@
       ],
       "type": "object"
     },
+    "ChainConfig": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/EthConfig"
+        },
+        {
+          "$ref": "#/definitions/BtcConfig"
+        },
+        {
+          "$ref": "#/definitions/DotConfig"
+        },
+        {
+          "$ref": "#/definitions/HubConfig"
+        },
+        {
+          "$ref": "#/definitions/FlipConfig"
+        },
+        {
+          "$ref": "#/definitions/ArbConfig"
+        },
+        {
+          "$ref": "#/definitions/SolConfig"
+        },
+        {
+          "$ref": "#/definitions/TronConfig"
+        }
+      ]
+    },
     "Config": {
       "additionalProperties": false,
       "properties": {
@@ -175,6 +203,9 @@
         },
         "sol": {
           "$ref": "#/definitions/SolConfig"
+        },
+        "tron": {
+          "$ref": "#/definitions/TronConfig"
         }
       },
       "required": [
@@ -184,7 +215,8 @@
         "hub",
         "flip",
         "arb",
-        "sol"
+        "sol",
+        "tron"
       ],
       "type": "object"
     },
@@ -591,6 +623,109 @@
         "enabled",
         "network",
         "skipMetrics",
+        "wallets"
+      ],
+      "type": "object"
+    },
+    "TronConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "contracts": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "defaultMetrics": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "network": {
+          "type": "string"
+        },
+        "skipMetrics": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tokens": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "symbol",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "wallets": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "contracts",
+        "defaultMetrics",
+        "enabled",
+        "network",
+        "skipMetrics",
+        "tokens",
         "wallets"
       ],
       "type": "object"

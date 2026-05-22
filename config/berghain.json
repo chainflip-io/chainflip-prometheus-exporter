@@ -199,5 +199,14 @@
     "wallets": [
     ],
     "skipMetrics": []
+  },
+  "tron": {
+    "enabled": true,
+    "network": "mainnet",
+    "defaultMetrics": [],
+    "contracts": [],
+    "wallets": [],
+    "tokens": [],
+    "skipMetrics": []
   }
 }

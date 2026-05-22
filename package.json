@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "engines": {
-    "node": "18.17.0",
-    "pnpm": ">=7"
+    "node": "22.13.0",
+    "pnpm": ">=9"
   },
   "main": "src/app.ts",
   "scripts": {
@@ -54,6 +54,7 @@
     "lodash": "^4.17.21",
     "moralis": "^2.13.0",
     "prom-client": "^14.1.1",
+    "tronweb": "^5.3.5",
     "ts-json-schema-generator": "^1.2.0",
     "winston": "^3.8.2",
     "zod": "^3.21.4"

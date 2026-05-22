@@ -1,14 +1,14 @@
-import { ethers } from 'ethers';
+import TronWeb from 'tronweb';
 import { Logger } from 'winston';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
-import { gaugeBlockHeight, gaugeEthBalance } from '../metrics/arb';
+import { gaugeBlockHeight, gaugeTrxBalance, gaugeTrc20Balance } from '../metrics/tron';
 import { pollEndpoint } from '../utils/utils';
 
-const metricName: string = 'arb_watcher_failure';
+const metricName: string = 'tron_watcher_failure';
 const metric: promClient.Gauge = new promClient.Gauge({
     name: metricName,
-    help: 'Arbitrum watcher failing',
+    help: 'Tron watcher failing',
     registers: [],
 });
 const metricFailureName: string = 'metric_scrape_failure';
@@ -27,9 +27,9 @@ let isWatcherRunning: boolean = false;
 let isExceptionCaught: boolean = false;
 let activeIntervals: Array<ReturnType<typeof setInterval>> = [];
 
-export default async function startArbitrumService(context: Context) {
+export default async function startTronService(context: Context) {
     const { logger, registry } = context;
-    logger.info('Starting Arbitrum listeners');
+    logger.info('Starting Tron listeners');
     loggerCopy = logger;
     mainRegistry = registry;
     mainContext = context;
@@ -39,7 +39,7 @@ export default async function startArbitrumService(context: Context) {
 process.on('uncaughtException', async (err) => {
     if (!isExceptionCaught && !isWatcherRunning) {
         isExceptionCaught = true;
-        loggerCopy.info(`ARB retrying in 15s`);
+        loggerCopy.info(`TRON retrying in 15s`);
         metric.set(1);
         setTimeout(() => {
             isExceptionCaught = false;
@@ -65,25 +65,28 @@ async function startWatcher(context: Context) {
             mainRegistry.registerMetric(metric);
         if (mainRegistry.getSingleMetric(metricFailureName) === undefined)
             mainRegistry.registerMetric(metricFailure);
-        const HTTP_URL = new URL(env.ARB_HTTP_ENDPOINT);
-        let httpProvider;
-        if (env.ARB_HTTP_ENDPOINT === 'http://localhost:8547') {
-            httpProvider = new ethers.providers.JsonRpcProvider(env.ARB_HTTP_ENDPOINT);
-        } else {
-            httpProvider = new ethers.providers.JsonRpcProvider({
-                url: HTTP_URL.origin + HTTP_URL.pathname,
-                user: HTTP_URL.username,
-                password: HTTP_URL.password,
-            });
+        const HTTP_URL = new URL(env.TRON_HTTP_ENDPOINT);
+        const fullHost = HTTP_URL.origin + HTTP_URL.pathname;
+        const headers: Record<string, string> = {};
+        if (HTTP_URL.username || HTTP_URL.password) {
+            const auth = Buffer.from(`${HTTP_URL.username}:${HTTP_URL.password}`).toString(
+                'base64',
+            );
+            headers.Authorization = `Basic ${auth}`;
         }
+        const httpProvider = new TronWeb({
+            fullHost,
+            headers,
+        });
         isWatcherRunning = true;
         metric.set(0);
 
         context.httpProvider = httpProvider;
         activeIntervals.push(await pollEndpoint(gaugeBlockHeight, context, 6));
-        activeIntervals.push(await pollEndpoint(gaugeEthBalance, context, 60));
+        activeIntervals.push(await pollEndpoint(gaugeTrxBalance, context, 60));
+        activeIntervals.push(await pollEndpoint(gaugeTrc20Balance, context, 60));
     } catch (e) {
-        logger.error(`ARB catch: ${e}`);
+        logger.error(`TRON catch: ${e}`);
         for (const interval of activeIntervals) {
             clearInterval(interval);
         }

@@ -12,6 +12,7 @@ import startBitcoinService from './watchers/bitcoin';
 import startArbitrumService from './watchers/arbitrum';
 import startSolanaService from './watchers/solana';
 import startAssetHubService from './watchers/assetHub';
+import startTronService from './watchers/tron';
 import { createBlockLagHealthRouter } from './routes/blockLagHealth';
 
 const logger: Logger = winston.createLogger();
@@ -59,6 +60,12 @@ const solanaRegistry = new promClient.Registry();
 solanaRegistry.setDefaultLabels({
     chain: 'solana',
     network: config.sol.network,
+});
+
+const tronRegistry = new promClient.Registry();
+tronRegistry.setDefaultLabels({
+    chain: 'tron',
+    network: config.tron.network,
 });
 
 app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
@@ -144,6 +151,15 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
         loadDefaultMetrics(solanaContext);
         startSolanaService(solanaContext);
     }
+    if (config.tron.enabled) {
+        const tronLogger: Logger = logger.child({
+            chain: 'tron',
+            network: config.tron.network,
+        });
+        const tronContext: Context = createContext(tronLogger, tronRegistry, env, config.tron);
+        loadDefaultMetrics(tronContext);
+        startTronService(tronContext);
+    }
 });
 
 app.get('/metrics', async (req, res) => {
@@ -154,7 +170,8 @@ app.get('/metrics', async (req, res) => {
             (await bitcoinRegistry.metrics()) +
             (await arbitrumRegistry.metrics()) +
             (await solanaRegistry.metrics()) +
-            (await assetHubRegistry.metrics()),
+            (await assetHubRegistry.metrics()) +
+            (await tronRegistry.metrics()),
     );
 });
 

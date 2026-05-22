@@ -38,4 +38,8 @@ export const gaugeDepositChannels = async (context: Context, data: ProtocolData)
     // SOL
     const solChannels = data.data.open_deposit_channels.solana;
     metric.labels('solana').set(solChannels);
+
+    // TRON
+    const tronChannels = data.data.open_deposit_channels.tron;
+    metric.labels('tron').set(tronChannels);
 };

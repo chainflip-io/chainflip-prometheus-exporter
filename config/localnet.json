@@ -163,5 +163,14 @@
 		"wallets": [
 		],
 		"skipMetrics": []
+	},
+	"tron": {
+		"enabled": true,
+		"network": "localnet",
+		"defaultMetrics": [],
+		"contracts": [],
+		"wallets": [],
+		"tokens": [],
+		"skipMetrics": []
 	}
 }

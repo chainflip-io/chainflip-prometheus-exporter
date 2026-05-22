@@ -55,6 +55,18 @@ const CHAIN_CONFIGS: ChainElectionConfig[] = [
         ],
         skipMetricKey: 'cf_arbitrum_elections',
     },
+    {
+        chainName: 'tron',
+        palletName: 'tronElections',
+        bhwFieldPath: 'runningTron',
+        electionInstances: [
+            { index: 1, instanceLabel: 'deposit_channels' },
+            { index: 2, instanceLabel: 'vaults' },
+            { index: 3, instanceLabel: 'key_manager' },
+            // index 4: Liveness - skipped
+        ],
+        skipMetricKey: 'cf_tron_elections',
+    },
 ];
 
 const metricNameWitnessFrom: string = 'cf_bhw_witness_from';

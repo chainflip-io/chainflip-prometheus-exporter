@@ -35,4 +35,5 @@ export const gaugeFeeDeficit = async (context: Context, data: ProtocolData): Pro
     metric.labels('assethub').set(feeImbalanceValue(data.data.fee_imbalance.assethub, 1e10));
     metric.labels('bitcoin').set(feeImbalanceValue(data.data.fee_imbalance.bitcoin, 1e8));
     metric.labels('solana').set(feeImbalanceValue(data.data.fee_imbalance.solana, 1e9));
+    metric.labels('tron').set(feeImbalanceValue(data.data.fee_imbalance.tron, 1e6));
 };
