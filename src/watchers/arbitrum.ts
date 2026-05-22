@@ -81,7 +81,7 @@ async function startWatcher(context: Context) {
 
         context.httpProvider = httpProvider;
         activeIntervals.push(await pollEndpoint(gaugeBlockHeight, context, 6));
-        activeIntervals.push(await pollEndpoint(gaugeEthBalance, context, 6));
+        activeIntervals.push(await pollEndpoint(gaugeEthBalance, context, 60));
     } catch (e) {
         logger.error(`ARB catch: ${e}`);
         for (const interval of activeIntervals) {
