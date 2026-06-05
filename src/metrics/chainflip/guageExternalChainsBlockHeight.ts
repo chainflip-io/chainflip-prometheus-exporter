@@ -28,9 +28,6 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
     metric.labels('bitcoin').set(data.data.external_chains_height.bitcoin);
     blockHeightStore.setTracked('bitcoin', data.data.external_chains_height.bitcoin);
 
-    // Polkadot
-    metric.labels('polkadot').set(data.data.external_chains_height.polkadot);
-
     // Assethub
     metric.labels('assethub').set(data.data.external_chains_height.assethub);
     blockHeightStore.setTracked('assethub', data.data.external_chains_height.assethub);
