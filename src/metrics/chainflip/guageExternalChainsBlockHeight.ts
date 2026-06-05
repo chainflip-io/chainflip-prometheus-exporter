@@ -16,7 +16,7 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
         return;
     }
     const { logger, registry } = context;
-    logger.debug(`Scraping ${metricName}`);
+    logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 

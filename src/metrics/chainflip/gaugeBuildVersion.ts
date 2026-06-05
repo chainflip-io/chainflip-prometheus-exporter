@@ -16,7 +16,7 @@ export const gaugeBuildVersion = async (context: Context, data: ProtocolData): P
     }
     const { logger, registry, metricFailure, apiLatest } = context;
 
-    logger.debug(`Scraping ${metricName}`);
+    logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 

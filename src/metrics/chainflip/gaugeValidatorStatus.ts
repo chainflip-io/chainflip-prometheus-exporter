@@ -59,9 +59,10 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
         return;
     }
 
-    logger.debug(
-        `Scraping ${metricNameValidatorOnline}, ${metricNameValidatorAuthority}, ${metricNameValidatorQualified}, ${metricNameReputation}`,
-    );
+    logger.debug('scraping', {
+        metric: `${metricNameValidatorOnline}, ${metricNameValidatorAuthority}, ${metricNameValidatorQualified}, ${metricNameReputation}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricNameValidatorOnline) === undefined)
         registry.registerMetric(metricAuthorityOnline);

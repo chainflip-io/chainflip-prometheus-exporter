@@ -29,7 +29,7 @@ export const gaugeWitnessCount = async (context: Context, data: ProtocolData): P
     }
     if (global.epochIndex) {
         const { logger, apiLatest, registry, metricFailure, header } = context;
-        logger.debug(`Scraping ${metricName}`);
+        logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
         if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
         if (registry.getSingleMetric(metricFailureName) === undefined)

@@ -72,7 +72,10 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
     const { logger, apiLatest, registry, metricFailure } = context;
     const config = context.config as FlipConfig;
 
-    logger.debug(`Scraping ${metricNameOraclePrices}, ${metricNameOraclePricesDelta}`);
+    logger.debug('scraping', {
+        metric: `${metricNameOraclePrices}, ${metricNameOraclePricesDelta}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricNameOraclePrices) === undefined)
         registry.registerMetric(metricOraclePrices);

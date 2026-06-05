@@ -35,9 +35,10 @@ export const gaugeEpoch = async (context: Context, data: ProtocolData): Promise<
         return;
     }
     const { logger, registry } = context;
-    logger.debug(
-        `Scraping ${metricNameBlocksPerEpoch}, ${metricNameMAB}, ${metricNameEpochDuration}`,
-    );
+    logger.debug('scraping', {
+        metric: `${metricNameBlocksPerEpoch}, ${metricNameMAB}, ${metricNameEpochDuration}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricNameBlocksPerEpoch) === undefined)
         registry.registerMetric(metricBlocksPerEpoch);

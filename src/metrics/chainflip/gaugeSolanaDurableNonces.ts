@@ -23,7 +23,7 @@ export const gaugeSolanaNonces = async (context: Context, data: ProtocolData): P
         return;
     }
     const { logger, registry } = context;
-    logger.debug(`Scraping ${metricSolanaNoncesName}`);
+    logger.debug('scraping', { metric: metricSolanaNoncesName, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricSolanaNoncesName) === undefined)
         registry.registerMetric(metricSolanaNonces);

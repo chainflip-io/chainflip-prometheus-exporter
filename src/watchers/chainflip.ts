@@ -83,13 +83,18 @@ async function startWatcher(context: Context) {
         context.apiLatest = api;
 
         await api.rpc.chain.subscribeFinalizedHeads(async (header: any) => {
-            const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
-            const stateChainData = await makeRpcRequest(api, 'monitoring_data', context.blockHash);
+            const blockNumber = header.toJSON().number;
+            const blockHash = (await api.rpc.chain.getBlockHash(blockNumber)).toJSON();
+            logger.info(`finalized_block_stream`, {
+                blockNumber,
+                blockHash,
+            });
+            const stateChainData = await makeRpcRequest(api, 'monitoring_data', blockHash);
 
-            const blockApi = await api.at(blockHash.toJSON());
+            const blockApi = await api.at(blockHash);
             const data: ProtocolData = {
-                blockNumber: header.toJSON().number,
-                blockHash: blockHash.toJSON(),
+                blockNumber,
+                blockHash,
                 data: stateChainData,
                 blockApi,
             };

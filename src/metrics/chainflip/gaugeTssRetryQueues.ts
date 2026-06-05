@@ -15,7 +15,7 @@ export const gaugeTssRetryQueues = async (context: Context, data: ProtocolData):
         return;
     }
     const { logger, registry } = context;
-    logger.debug(`Scraping ${metricNamePendingTss}`);
+    logger.debug('scraping', { metric: metricNamePendingTss, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricNamePendingTss) === undefined)
         registry.registerMetric(metricPendingTss);

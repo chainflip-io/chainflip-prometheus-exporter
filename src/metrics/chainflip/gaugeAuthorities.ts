@@ -35,9 +35,10 @@ export const gaugeAuthorities = async (context: Context, data: ProtocolData): Pr
         return;
     }
     const { logger, registry } = context;
-    logger.debug(
-        `Scraping ${metricNameAuthorities}, ${metricNameOnlineAuthorities}, ${metricNameBackups}, ${metricNameOnlineBackups}`,
-    );
+    logger.debug('scraping', {
+        metric: `${metricNameAuthorities}, ${metricNameOnlineAuthorities}, ${metricNameBackups}, ${metricNameOnlineBackups}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricNameAuthorities) === undefined)
         registry.registerMetric(metricAuthorities);

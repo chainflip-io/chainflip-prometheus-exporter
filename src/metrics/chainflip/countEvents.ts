@@ -84,7 +84,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
     const config = context.config as FlipConfig;
     const { accounts, skipEvents } = config;
 
-    logger.debug(`Scraping ${metricName}`);
+    logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricName) === undefined) {
         registry.registerMetric(metric);

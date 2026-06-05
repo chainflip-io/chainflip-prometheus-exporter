@@ -77,7 +77,7 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
     }
     const { logger, registry, metricFailure, apiLatest } = context;
 
-    logger.debug(`Scraping ${metricNameLendingPools}`);
+    logger.debug('scraping', { metric: metricNameLendingPools, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricNameLendingPools) === undefined)
         registry.registerMetric(metricLendingPools);
