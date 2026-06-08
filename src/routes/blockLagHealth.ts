@@ -105,7 +105,7 @@ export const createBlockLagHealthRouter = (config: Config): Router => {
         }
 
         const result = evaluate(chainParam, sources[chainParam], parsedMaxLag ?? undefined);
-        return res.status(result.healthy ? 200 : 500).json(result);
+        return res.status(200).json(result);
     });
 
     router.get('/block-lag', (req, res) => {
@@ -123,7 +123,7 @@ export const createBlockLagHealthRouter = (config: Config): Router => {
             .map((chain) => evaluate(chain, sources[chain], parsedMaxLag ?? undefined));
 
         const healthy = results.every((r) => r.healthy);
-        return res.status(healthy ? 200 : 500).json({
+        return res.status(200).json({
             healthy,
             maxLagOverride: parsedMaxLag ?? null,
             results,
