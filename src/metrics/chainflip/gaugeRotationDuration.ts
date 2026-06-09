@@ -37,62 +37,71 @@ export const gaugeRotationDuration = async (
     if (context.config.skipMetrics.includes('cf_rotation_duration')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
 
     logger.debug('scraping', {
         metric: `${metricNameRotation}, ${metricName}`,
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricNameRotation) === undefined)
-        registry.registerMetric(metricRotationDuration);
-    if (registry.getSingleMetric(metricName) === undefined)
-        registry.registerMetric(metricRotationPhase);
+    try {
+        if (registry.getSingleMetric(metricNameRotation) === undefined)
+            registry.registerMetric(metricRotationDuration);
+        if (registry.getSingleMetric(metricName) === undefined)
+            registry.registerMetric(metricRotationPhase);
 
-    const currentRotationPhase: any = data.data.epoch.rotation_phase;
+        const currentRotationPhase: any = data.data.epoch.rotation_phase;
 
-    switch (currentRotationPhase) {
-        case 'Idle':
-            if (currentPhase !== rotationPhase.idle) {
-                currentPhase = rotationPhase.idle;
-                metricRotationDuration.reset();
-                metricRotationPhase.reset();
-            }
-            break;
-        case 'KeygensInProgress':
-            if (currentPhase !== rotationPhase.keygensInProgress) {
-                currentPhase = rotationPhase.keygensInProgress;
-            }
-            metricRotationPhase.labels({ rotationPhase: 'keygensInProgress' }).inc();
-            metricRotationDuration.inc();
-            break;
-        case 'KeyHandoversInProgress':
-            if (currentPhase !== rotationPhase.keyHandoversInProgress) {
-                currentPhase = rotationPhase.keyHandoversInProgress;
-            }
-            metricRotationPhase.labels({ rotationPhase: 'keyHandoversInProgress' }).inc();
-            metricRotationDuration.inc();
-            break;
-        case 'ActivatingKeys':
-            if (currentPhase !== rotationPhase.activatingKeys) {
-                currentPhase = rotationPhase.activatingKeys;
-            }
-            metricRotationPhase.labels({ rotationPhase: 'activatingKeys' }).inc();
-            metricRotationDuration.inc();
-            break;
-        case 'NewKeysActivated':
-            if (currentPhase !== rotationPhase.newKeysActivated) {
-                currentPhase = rotationPhase.newKeysActivated;
-            }
-            metricRotationPhase.labels({ rotationPhase: 'newKeysActivated' }).inc();
-            metricRotationDuration.inc();
-            break;
-        case 'SessionRotating':
-            if (currentPhase !== rotationPhase.sessionRotating) {
-                currentPhase = rotationPhase.sessionRotating;
-            }
-            metricRotationPhase.labels({ rotationPhase: 'sessionRotating' }).inc();
-            metricRotationDuration.inc();
-            break;
+        switch (currentRotationPhase) {
+            case 'Idle':
+                if (currentPhase !== rotationPhase.idle) {
+                    currentPhase = rotationPhase.idle;
+                    metricRotationDuration.reset();
+                    metricRotationPhase.reset();
+                }
+                break;
+            case 'KeygensInProgress':
+                if (currentPhase !== rotationPhase.keygensInProgress) {
+                    currentPhase = rotationPhase.keygensInProgress;
+                }
+                metricRotationPhase.labels({ rotationPhase: 'keygensInProgress' }).inc();
+                metricRotationDuration.inc();
+                break;
+            case 'KeyHandoversInProgress':
+                if (currentPhase !== rotationPhase.keyHandoversInProgress) {
+                    currentPhase = rotationPhase.keyHandoversInProgress;
+                }
+                metricRotationPhase.labels({ rotationPhase: 'keyHandoversInProgress' }).inc();
+                metricRotationDuration.inc();
+                break;
+            case 'ActivatingKeys':
+                if (currentPhase !== rotationPhase.activatingKeys) {
+                    currentPhase = rotationPhase.activatingKeys;
+                }
+                metricRotationPhase.labels({ rotationPhase: 'activatingKeys' }).inc();
+                metricRotationDuration.inc();
+                break;
+            case 'NewKeysActivated':
+                if (currentPhase !== rotationPhase.newKeysActivated) {
+                    currentPhase = rotationPhase.newKeysActivated;
+                }
+                metricRotationPhase.labels({ rotationPhase: 'newKeysActivated' }).inc();
+                metricRotationDuration.inc();
+                break;
+            case 'SessionRotating':
+                if (currentPhase !== rotationPhase.sessionRotating) {
+                    currentPhase = rotationPhase.sessionRotating;
+                }
+                metricRotationPhase.labels({ rotationPhase: 'sessionRotating' }).inc();
+                metricRotationDuration.inc();
+                break;
+        }
+
+        metricFailure.labels({ metric: metricNameRotation }).set(0);
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNameRotation }).set(1);
+        metricFailure.labels({ metric: metricName }).set(1);
     }
 };

@@ -64,26 +64,6 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricNameValidatorOnline) === undefined)
-        registry.registerMetric(metricAuthorityOnline);
-    if (registry.getSingleMetric(metricNameValidatorAuthority) === undefined)
-        registry.registerMetric(metricAuthority);
-    if (registry.getSingleMetric(metricNameValidatorQualified) === undefined)
-        registry.registerMetric(metricQualified);
-    if (registry.getSingleMetric(metricNameValidatorBidding) === undefined)
-        registry.registerMetric(metricBidding);
-    if (registry.getSingleMetric(metricNameValidatorBalance) === undefined)
-        registry.registerMetric(metricBalance);
-    if (registry.getSingleMetric(metricNameReputation) === undefined)
-        registry.registerMetric(metricReputation);
-
-    metricFailure.labels({ metric: metricNameValidatorOnline }).set(0);
-    metricFailure.labels({ metric: metricNameValidatorAuthority }).set(0);
-    metricFailure.labels({ metric: metricNameValidatorQualified }).set(0);
-    metricFailure.labels({ metric: metricNameValidatorBidding }).set(0);
-    metricFailure.labels({ metric: metricNameValidatorBalance }).set(0);
-    metricFailure.labels({ metric: metricNameReputation }).set(0);
-
     const accounts = [];
     const vanityNames = [];
     for (const { ss58Address, alias } of config.accounts) {
@@ -94,6 +74,19 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
     const accountsChunked = chunk(accounts, 10);
     const vanityNamesChunked = chunk(vanityNames, 10);
     try {
+        if (registry.getSingleMetric(metricNameValidatorOnline) === undefined)
+            registry.registerMetric(metricAuthorityOnline);
+        if (registry.getSingleMetric(metricNameValidatorAuthority) === undefined)
+            registry.registerMetric(metricAuthority);
+        if (registry.getSingleMetric(metricNameValidatorQualified) === undefined)
+            registry.registerMetric(metricQualified);
+        if (registry.getSingleMetric(metricNameValidatorBidding) === undefined)
+            registry.registerMetric(metricBidding);
+        if (registry.getSingleMetric(metricNameValidatorBalance) === undefined)
+            registry.registerMetric(metricBalance);
+        if (registry.getSingleMetric(metricNameReputation) === undefined)
+            registry.registerMetric(metricReputation);
+
         let j = 0;
         for (const chunk of accountsChunked) {
             const result = await makeRpcRequest(
@@ -161,6 +154,12 @@ export const gaugeValidatorStatus = async (context: Context, data: ProtocolData)
                 metricQualified.labels(chunk[i], '').set(is_qualified ? 1 : 0);
             }
         }
+        metricFailure.labels({ metric: metricNameValidatorOnline }).set(0);
+        metricFailure.labels({ metric: metricNameValidatorAuthority }).set(0);
+        metricFailure.labels({ metric: metricNameValidatorQualified }).set(0);
+        metricFailure.labels({ metric: metricNameValidatorBidding }).set(0);
+        metricFailure.labels({ metric: metricNameValidatorBalance }).set(0);
+        metricFailure.labels({ metric: metricNameReputation }).set(0);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricNameValidatorOnline }).set(1);

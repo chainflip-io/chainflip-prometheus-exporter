@@ -63,30 +63,24 @@ export const gaugeDelegation = async (context: Context, data: ProtocolData): Pro
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricNameBondDifference) === undefined)
-        registry.registerMetric(metricBondDifference);
-    if (registry.getSingleMetric(metricNameNewValidators) === undefined)
-        registry.registerMetric(metricNewValidators);
-    if (registry.getSingleMetric(metricNameNextBond) === undefined)
-        registry.registerMetric(metricNextBond);
-    if (registry.getSingleMetric(metricNameOperatorDelegatedBalance) === undefined)
-        registry.registerMetric(metricOperatorDelegatedBalance);
-    if (registry.getSingleMetric(metricNameCurrentBond) === undefined)
-        registry.registerMetric(metricCurrentBond);
-    if (registry.getSingleMetric(metricNameNextAuthoritySize) === undefined)
-        registry.registerMetric(metricNextAuthoritySize);
-
-    metricFailure.labels({ metric: metricNameBondDifference }).set(0);
-    metricFailure.labels({ metric: metricNameNewValidators }).set(0);
-    metricFailure.labels({ metric: metricNameNextBond }).set(0);
-    metricFailure.labels({ metric: metricNameOperatorDelegatedBalance }).set(0);
-    metricFailure.labels({ metric: metricNameCurrentBond }).set(0);
-
     try {
+        if (registry.getSingleMetric(metricNameBondDifference) === undefined)
+            registry.registerMetric(metricBondDifference);
+        if (registry.getSingleMetric(metricNameNewValidators) === undefined)
+            registry.registerMetric(metricNewValidators);
+        if (registry.getSingleMetric(metricNameNextBond) === undefined)
+            registry.registerMetric(metricNextBond);
+        if (registry.getSingleMetric(metricNameOperatorDelegatedBalance) === undefined)
+            registry.registerMetric(metricOperatorDelegatedBalance);
+        if (registry.getSingleMetric(metricNameCurrentBond) === undefined)
+            registry.registerMetric(metricCurrentBond);
+        if (registry.getSingleMetric(metricNameNextAuthoritySize) === undefined)
+            registry.registerMetric(metricNextAuthoritySize);
+
         const result = await makeRpcRequest(
             apiLatest,
             'monitoring_simulate_auction',
-            context.blockHash,
+            data.blockHash,
         );
 
         metricNewValidators.set(result.new_validators.length);
@@ -107,6 +101,12 @@ export const gaugeDelegation = async (context: Context, data: ProtocolData): Pro
             }
             metricOperatorDelegatedBalance.labels(entry.operator).set(total_delegated);
         }
+        metricFailure.labels({ metric: metricNameBondDifference }).set(0);
+        metricFailure.labels({ metric: metricNameNewValidators }).set(0);
+        metricFailure.labels({ metric: metricNameNextBond }).set(0);
+        metricFailure.labels({ metric: metricNameOperatorDelegatedBalance }).set(0);
+        metricFailure.labels({ metric: metricNameCurrentBond }).set(0);
+        metricFailure.labels({ metric: metricNameNextAuthoritySize }).set(0);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricNameBondDifference }).set(1);
@@ -114,5 +114,6 @@ export const gaugeDelegation = async (context: Context, data: ProtocolData): Pro
         metricFailure.labels({ metric: metricNameNextBond }).set(1);
         metricFailure.labels({ metric: metricNameOperatorDelegatedBalance }).set(1);
         metricFailure.labels({ metric: metricNameCurrentBond }).set(1);
+        metricFailure.labels({ metric: metricNameNextAuthoritySize }).set(1);
     }
 };

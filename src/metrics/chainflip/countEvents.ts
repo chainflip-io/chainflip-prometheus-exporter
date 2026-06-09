@@ -86,78 +86,78 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
 
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) {
-        registry.registerMetric(metric);
-        metric.labels('governance:Approved').set(0);
-        metric.labels('governance:Executed').set(0);
-        metric.labels('governance:Proposed').set(0);
-        metric.labels('ethereumBroadcaster:BroadcastAborted').set(0);
-        metric.labels('arbitrumBroadcaster:BroadcastAborted').set(0);
-        metric.labels('bitcoinBroadcaster:BroadcastAborted').set(0);
-        metric.labels('solanaBroadcaster:BroadcastAborted').set(0);
-        metric.labels('bitcoinBroadcaster:BroadcastTimeout').set(0);
-        metric.labels('ethereumBroadcaster:BroadcastTimeout').set(0);
-        metric.labels('arbitrumBroadcaster:BroadcastTimeout').set(0);
-        metric.labels('solanaBroadcaster:BroadcastTimeout').set(0);
-        metric.labels('evmThresholdSigner:RetryRequested').set(0);
-        metric.labels('bitcoinThresholdSigner:RetryRequested').set(0);
-        metric.labels('solanaThresholdSigner:RetryRequested').set(0);
-        metric.labels('evmThresholdSigner:KeygenFailure').set(0);
-        metric.labels('bitcoinThresholdSigner:KeygenFailure').set(0);
-        metric.labels('solanaThresholdSigner:KeygenFailure').set(0);
-        metric.labels('solanaIngressEgress:ChannelOpeningFeePaid').set(0);
-        metric.labels('bitcoinIngressEgress:ChannelOpeningFeePaid').set(0);
-        metric.labels('ethereumIngressEgress:ChannelOpeningFeePaid').set(0);
-        metric.labels('arbitrumIngressEgress:ChannelOpeningFeePaid').set(0);
-        metric.labels('flip:SlashingPerformed').set(0);
-        metric.labels('ethereumChainTracking:ChainStateUpdated').set(0);
-        metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
-        metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
-        metric.labels('bitcoinIngressEgress:BoostedDepositLost').set(0);
-        metric.labels('arbitrumIngressEgress:TransferFallbackRequested').set(0);
-        metric.labels('ethereumIngressEgress:TransferFallbackRequested').set(0);
-        metric.labels('solanaIngressEgress:TransferFallbackRequested').set(0);
-        metric.labels('assethubIngressEgress:TransferFallbackRequested').set(0);
-        metric.labels('bitcoinIngressEgress:TransferFallbackRequested').set(0);
-        metric.labels('tronBroadcaster:BroadcastAborted').set(0);
-        metric.labels('tronBroadcaster:BroadcastTimeout').set(0);
-        metric.labels('tronIngressEgress:ChannelOpeningFeePaid').set(0);
-        metric.labels('tronChainTracking:ChainStateUpdated').set(0);
-        metric.labels('tronIngressEgress:TransferFallbackRequested').set(0);
-        metricReorgDetected.labels('bitcoin').set(0);
-        metricReorgDetected.labels('ethereum').set(0);
-        metricReorgDetected.labels('arbitrum').set(0);
-        metricReorgDetected.labels('tron').set(0);
-    }
-    if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
-        registry.registerMetric(metricExtrinsicFailed);
-    if (registry.getSingleMetric(metricNameSlashing) === undefined) {
-        registry.registerMetric(metricSlash);
-        for (const { ss58Address, alias } of accounts) {
-            const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
-            metricSlash.labels(ss58Address, hex, alias).set(0);
-        }
-    }
-    if (registry.getSingleMetric(metricNameCcmBroadcastAborted) === undefined) {
-        registry.registerMetric(metricCcmBroadcastAborted);
-        metricCcmBroadcastAborted.labels('arbitrumBroadcaster').set(0);
-        metricCcmBroadcastAborted.labels('bitcoinBroadcaster').set(0);
-        metricCcmBroadcastAborted.labels('ethereumBroadcaster').set(0);
-        metricCcmBroadcastAborted.labels('solanaBroadcaster').set(0);
-        metricCcmBroadcastAborted.labels('tronBroadcaster').set(0);
-    }
-    if (registry.getSingleMetric(metricNameBroadcastAborted) === undefined) {
-        registry.registerMetric(metricBroadcastAborted);
-        metricBroadcastAborted.labels('arbitrumBroadcaster').set(0);
-        metricBroadcastAborted.labels('bitcoinBroadcaster').set(0);
-        metricBroadcastAborted.labels('ethereumBroadcaster').set(0);
-        metricBroadcastAborted.labels('solanaBroadcaster').set(0);
-        metricBroadcastAborted.labels('tronBroadcaster').set(0);
-    }
-    if (registry.getSingleMetric(metricNameReorgDetected) === undefined) {
-        registry.registerMetric(metricReorgDetected);
-    }
     try {
+        if (registry.getSingleMetric(metricName) === undefined) {
+            registry.registerMetric(metric);
+            metric.labels('governance:Approved').set(0);
+            metric.labels('governance:Executed').set(0);
+            metric.labels('governance:Proposed').set(0);
+            metric.labels('ethereumBroadcaster:BroadcastAborted').set(0);
+            metric.labels('arbitrumBroadcaster:BroadcastAborted').set(0);
+            metric.labels('bitcoinBroadcaster:BroadcastAborted').set(0);
+            metric.labels('solanaBroadcaster:BroadcastAborted').set(0);
+            metric.labels('bitcoinBroadcaster:BroadcastTimeout').set(0);
+            metric.labels('ethereumBroadcaster:BroadcastTimeout').set(0);
+            metric.labels('arbitrumBroadcaster:BroadcastTimeout').set(0);
+            metric.labels('solanaBroadcaster:BroadcastTimeout').set(0);
+            metric.labels('evmThresholdSigner:RetryRequested').set(0);
+            metric.labels('bitcoinThresholdSigner:RetryRequested').set(0);
+            metric.labels('solanaThresholdSigner:RetryRequested').set(0);
+            metric.labels('evmThresholdSigner:KeygenFailure').set(0);
+            metric.labels('bitcoinThresholdSigner:KeygenFailure').set(0);
+            metric.labels('solanaThresholdSigner:KeygenFailure').set(0);
+            metric.labels('solanaIngressEgress:ChannelOpeningFeePaid').set(0);
+            metric.labels('bitcoinIngressEgress:ChannelOpeningFeePaid').set(0);
+            metric.labels('ethereumIngressEgress:ChannelOpeningFeePaid').set(0);
+            metric.labels('arbitrumIngressEgress:ChannelOpeningFeePaid').set(0);
+            metric.labels('flip:SlashingPerformed').set(0);
+            metric.labels('ethereumChainTracking:ChainStateUpdated').set(0);
+            metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
+            metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
+            metric.labels('bitcoinIngressEgress:BoostedDepositLost').set(0);
+            metric.labels('arbitrumIngressEgress:TransferFallbackRequested').set(0);
+            metric.labels('ethereumIngressEgress:TransferFallbackRequested').set(0);
+            metric.labels('solanaIngressEgress:TransferFallbackRequested').set(0);
+            metric.labels('assethubIngressEgress:TransferFallbackRequested').set(0);
+            metric.labels('bitcoinIngressEgress:TransferFallbackRequested').set(0);
+            metric.labels('tronBroadcaster:BroadcastAborted').set(0);
+            metric.labels('tronBroadcaster:BroadcastTimeout').set(0);
+            metric.labels('tronIngressEgress:ChannelOpeningFeePaid').set(0);
+            metric.labels('tronChainTracking:ChainStateUpdated').set(0);
+            metric.labels('tronIngressEgress:TransferFallbackRequested').set(0);
+            metricReorgDetected.labels('bitcoin').set(0);
+            metricReorgDetected.labels('ethereum').set(0);
+            metricReorgDetected.labels('arbitrum').set(0);
+            metricReorgDetected.labels('tron').set(0);
+        }
+        if (registry.getSingleMetric(metricExtrinsicFailedName) === undefined)
+            registry.registerMetric(metricExtrinsicFailed);
+        if (registry.getSingleMetric(metricNameSlashing) === undefined) {
+            registry.registerMetric(metricSlash);
+            for (const { ss58Address, alias } of accounts) {
+                const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
+                metricSlash.labels(ss58Address, hex, alias).set(0);
+            }
+        }
+        if (registry.getSingleMetric(metricNameCcmBroadcastAborted) === undefined) {
+            registry.registerMetric(metricCcmBroadcastAborted);
+            metricCcmBroadcastAborted.labels('arbitrumBroadcaster').set(0);
+            metricCcmBroadcastAborted.labels('bitcoinBroadcaster').set(0);
+            metricCcmBroadcastAborted.labels('ethereumBroadcaster').set(0);
+            metricCcmBroadcastAborted.labels('solanaBroadcaster').set(0);
+            metricCcmBroadcastAborted.labels('tronBroadcaster').set(0);
+        }
+        if (registry.getSingleMetric(metricNameBroadcastAborted) === undefined) {
+            registry.registerMetric(metricBroadcastAborted);
+            metricBroadcastAborted.labels('arbitrumBroadcaster').set(0);
+            metricBroadcastAborted.labels('bitcoinBroadcaster').set(0);
+            metricBroadcastAborted.labels('ethereumBroadcaster').set(0);
+            metricBroadcastAborted.labels('solanaBroadcaster').set(0);
+            metricBroadcastAborted.labels('tronBroadcaster').set(0);
+        }
+        if (registry.getSingleMetric(metricNameReorgDetected) === undefined) {
+            registry.registerMetric(metricReorgDetected);
+        }
         cleanupStaleCcmBroadcasts(data.blockNumber, logger);
         logStructureSize(
             logger,
@@ -171,7 +171,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
 
         const events = await api.query.system.events();
         const reorgChains: Set<string> = new Set<string>();
-        eventsRotationInfo(context, data, events);
+        await eventsRotationInfo(context, data, events);
         for (const { event } of events) {
             let skip = false;
             for (const { section, method } of skipEvents) {

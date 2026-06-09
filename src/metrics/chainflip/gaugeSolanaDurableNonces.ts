@@ -22,35 +22,44 @@ export const gaugeSolanaNonces = async (context: Context, data: ProtocolData): P
     if (context.config.skipMetrics.includes('cf_solana_nonces')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricSolanaNoncesName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricSolanaNoncesName) === undefined)
-        registry.registerMetric(metricSolanaNonces);
-    if (registry.getSingleMetric(metricSolanaUnavailableNoncesName) === undefined)
-        registry.registerMetric(metricSolanaUnavailableNonces);
+    try {
+        if (registry.getSingleMetric(metricSolanaNoncesName) === undefined)
+            registry.registerMetric(metricSolanaNonces);
+        if (registry.getSingleMetric(metricSolanaUnavailableNoncesName) === undefined)
+            registry.registerMetric(metricSolanaUnavailableNonces);
 
-    const availableNonces = data.data.sol_nonces.available;
-    const unavailableNonces = data.data.sol_nonces.unavailable;
+        const availableNonces = data.data.sol_nonces.available;
+        const unavailableNonces = data.data.sol_nonces.unavailable;
 
-    metricSolanaNonces.set(availableNonces.length);
-    const nonces: SolanaNonce[] = [];
-    availableNonces.forEach(([addressBase58, nonceBase58]: [string, string]) => {
-        const address = '0x' + Buffer.from(base58.decode(addressBase58)).toString('hex');
-        const nonce = '0x' + Buffer.from(base58.decode(nonceBase58)).toString('hex');
-        metricSolanaUnavailableNonces.labels(address, addressBase58).set(0);
+        metricSolanaNonces.set(availableNonces.length);
+        const nonces: SolanaNonce[] = [];
+        availableNonces.forEach(([addressBase58, nonceBase58]: [string, string]) => {
+            const address = '0x' + Buffer.from(base58.decode(addressBase58)).toString('hex');
+            const nonce = '0x' + Buffer.from(base58.decode(nonceBase58)).toString('hex');
+            metricSolanaUnavailableNonces.labels(address, addressBase58).set(0);
 
-        nonces.push({
-            address,
-            nonce,
-            base58address: addressBase58,
-            base58nonce: nonceBase58,
+            nonces.push({
+                address,
+                nonce,
+                base58address: addressBase58,
+                base58nonce: nonceBase58,
+            });
         });
-    });
-    global.availableSolanaNonces = nonces;
+        global.availableSolanaNonces = nonces;
 
-    unavailableNonces.forEach((addressBase58: string) => {
-        const address = '0x' + Buffer.from(base58.decode(addressBase58)).toString('hex');
-        metricSolanaUnavailableNonces.labels(address, addressBase58).set(1);
-    });
+        unavailableNonces.forEach((addressBase58: string) => {
+            const address = '0x' + Buffer.from(base58.decode(addressBase58)).toString('hex');
+            metricSolanaUnavailableNonces.labels(address, addressBase58).set(1);
+        });
+
+        metricFailure.labels({ metric: metricSolanaNoncesName }).set(0);
+        metricFailure.labels({ metric: metricSolanaUnavailableNoncesName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricSolanaNoncesName }).set(1);
+        metricFailure.labels({ metric: metricSolanaUnavailableNoncesName }).set(1);
+    }
 };

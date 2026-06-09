@@ -20,18 +20,27 @@ export const gaugeBtcUtxos = async (context: Context, data: ProtocolData): Promi
     if (context.config.skipMetrics.includes('cf_btc_utxos')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
 
     logger.debug('scraping', {
         metric: `${metricNameUtxosCount}, ${metricNameUtxosBalance}`,
         blockNumber: data.blockNumber,
     });
-    if (registry.getSingleMetric(metricNameUtxosCount) === undefined)
-        registry.registerMetric(metricUtxosCount);
-    if (registry.getSingleMetric(metricNameUtxosBalance) === undefined)
-        registry.registerMetric(metricUtxosBalance);
+    try {
+        if (registry.getSingleMetric(metricNameUtxosCount) === undefined)
+            registry.registerMetric(metricUtxosCount);
+        if (registry.getSingleMetric(metricNameUtxosBalance) === undefined)
+            registry.registerMetric(metricUtxosBalance);
 
-    metricUtxosCount.set(data.data.btc_utxos.count);
+        metricUtxosCount.set(data.data.btc_utxos.count);
 
-    metricUtxosBalance.set(Number(data.data.btc_utxos.total_balance));
+        metricUtxosBalance.set(Number(data.data.btc_utxos.total_balance));
+
+        metricFailure.labels({ metric: metricNameUtxosCount }).set(0);
+        metricFailure.labels({ metric: metricNameUtxosBalance }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNameUtxosCount }).set(1);
+        metricFailure.labels({ metric: metricNameUtxosBalance }).set(1);
+    }
 };

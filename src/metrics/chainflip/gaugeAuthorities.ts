@@ -34,25 +34,38 @@ export const gaugeAuthorities = async (context: Context, data: ProtocolData): Pr
     if (context.config.skipMetrics.includes('cf_authorities')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', {
         metric: `${metricNameAuthorities}, ${metricNameOnlineAuthorities}, ${metricNameBackups}, ${metricNameOnlineBackups}`,
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricNameAuthorities) === undefined)
-        registry.registerMetric(metricAuthorities);
-    if (registry.getSingleMetric(metricNameOnlineAuthorities) === undefined)
-        registry.registerMetric(metricOnlineAuthorities);
-    if (registry.getSingleMetric(metricNameBackups) === undefined)
-        registry.registerMetric(metricBackups);
-    if (registry.getSingleMetric(metricNameOnlineBackups) === undefined)
-        registry.registerMetric(metricOnlineBackups);
+    try {
+        if (registry.getSingleMetric(metricNameAuthorities) === undefined)
+            registry.registerMetric(metricAuthorities);
+        if (registry.getSingleMetric(metricNameOnlineAuthorities) === undefined)
+            registry.registerMetric(metricOnlineAuthorities);
+        if (registry.getSingleMetric(metricNameBackups) === undefined)
+            registry.registerMetric(metricBackups);
+        if (registry.getSingleMetric(metricNameOnlineBackups) === undefined)
+            registry.registerMetric(metricOnlineBackups);
 
-    metricAuthorities.set(data.data.authorities.authorities);
-    global.currentAuthorities = data.data.authorities.authorities;
-    metricOnlineAuthorities.set(data.data.authorities.online_authorities);
+        metricAuthorities.set(data.data.authorities.authorities);
+        global.currentAuthorities = data.data.authorities.authorities;
+        metricOnlineAuthorities.set(data.data.authorities.online_authorities);
 
-    metricBackups.set(data.data.authorities.backups);
-    metricOnlineBackups.set(data.data.authorities.online_backups);
+        metricBackups.set(data.data.authorities.backups);
+        metricOnlineBackups.set(data.data.authorities.online_backups);
+
+        metricFailure.labels({ metric: metricNameAuthorities }).set(0);
+        metricFailure.labels({ metric: metricNameOnlineAuthorities }).set(0);
+        metricFailure.labels({ metric: metricNameBackups }).set(0);
+        metricFailure.labels({ metric: metricNameOnlineBackups }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNameAuthorities }).set(1);
+        metricFailure.labels({ metric: metricNameOnlineAuthorities }).set(1);
+        metricFailure.labels({ metric: metricNameBackups }).set(1);
+        metricFailure.labels({ metric: metricNameOnlineBackups }).set(1);
+    }
 };

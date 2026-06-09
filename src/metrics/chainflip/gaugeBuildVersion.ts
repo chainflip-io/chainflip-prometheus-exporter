@@ -18,11 +18,11 @@ export const gaugeBuildVersion = async (context: Context, data: ProtocolData): P
 
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-
     let runtime = '';
     let node = '';
     try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+
         node = await apiLatest.rpc.system.version();
         const api = data.blockApi;
         const getRuntime = await api.query.system.lastRuntimeUpgrade();

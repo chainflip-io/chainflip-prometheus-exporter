@@ -33,50 +33,64 @@ export const eventsRotationInfo = async (
     if (context.config.skipMetrics.includes('cf_rotation_phase_attempts')) {
         return;
     }
-    const { logger, registry, apiLatest } = context;
+    const { logger, registry, apiLatest, metricFailure } = context;
 
     logger.debug('scraping', {
         metric: `${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`,
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricNameRotationPhaseAttempt) === undefined)
-        registry.registerMetric(metricRotationPhaseAttempt);
-    if (registry.getSingleMetric(metricNameBanned) === undefined)
-        registry.registerMetric(metricBanned);
-    if (registry.getSingleMetric(metricNameBalanceBanned) === undefined)
-        registry.registerMetric(metricBalanceBanned);
+    try {
+        if (registry.getSingleMetric(metricNameRotationPhaseAttempt) === undefined)
+            registry.registerMetric(metricRotationPhaseAttempt);
+        if (registry.getSingleMetric(metricNameBanned) === undefined)
+            registry.registerMetric(metricBanned);
+        if (registry.getSingleMetric(metricNameBalanceBanned) === undefined)
+            registry.registerMetric(metricBalanceBanned);
 
-    if (global.rotationInProgress) {
-        for (const { event } of events) {
-            if (event.section === 'validator' && event.method === 'RotationPhaseUpdated') {
-                try {
-                    const phase = event.data.newPhase.toJSON();
-                    const phaseName = Object.keys(phase)[0];
-                    metricRotationPhaseAttempt.labels(phaseName).inc();
-                    const bannedNodes = phase[phaseName].banned.length;
-                    metricBanned.set(bannedNodes);
-                    if (bannedNodes > 0) {
-                        let totalBannedBalance = 0;
-                        for (const idSs58 of phase[phaseName].banned) {
-                            const result = await makeRpcRequest(
-                                apiLatest,
-                                'account_info_v2',
-                                idSs58,
-                                data.blockHash,
-                            );
-                            totalBannedBalance += Number(result.balance) / 1e18;
+        let failed = false;
+        if (global.rotationInProgress) {
+            for (const { event } of events) {
+                if (event.section === 'validator' && event.method === 'RotationPhaseUpdated') {
+                    try {
+                        const phase = event.data.newPhase.toJSON();
+                        const phaseName = Object.keys(phase)[0];
+                        metricRotationPhaseAttempt.labels(phaseName).inc();
+                        const bannedNodes = phase[phaseName].banned.length;
+                        metricBanned.set(bannedNodes);
+                        if (bannedNodes > 0) {
+                            let totalBannedBalance = 0;
+                            for (const idSs58 of phase[phaseName].banned) {
+                                const result = await makeRpcRequest(
+                                    apiLatest,
+                                    'account_info_v2',
+                                    idSs58,
+                                    data.blockHash,
+                                );
+                                totalBannedBalance += Number(result.balance) / 1e18;
+                            }
+                            metricBalanceBanned.set(Number(totalBannedBalance));
                         }
-                        metricBalanceBanned.set(Number(totalBannedBalance));
+                    } catch (e) {
+                        failed = true;
+                        logger.error(e);
                     }
-                } catch (e) {
-                    logger.error(e);
                 }
             }
+        } else {
+            metricRotationPhaseAttempt.reset();
+            metricBanned.reset();
+            metricBalanceBanned.reset();
         }
-    } else {
-        metricRotationPhaseAttempt.reset();
-        metricBanned.reset();
-        metricBalanceBanned.reset();
+
+        const failureValue = failed ? 1 : 0;
+        metricFailure.labels({ metric: metricNameRotationPhaseAttempt }).set(failureValue);
+        metricFailure.labels({ metric: metricNameBanned }).set(failureValue);
+        metricFailure.labels({ metric: metricNameBalanceBanned }).set(failureValue);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNameRotationPhaseAttempt }).set(1);
+        metricFailure.labels({ metric: metricNameBanned }).set(1);
+        metricFailure.labels({ metric: metricNameBalanceBanned }).set(1);
     }
 };

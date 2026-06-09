@@ -13,10 +13,16 @@ export const gaugeSwappingQueue = async (context: Context, data: ProtocolData): 
     if (context.config.skipMetrics.includes('cf_swapping_queue')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.set(data.data.pending_swaps);
+        metric.set(data.data.pending_swaps);
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricName }).set(1);
+    }
 };

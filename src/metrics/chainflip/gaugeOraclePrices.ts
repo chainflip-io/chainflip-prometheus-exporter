@@ -77,22 +77,18 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricNameOraclePrices) === undefined)
-        registry.registerMetric(metricOraclePrices);
-    if (registry.getSingleMetric(metricNameOraclePricesDelta) === undefined)
-        registry.registerMetric(metricOraclePricesDelta);
-    if (registry.getSingleMetric(metricNameOraclePricesTimestamp) === undefined)
-        registry.registerMetric(metricOraclePricesTimestamp);
-    if (registry.getSingleMetric(metricNameOraclePricesBlock) === undefined)
-        registry.registerMetric(metricOraclePricesBlock);
-    if (registry.getSingleMetric(metricNameOraclePricesStaleness) === undefined)
-        registry.registerMetric(metricOraclePricesStaleness);
-
-    metricFailure.labels({ metric: metricNameOraclePrices }).set(0);
-    metricFailure.labels({ metric: metricNameOraclePricesDelta }).set(0);
-    metricFailure.labels({ metric: metricNameOraclePricesStaleness }).set(0);
-
     try {
+        if (registry.getSingleMetric(metricNameOraclePrices) === undefined)
+            registry.registerMetric(metricOraclePrices);
+        if (registry.getSingleMetric(metricNameOraclePricesDelta) === undefined)
+            registry.registerMetric(metricOraclePricesDelta);
+        if (registry.getSingleMetric(metricNameOraclePricesTimestamp) === undefined)
+            registry.registerMetric(metricOraclePricesTimestamp);
+        if (registry.getSingleMetric(metricNameOraclePricesBlock) === undefined)
+            registry.registerMetric(metricOraclePricesBlock);
+        if (registry.getSingleMetric(metricNameOraclePricesStaleness) === undefined)
+            registry.registerMetric(metricOraclePricesStaleness);
+
         const result = await makeRpcRequest(apiLatest, 'oracle_prices', undefined, data.blockHash);
         for (const asset of result) {
             const baseAsset = asset.base_asset;
@@ -190,10 +186,17 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
             data.blockNumber,
             { everyBlocks: 100 },
         );
+        metricFailure.labels({ metric: metricNameOraclePrices }).set(0);
+        metricFailure.labels({ metric: metricNameOraclePricesDelta }).set(0);
+        metricFailure.labels({ metric: metricNameOraclePricesTimestamp }).set(0);
+        metricFailure.labels({ metric: metricNameOraclePricesBlock }).set(0);
+        metricFailure.labels({ metric: metricNameOraclePricesStaleness }).set(0);
     } catch (e) {
         logger.error(e);
         metricFailure.labels({ metric: metricNameOraclePrices }).set(1);
         metricFailure.labels({ metric: metricNameOraclePricesDelta }).set(1);
+        metricFailure.labels({ metric: metricNameOraclePricesTimestamp }).set(1);
+        metricFailure.labels({ metric: metricNameOraclePricesBlock }).set(1);
         metricFailure.labels({ metric: metricNameOraclePricesStaleness }).set(1);
     }
 };

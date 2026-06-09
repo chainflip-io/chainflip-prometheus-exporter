@@ -15,32 +15,39 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
     if (context.config.skipMetrics.includes('cf_external_chain_block_height')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    // Ethereum
-    metric.labels('ethereum').set(data.data.external_chains_height.ethereum);
-    blockHeightStore.setTracked('ethereum', data.data.external_chains_height.ethereum);
+        // Ethereum
+        metric.labels('ethereum').set(data.data.external_chains_height.ethereum);
+        blockHeightStore.setTracked('ethereum', data.data.external_chains_height.ethereum);
 
-    // Bitcoin
-    metric.labels('bitcoin').set(data.data.external_chains_height.bitcoin);
-    blockHeightStore.setTracked('bitcoin', data.data.external_chains_height.bitcoin);
+        // Bitcoin
+        metric.labels('bitcoin').set(data.data.external_chains_height.bitcoin);
+        blockHeightStore.setTracked('bitcoin', data.data.external_chains_height.bitcoin);
 
-    // Assethub
-    metric.labels('assethub').set(data.data.external_chains_height.assethub);
-    blockHeightStore.setTracked('assethub', data.data.external_chains_height.assethub);
+        // Assethub
+        metric.labels('assethub').set(data.data.external_chains_height.assethub);
+        blockHeightStore.setTracked('assethub', data.data.external_chains_height.assethub);
 
-    // Arbitrum
-    metric.labels('arbitrum').set(data.data.external_chains_height.arbitrum);
-    blockHeightStore.setTracked('arbitrum', data.data.external_chains_height.arbitrum);
+        // Arbitrum
+        metric.labels('arbitrum').set(data.data.external_chains_height.arbitrum);
+        blockHeightStore.setTracked('arbitrum', data.data.external_chains_height.arbitrum);
 
-    // Solana
-    metric.labels('solana').set(data.data.external_chains_height.solana);
-    blockHeightStore.setTracked('solana', data.data.external_chains_height.solana);
+        // Solana
+        metric.labels('solana').set(data.data.external_chains_height.solana);
+        blockHeightStore.setTracked('solana', data.data.external_chains_height.solana);
 
-    // Tron
-    metric.labels('tron').set(data.data.external_chains_height.tron);
-    blockHeightStore.setTracked('tron', data.data.external_chains_height.tron);
+        // Tron
+        metric.labels('tron').set(data.data.external_chains_height.tron);
+        blockHeightStore.setTracked('tron', data.data.external_chains_height.tron);
+
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricName }).set(1);
+    }
 };
