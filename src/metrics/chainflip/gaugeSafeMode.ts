@@ -17,7 +17,7 @@ export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promi
     }
     const { logger, apiLatest, registry, metricFailure } = context;
 
-    logger.debug(`Scraping ${metricNameSafeMode}`);
+    logger.debug('scraping', { metric: metricNameSafeMode, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricNameSafeMode) === undefined)
         registry.registerMetric(metricSafeMode);

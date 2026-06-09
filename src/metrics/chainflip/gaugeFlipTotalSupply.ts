@@ -15,7 +15,7 @@ export const gaugeFlipTotalSupply = async (context: Context, data: ProtocolData)
     }
     const { logger, registry } = context;
 
-    logger.debug(`Scraping ${metricName}`);
+    logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
     const totalSupply: bigint = data.data.flip_supply.total_supply;

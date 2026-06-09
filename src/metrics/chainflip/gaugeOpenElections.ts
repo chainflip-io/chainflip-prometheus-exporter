@@ -87,7 +87,7 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
     }
     const { logger, registry, metricFailure } = context;
 
-    logger.debug(`Scraping ${metricNameOpenElection}`);
+    logger.debug('scraping', { metric: metricNameOpenElection, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricNameOpenElection) === undefined)
         registry.registerMetric(metricOpenElection);

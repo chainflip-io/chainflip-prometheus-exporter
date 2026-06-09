@@ -22,7 +22,10 @@ export const gaugeBtcUtxos = async (context: Context, data: ProtocolData): Promi
     }
     const { logger, registry } = context;
 
-    logger.debug(`Scraping ${metricNameUtxosCount}, ${metricNameUtxosBalance}`);
+    logger.debug('scraping', {
+        metric: `${metricNameUtxosCount}, ${metricNameUtxosBalance}`,
+        blockNumber: data.blockNumber,
+    });
     if (registry.getSingleMetric(metricNameUtxosCount) === undefined)
         registry.registerMetric(metricUtxosCount);
     if (registry.getSingleMetric(metricNameUtxosBalance) === undefined)

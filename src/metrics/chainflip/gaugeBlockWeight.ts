@@ -14,7 +14,7 @@ export const gaugeBlockWeight = async (context: Context, data: ProtocolData): Pr
     const api = data.blockApi;
     if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    logger.debug(`Scraping ${metricName}`);
+    logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
     try {
         const currentBlockWeight = (await api.query.system.blockWeight()).toJSON();

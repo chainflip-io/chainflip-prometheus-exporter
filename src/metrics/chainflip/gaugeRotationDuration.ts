@@ -39,7 +39,10 @@ export const gaugeRotationDuration = async (
     }
     const { logger, registry } = context;
 
-    logger.debug(`Scraping ${metricNameRotation}, ${metricName}`);
+    logger.debug('scraping', {
+        metric: `${metricNameRotation}, ${metricName}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricNameRotation) === undefined)
         registry.registerMetric(metricRotationDuration);

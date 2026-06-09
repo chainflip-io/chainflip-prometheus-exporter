@@ -20,7 +20,7 @@ export const gaugeKeyActivationBroadcast = async (
         return;
     }
     const { logger, registry } = context;
-    logger.debug(`Scraping ${metricKeyBroadcastName}`);
+    logger.debug('scraping', { metric: metricKeyBroadcastName, blockNumber: data.blockNumber });
 
     if (registry.getSingleMetric(metricKeyBroadcastName) === undefined)
         registry.registerMetric(metricKeyBroadcast);

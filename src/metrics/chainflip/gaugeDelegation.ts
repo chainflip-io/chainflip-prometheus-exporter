@@ -58,9 +58,10 @@ export const gaugeDelegation = async (context: Context, data: ProtocolData): Pro
     }
     const { logger, apiLatest, registry, metricFailure } = context;
 
-    logger.debug(
-        `Scraping ${metricNameBondDifference}, ${metricNameCurrentBond}, ${metricNameNextBond}, ${metricNameNewValidators}, ${metricNameOperatorDelegatedBalance}`,
-    );
+    logger.debug('scraping', {
+        metric: `${metricNameBondDifference}, ${metricNameCurrentBond}, ${metricNameNextBond}, ${metricNameNewValidators}, ${metricNameOperatorDelegatedBalance}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricNameBondDifference) === undefined)
         registry.registerMetric(metricBondDifference);

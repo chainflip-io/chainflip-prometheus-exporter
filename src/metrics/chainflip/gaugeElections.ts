@@ -210,7 +210,10 @@ export const gaugeElections = async (context: Context, data: ProtocolData): Prom
             continue;
         }
 
-        logger.debug(`Scraping ${chainConfig.skipMetricKey}`);
+        logger.debug('scraping', {
+            metric: chainConfig.skipMetricKey,
+            blockNumber: data.blockNumber,
+        });
 
         try {
             const unsyncState = (

@@ -203,7 +203,10 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         return;
     }
     const { logger, apiLatest, registry, metricFailure } = context;
-    logger.debug(`Scraping ${metricToUsdcName}, ${metricFromUsdcName}`);
+    logger.debug('scraping', {
+        metric: `${metricToUsdcName}, ${metricFromUsdcName}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricToUsdcName) === undefined)
         registry.registerMetric(metricToUsdc);

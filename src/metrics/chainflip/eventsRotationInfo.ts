@@ -35,9 +35,10 @@ export const eventsRotationInfo = async (
     }
     const { logger, registry, apiLatest } = context;
 
-    logger.debug(
-        `Scraping ${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`,
-    );
+    logger.debug('scraping', {
+        metric: `${metricNameRotationPhaseAttempt}, ${metricNameBanned}, ${metricNameBalanceBanned}`,
+        blockNumber: data.blockNumber,
+    });
 
     if (registry.getSingleMetric(metricNameRotationPhaseAttempt) === undefined)
         registry.registerMetric(metricRotationPhaseAttempt);

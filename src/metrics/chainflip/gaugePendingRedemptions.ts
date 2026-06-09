@@ -30,7 +30,10 @@ export const gaugePendingRedemptions = async (
     if (registry.getSingleMetric(metricNamePendingRedemptionBalance) === undefined)
         registry.registerMetric(metricPendingRedemptionBalance);
 
-    logger.debug(`Scraping ${metricNamePendingRedemption}, ${metricNamePendingRedemptionBalance}`);
+    logger.debug('scraping', {
+        metric: `${metricNamePendingRedemption}, ${metricNamePendingRedemptionBalance}`,
+        blockNumber: data.blockNumber,
+    });
 
     const pendingRedemptions = data.data.pending_redemptions.count;
     const totalRedemptionBalance: number =
