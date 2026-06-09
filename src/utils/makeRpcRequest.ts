@@ -341,6 +341,8 @@ export const customRpcTypes = {
     ),
 } as const;
 
+type AssetSpecifier = string | { chain: string; asset: string };
+
 type RpcParamsMap = {
     account_info_v2: [idSs58: string, at?: string];
     accounts: [at?: string];
@@ -359,8 +361,8 @@ type RpcParamsMap = {
     safe_mode_statuses: [];
     oracle_prices: [asset_pair?: string, at?: string];
     monitoring_simulate_auction: [at?: string];
-    lending_pools: [at?: string];
-    loan_accounts: [at?: string];
+    lending_pools: [asset?: AssetSpecifier, at?: string];
+    loan_accounts: [accountId?: string, at?: string];
     lending_pool_supply_balances: [at?: string];
 };
 

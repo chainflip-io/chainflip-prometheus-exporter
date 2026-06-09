@@ -95,7 +95,12 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
         if (registry.getSingleMetric(metricNameTotalCollateralAmount) === undefined)
             registry.registerMetric(metricTotalCollateralAmount);
 
-        const lendingPools = await makeRpcRequest(apiLatest, 'lending_pools', data.blockHash);
+        const lendingPools = await makeRpcRequest(
+            apiLatest,
+            'lending_pools',
+            undefined,
+            data.blockHash,
+        );
         for (const pool of lendingPools) {
             metricLendingPools.labels(pool.asset.asset, 'total_amount').set(pool.total_amount);
             metricLendingPools
@@ -120,7 +125,12 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
             }
         }
 
-        const loanAccounts = await makeRpcRequest(apiLatest, 'loan_accounts', data.blockHash);
+        const loanAccounts = await makeRpcRequest(
+            apiLatest,
+            'loan_accounts',
+            undefined,
+            data.blockHash,
+        );
 
         const now = Date.now();
         const shouldObserveHistogram =

@@ -156,6 +156,11 @@ export const customRpcs = {
         lending_pools: {
             params: [
                 {
+                    name: 'asset',
+                    type: 'Option<Asset>',
+                    isOptional: true,
+                },
+                {
                     name: 'at',
                     type: 'Option<String>',
                     isOptional: true,
@@ -166,6 +171,11 @@ export const customRpcs = {
         },
         loan_accounts: {
             params: [
+                {
+                    name: 'account_id',
+                    type: 'Option<AccountId>',
+                    isOptional: true,
+                },
                 {
                     name: 'at',
                     type: 'Option<String>',
