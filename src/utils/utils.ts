@@ -36,6 +36,7 @@ export type ProtocolData = {
     blockNumber: number;
     data: RpcReturnValue['monitoring_data'];
     blockApi: any;
+    signedBlock: any;
 };
 
 export type SolanaNonce = {

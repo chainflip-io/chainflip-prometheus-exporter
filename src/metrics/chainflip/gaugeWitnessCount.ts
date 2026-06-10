@@ -36,7 +36,7 @@ export const gaugeWitnessCount = async (context: Context, data: ProtocolData): P
             if (registry.getSingleMetric(metricFailureName) === undefined)
                 registry.registerMetric(metricWitnessFailure);
 
-            const signedBlock = await apiLatest.rpc.chain.getBlock(data.blockHash);
+            const signedBlock = data.signedBlock;
             const currentBlockNumber = data.blockNumber;
             logStructureSize(
                 logger,

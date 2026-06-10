@@ -52,6 +52,9 @@ const metricNextAuthoritySize: Gauge = new promClient.Gauge({
     labelNames: [],
 });
 
+// Track previously seen operators so series for departed operators can be removed
+let previousOperators: Set<string> = new Set<string>();
+
 export const gaugeDelegation = async (context: Context, data: ProtocolData): Promise<void> => {
     if (context.config.skipMetrics.includes('cf_simulate_auction')) {
         return;
@@ -94,13 +97,21 @@ export const gaugeDelegation = async (context: Context, data: ProtocolData): Pro
         metricNextBond.set(Number(BigInt(result.auction_outcome.bond) / BigInt(1e18)));
         metricCurrentBond.set(Number(BigInt(result.current_mab) / BigInt(1e18)));
 
+        const currentOperators = new Set<string>();
         for (const [, entry] of Object.entries(result.operators_info)) {
             let total_delegated = 0;
             for (const [, val] of Object.entries(entry.delegators)) {
                 total_delegated += Number(BigInt(val)) / 1e18;
             }
+            currentOperators.add(entry.operator);
             metricOperatorDelegatedBalance.labels(entry.operator).set(total_delegated);
         }
+        for (const operator of previousOperators) {
+            if (!currentOperators.has(operator)) {
+                metricOperatorDelegatedBalance.remove(operator);
+            }
+        }
+        previousOperators = currentOperators;
         metricFailure.labels({ metric: metricNameBondDifference }).set(0);
         metricFailure.labels({ metric: metricNameNewValidators }).set(0);
         metricFailure.labels({ metric: metricNameNextBond }).set(0);

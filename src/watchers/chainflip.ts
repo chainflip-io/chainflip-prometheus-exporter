@@ -85,6 +85,10 @@ async function startWatcher(context: Context) {
     const STALL_TIMEOUT_MS = 120_000; // ~20 finalized blocks
     const RESTART_DELAY_MS = 5_000;
     const WATCHDOG_INTERVAL_MS = 15_000;
+    // rpc-core memoizes a registry lookup per block hash with no eviction (one entry
+    // per finalized block, kept forever — see RpcCore.setRegistrySwap). Re-arming the
+    // swap every N blocks replaces the memoized function and drops the stale cache.
+    const REGISTRY_SWAP_RESET_BLOCKS = 100;
     let stopped = false;
     let lastHeadAt = Date.now();
     let watchdog: ReturnType<typeof setInterval> | undefined;
@@ -143,11 +147,14 @@ async function startWatcher(context: Context) {
                 const stateChainData = await makeRpcRequest(api, 'monitoring_data', blockHash);
 
                 const blockApi = await api.at(blockHash);
+                // fetched once and shared: several metrics need the full signed block
+                const signedBlock = await api.rpc.chain.getBlock(blockHash);
                 const data: ProtocolData = {
                     blockNumber,
                     blockHash,
                     data: stateChainData,
                     blockApi,
+                    signedBlock,
                 };
                 gatherGlobalValues(data);
                 gaugeBlockHeight(context, data);
@@ -180,6 +187,10 @@ async function startWatcher(context: Context) {
                 gaugeOraclePrices(context, data);
                 gaugeElections(context, data);
                 gaugeLending(context, data);
+
+                if (blockNumber % REGISTRY_SWAP_RESET_BLOCKS === 0) {
+                    api._rpcCore.setRegistrySwap((hash: Uint8Array) => api.getBlockRegistry(hash));
+                }
 
                 lastHeadAt = Date.now();
                 metricFailure.labels('cf_exporter_block_processing').set(0);
