@@ -120,64 +120,64 @@ export const gaugeOraclePrices = async (context: Context, data: ProtocolData): P
                     metricOraclePricesDelta.labels(asset.base_asset).set(delta);
                 }
             }
+        }
 
-            const api = data.blockApi;
-            const unsync_state = (
-                await api.query.genericElections.electoralUnsynchronisedState()
-            ).toJSON();
+        const api = data.blockApi;
+        const unsync_state = (
+            await api.query.genericElections.electoralUnsynchronisedState()
+        ).toJSON();
 
-            const arbitrumPrices: Record<
-                string,
-                { timestamp: number; updatedAtStatechainBlock: number; priceStatus: string }
-            > = simplify(unsync_state.chainStates.arbitrum);
-            const ethereumPrices: Record<
-                string,
-                { timestamp: number; updatedAtStatechainBlock: number; priceStatus: string }
-            > = simplify(unsync_state.chainStates.ethereum);
-            const latestPrices: Record<string, string> = mergeAndSelectLatest(
-                unsync_state.chainStates.arbitrum,
-                unsync_state.chainStates.ethereum,
-            );
+        const arbitrumPrices: Record<
+            string,
+            { timestamp: number; updatedAtStatechainBlock: number; priceStatus: string }
+        > = simplify(unsync_state.chainStates.arbitrum);
+        const ethereumPrices: Record<
+            string,
+            { timestamp: number; updatedAtStatechainBlock: number; priceStatus: string }
+        > = simplify(unsync_state.chainStates.ethereum);
+        const latestPrices: Record<string, string> = mergeAndSelectLatest(
+            unsync_state.chainStates.arbitrum,
+            unsync_state.chainStates.ethereum,
+        );
 
-            for (const asset in latestPrices) {
-                if (latestPrices[asset] === 'Stale') {
-                    metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(2);
-                } else if (latestPrices[asset] === 'MaybeStale') {
-                    metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(1);
-                } else {
-                    metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(0);
-                }
+        for (const asset in latestPrices) {
+            if (latestPrices[asset] === 'Stale') {
+                metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(2);
+            } else if (latestPrices[asset] === 'MaybeStale') {
+                metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(1);
+            } else {
+                metricOraclePricesStaleness.labels(asset, 'PriceFeedApi').set(0);
             }
-            for (const asset in arbitrumPrices) {
-                if (arbitrumPrices[asset].priceStatus === 'Stale') {
-                    metricOraclePricesStaleness.labels(asset, 'arbitrum').set(2);
-                } else if (latestPrices[asset] === 'MaybeStale') {
-                    metricOraclePricesStaleness.labels(asset, 'arbitrum').set(1);
-                } else {
-                    metricOraclePricesStaleness.labels(asset, 'arbitrum').set(0);
-                }
-                metricOraclePricesTimestamp
-                    .labels(asset, 'arbitrum')
-                    .set(arbitrumPrices[asset].timestamp);
-                metricOraclePricesBlock
-                    .labels(asset, 'arbitrum')
-                    .set(arbitrumPrices[asset].updatedAtStatechainBlock);
+        }
+        for (const asset in arbitrumPrices) {
+            if (arbitrumPrices[asset].priceStatus === 'Stale') {
+                metricOraclePricesStaleness.labels(asset, 'arbitrum').set(2);
+            } else if (latestPrices[asset] === 'MaybeStale') {
+                metricOraclePricesStaleness.labels(asset, 'arbitrum').set(1);
+            } else {
+                metricOraclePricesStaleness.labels(asset, 'arbitrum').set(0);
             }
-            for (const asset in ethereumPrices) {
-                if (ethereumPrices[asset].priceStatus === 'Stale') {
-                    metricOraclePricesStaleness.labels(asset, 'ethereum').set(2);
-                } else if (latestPrices[asset] === 'MaybeStale') {
-                    metricOraclePricesStaleness.labels(asset, 'ethereum').set(1);
-                } else {
-                    metricOraclePricesStaleness.labels(asset, 'ethereum').set(0);
-                }
-                metricOraclePricesTimestamp
-                    .labels(asset, 'ethereum')
-                    .set(ethereumPrices[asset].timestamp);
-                metricOraclePricesBlock
-                    .labels(asset, 'ethereum')
-                    .set(ethereumPrices[asset].updatedAtStatechainBlock);
+            metricOraclePricesTimestamp
+                .labels(asset, 'arbitrum')
+                .set(arbitrumPrices[asset].timestamp);
+            metricOraclePricesBlock
+                .labels(asset, 'arbitrum')
+                .set(arbitrumPrices[asset].updatedAtStatechainBlock);
+        }
+        for (const asset in ethereumPrices) {
+            if (ethereumPrices[asset].priceStatus === 'Stale') {
+                metricOraclePricesStaleness.labels(asset, 'ethereum').set(2);
+            } else if (latestPrices[asset] === 'MaybeStale') {
+                metricOraclePricesStaleness.labels(asset, 'ethereum').set(1);
+            } else {
+                metricOraclePricesStaleness.labels(asset, 'ethereum').set(0);
             }
+            metricOraclePricesTimestamp
+                .labels(asset, 'ethereum')
+                .set(ethereumPrices[asset].timestamp);
+            metricOraclePricesBlock
+                .labels(asset, 'ethereum')
+                .set(ethereumPrices[asset].updatedAtStatechainBlock);
         }
         logStructureSize(
             logger,
