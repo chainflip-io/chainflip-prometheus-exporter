@@ -14,18 +14,25 @@ export const gaugeTssRetryQueues = async (context: Context, data: ProtocolData):
     if (context.config.skipMetrics.includes('cf_tss')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricNamePendingTss, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricNamePendingTss) === undefined)
-        registry.registerMetric(metricPendingTss);
+    try {
+        if (registry.getSingleMetric(metricNamePendingTss) === undefined)
+            registry.registerMetric(metricPendingTss);
 
-    // EVM
-    metricPendingTss.labels('evm').set(data.data.pending_tss.evm);
+        // EVM
+        metricPendingTss.labels('evm').set(data.data.pending_tss.evm);
 
-    // Bitcoin
-    metricPendingTss.labels('bitcoin').set(data.data.pending_tss.bitcoin);
+        // Bitcoin
+        metricPendingTss.labels('bitcoin').set(data.data.pending_tss.bitcoin);
 
-    // Solana
-    metricPendingTss.labels('solana').set(data.data.pending_tss.solana);
+        // Solana
+        metricPendingTss.labels('solana').set(data.data.pending_tss.solana);
+
+        metricFailure.labels({ metric: metricNamePendingTss }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNamePendingTss }).set(1);
+    }
 };

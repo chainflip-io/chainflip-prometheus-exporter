@@ -23,22 +23,31 @@ export const gaugePendingRedemptions = async (
     if (context.config.skipMetrics.includes('cf_pending_redemptions')) {
         return;
     }
-    const { logger, registry } = context;
-
-    if (registry.getSingleMetric(metricNamePendingRedemption) === undefined)
-        registry.registerMetric(metricPendingRedemption);
-    if (registry.getSingleMetric(metricNamePendingRedemptionBalance) === undefined)
-        registry.registerMetric(metricPendingRedemptionBalance);
+    const { logger, registry, metricFailure } = context;
 
     logger.debug('scraping', {
         metric: `${metricNamePendingRedemption}, ${metricNamePendingRedemptionBalance}`,
         blockNumber: data.blockNumber,
     });
 
-    const pendingRedemptions = data.data.pending_redemptions.count;
-    const totalRedemptionBalance: number =
-        Number(data.data.pending_redemptions.total_balance) / 1e18;
+    try {
+        if (registry.getSingleMetric(metricNamePendingRedemption) === undefined)
+            registry.registerMetric(metricPendingRedemption);
+        if (registry.getSingleMetric(metricNamePendingRedemptionBalance) === undefined)
+            registry.registerMetric(metricPendingRedemptionBalance);
 
-    metricPendingRedemptionBalance.set(totalRedemptionBalance);
-    metricPendingRedemption.set(pendingRedemptions);
+        const pendingRedemptions = data.data.pending_redemptions.count;
+        const totalRedemptionBalance: number =
+            Number(data.data.pending_redemptions.total_balance) / 1e18;
+
+        metricPendingRedemptionBalance.set(totalRedemptionBalance);
+        metricPendingRedemption.set(pendingRedemptions);
+
+        metricFailure.labels({ metric: metricNamePendingRedemption }).set(0);
+        metricFailure.labels({ metric: metricNamePendingRedemptionBalance }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNamePendingRedemption }).set(1);
+        metricFailure.labels({ metric: metricNamePendingRedemptionBalance }).set(1);
+    }
 };

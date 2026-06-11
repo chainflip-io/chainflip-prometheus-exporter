@@ -188,20 +188,29 @@ function processElectionInstance(
 export const gaugeElections = async (context: Context, data: ProtocolData): Promise<void> => {
     const { logger, registry, metricFailure } = context;
 
-    if (registry.getSingleMetric(metricNameWitnessFrom) === undefined)
-        registry.registerMetric(metricWitnessFrom);
-    if (registry.getSingleMetric(metricNameSeenHeightsBelow) === undefined)
-        registry.registerMetric(metricSeenHeightsBelow);
-    if (registry.getSingleMetric(metricNameHighestEverOngoing) === undefined)
-        registry.registerMetric(metricHighestEverOngoing);
-    if (registry.getSingleMetric(metricNameQueuedHash) === undefined)
-        registry.registerMetric(metricQueuedHash);
-    if (registry.getSingleMetric(metricNameQueuedSafe) === undefined)
-        registry.registerMetric(metricQueuedSafe);
-    if (registry.getSingleMetric(metricNameOngoing) === undefined)
-        registry.registerMetric(metricOngoing);
-    if (registry.getSingleMetric(metricNameBtcFees) === undefined)
-        registry.registerMetric(metricBtcFees);
+    try {
+        if (registry.getSingleMetric(metricNameWitnessFrom) === undefined)
+            registry.registerMetric(metricWitnessFrom);
+        if (registry.getSingleMetric(metricNameSeenHeightsBelow) === undefined)
+            registry.registerMetric(metricSeenHeightsBelow);
+        if (registry.getSingleMetric(metricNameHighestEverOngoing) === undefined)
+            registry.registerMetric(metricHighestEverOngoing);
+        if (registry.getSingleMetric(metricNameQueuedHash) === undefined)
+            registry.registerMetric(metricQueuedHash);
+        if (registry.getSingleMetric(metricNameQueuedSafe) === undefined)
+            registry.registerMetric(metricQueuedSafe);
+        if (registry.getSingleMetric(metricNameOngoing) === undefined)
+            registry.registerMetric(metricOngoing);
+        if (registry.getSingleMetric(metricNameBtcFees) === undefined)
+            registry.registerMetric(metricBtcFees);
+    } catch (e) {
+        logger.error(e);
+        for (const chainConfig of CHAIN_CONFIGS) {
+            metricFailure.labels(chainConfig.skipMetricKey).set(1);
+        }
+        metricFailure.labels({ metric: metricNameBtcFees }).set(1);
+        return;
+    }
 
     const api = data.blockApi;
 
@@ -244,8 +253,10 @@ export const gaugeElections = async (context: Context, data: ProtocolData): Prom
         try {
             const chainState = (await api.query.bitcoinChainTracking.currentChainState()).toJSON();
             metricBtcFees.set(Number(chainState.trackedData.btcFeeInfo.satsPerKilobyte));
+            metricFailure.labels({ metric: metricNameBtcFees }).set(0);
         } catch (e) {
             logger.error(e);
+            metricFailure.labels({ metric: metricNameBtcFees }).set(1);
         }
     }
 };

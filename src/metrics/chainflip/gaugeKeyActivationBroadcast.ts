@@ -19,67 +19,74 @@ export const gaugeKeyActivationBroadcast = async (
     if (context.config.skipMetrics.includes('cf_key_activation_broadcast')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricKeyBroadcastName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricKeyBroadcastName) === undefined)
-        registry.registerMetric(metricKeyBroadcast);
+    try {
+        if (registry.getSingleMetric(metricKeyBroadcastName) === undefined)
+            registry.registerMetric(metricKeyBroadcast);
 
-    // Arbitrum
-    const arbitrumBroadcastId = data.data.activating_key_broadcast_ids.arbitrum;
-    if (arbitrumBroadcastId == null) {
-        metricKeyBroadcast.labels('arbitrum').set(0);
-    } else {
-        metricKeyBroadcast.labels('arbitrum').set(arbitrumBroadcastId);
-    }
-
-    // Ethereum
-    const ethereumBroadcastId = data.data.activating_key_broadcast_ids.ethereum;
-    if (ethereumBroadcastId == null) {
-        metricKeyBroadcast.labels('ethereum').set(0);
-    } else {
-        metricKeyBroadcast.labels('ethereum').set(ethereumBroadcastId);
-    }
-
-    // Bitcoin
-    const bitcoinBroadcastId = data.data.activating_key_broadcast_ids.bitcoin;
-    if (bitcoinBroadcastId == null) {
-        metricKeyBroadcast.labels('bitcoin').set(0);
-    } else {
-        metricKeyBroadcast.labels('bitcoin').set(bitcoinBroadcastId);
-    }
-
-    // AssetHub
-    const assetHubBroadcastId = data.data.activating_key_broadcast_ids.assethub;
-    if (assetHubBroadcastId == null) {
-        metricKeyBroadcast.labels('assethub').set(0);
-    } else {
-        metricKeyBroadcast.labels('assethub').set(assetHubBroadcastId);
-    }
-
-    // Solana
-    // solana transaction are witnessed as succefull even if they revert!! We should also check that the signature contained in broadcast success
-    // didn't revert on-chain
-    const solanaBroadcastInfo = data.data.activating_key_broadcast_ids.solana;
-    if (solanaBroadcastInfo[0] == null || solanaBroadcastInfo[1] == null) {
-        metricKeyBroadcast.labels('solana').set(0);
-        if (global.solanaRotationTx && !deleted) {
-            setTimeout(() => {
-                global.solanaRotationTx = '';
-                deleted = false;
-            }, 60000); // 60s
-            deleted = true;
+        // Arbitrum
+        const arbitrumBroadcastId = data.data.activating_key_broadcast_ids.arbitrum;
+        if (arbitrumBroadcastId == null) {
+            metricKeyBroadcast.labels('arbitrum').set(0);
+        } else {
+            metricKeyBroadcast.labels('arbitrum').set(arbitrumBroadcastId);
         }
-    } else {
-        metricKeyBroadcast.labels('solana').set(solanaBroadcastInfo[0]);
-        global.solanaRotationTx = solanaBroadcastInfo[1];
-    }
 
-    // Tron
-    const tronBroadcastId = data.data.activating_key_broadcast_ids.tron;
-    if (tronBroadcastId == null) {
-        metricKeyBroadcast.labels('tron').set(0);
-    } else {
-        metricKeyBroadcast.labels('tron').set(tronBroadcastId);
+        // Ethereum
+        const ethereumBroadcastId = data.data.activating_key_broadcast_ids.ethereum;
+        if (ethereumBroadcastId == null) {
+            metricKeyBroadcast.labels('ethereum').set(0);
+        } else {
+            metricKeyBroadcast.labels('ethereum').set(ethereumBroadcastId);
+        }
+
+        // Bitcoin
+        const bitcoinBroadcastId = data.data.activating_key_broadcast_ids.bitcoin;
+        if (bitcoinBroadcastId == null) {
+            metricKeyBroadcast.labels('bitcoin').set(0);
+        } else {
+            metricKeyBroadcast.labels('bitcoin').set(bitcoinBroadcastId);
+        }
+
+        // AssetHub
+        const assetHubBroadcastId = data.data.activating_key_broadcast_ids.assethub;
+        if (assetHubBroadcastId == null) {
+            metricKeyBroadcast.labels('assethub').set(0);
+        } else {
+            metricKeyBroadcast.labels('assethub').set(assetHubBroadcastId);
+        }
+
+        // Solana
+        // solana transaction are witnessed as succefull even if they revert!! We should also check that the signature contained in broadcast success
+        // didn't revert on-chain
+        const solanaBroadcastInfo = data.data.activating_key_broadcast_ids.solana;
+        if (solanaBroadcastInfo[0] == null || solanaBroadcastInfo[1] == null) {
+            metricKeyBroadcast.labels('solana').set(0);
+            if (global.solanaRotationTx && !deleted) {
+                setTimeout(() => {
+                    global.solanaRotationTx = '';
+                    deleted = false;
+                }, 60000); // 60s
+                deleted = true;
+            }
+        } else {
+            metricKeyBroadcast.labels('solana').set(solanaBroadcastInfo[0]);
+            global.solanaRotationTx = solanaBroadcastInfo[1];
+        }
+
+        // Tron
+        const tronBroadcastId = data.data.activating_key_broadcast_ids.tron;
+        if (tronBroadcastId == null) {
+            metricKeyBroadcast.labels('tron').set(0);
+        } else {
+            metricKeyBroadcast.labels('tron').set(tronBroadcastId);
+        }
+
+        metricFailure.labels({ metric: metricKeyBroadcastName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricKeyBroadcastName }).set(1);
     }
 };

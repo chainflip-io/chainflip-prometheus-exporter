@@ -13,11 +13,16 @@ export const gaugeBlockHeight = async (context: Context, data: ProtocolData) => 
     if (context.config.skipMetrics.includes('cf_block_height')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.set(data.blockNumber);
-    registry.registerMetric(metric);
+        metric.set(data.blockNumber);
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricName }).set(1);
+    }
 };

@@ -1,6 +1,6 @@
 import { ProtocolData } from '../../utils/utils';
 
-export const gatherGlobalValues = async (data: ProtocolData): Promise<void> => {
+export const gatherGlobalValues = (data: ProtocolData): void => {
     global.epochIndex = data.data.epoch.current_epoch_index;
     global.currentBlock = data.blockNumber;
     global.solAggKeyAddress = data.data.sol_aggkey;

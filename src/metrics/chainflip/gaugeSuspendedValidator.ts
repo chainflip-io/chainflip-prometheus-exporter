@@ -17,13 +17,20 @@ export const gaugeSuspendedValidator = async (
     if (context.config.skipMetrics.includes('cf_suspended_validators')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    const suspensionList: any = data.data.suspended_validators;
-    suspensionList.forEach(([offence, count]: [any, any]) => {
-        metric.labels(offence).set(count);
-    });
+        const suspensionList: any = data.data.suspended_validators;
+        suspensionList.forEach(([offence, count]: [any, any]) => {
+            metric.labels(offence).set(count);
+        });
+
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricName }).set(1);
+    }
 };

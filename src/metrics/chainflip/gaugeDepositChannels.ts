@@ -14,32 +14,39 @@ export const gaugeDepositChannels = async (context: Context, data: ProtocolData)
     if (context.config.skipMetrics.includes('cf_open_deposit_channels')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    // BTC
-    const btcChannels = data.data.open_deposit_channels.bitcoin;
-    metric.labels('bitcoin').set(btcChannels);
+        // BTC
+        const btcChannels = data.data.open_deposit_channels.bitcoin;
+        metric.labels('bitcoin').set(btcChannels);
 
-    // ASSETHUB
-    const hubChannels = data.data.open_deposit_channels.assethub;
-    metric.labels('assethub').set(hubChannels);
+        // ASSETHUB
+        const hubChannels = data.data.open_deposit_channels.assethub;
+        metric.labels('assethub').set(hubChannels);
 
-    // ETH
-    const ethChannels = data.data.open_deposit_channels.ethereum;
-    metric.labels('ethereum').set(ethChannels);
+        // ETH
+        const ethChannels = data.data.open_deposit_channels.ethereum;
+        metric.labels('ethereum').set(ethChannels);
 
-    // ARB
-    const arbChannels = data.data.open_deposit_channels.arbitrum;
-    metric.labels('arbitrum').set(arbChannels);
+        // ARB
+        const arbChannels = data.data.open_deposit_channels.arbitrum;
+        metric.labels('arbitrum').set(arbChannels);
 
-    // SOL
-    const solChannels = data.data.open_deposit_channels.solana;
-    metric.labels('solana').set(solChannels);
+        // SOL
+        const solChannels = data.data.open_deposit_channels.solana;
+        metric.labels('solana').set(solChannels);
 
-    // TRON
-    const tronChannels = data.data.open_deposit_channels.tron;
-    metric.labels('tron').set(tronChannels);
+        // TRON
+        const tronChannels = data.data.open_deposit_channels.tron;
+        metric.labels('tron').set(tronChannels);
+
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricName }).set(1);
+    }
 };

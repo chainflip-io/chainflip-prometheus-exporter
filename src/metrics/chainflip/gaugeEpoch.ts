@@ -34,38 +34,52 @@ export const gaugeEpoch = async (context: Context, data: ProtocolData): Promise<
     if (context.config.skipMetrics.includes('cf_epoch')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', {
         metric: `${metricNameBlocksPerEpoch}, ${metricNameMAB}, ${metricNameEpochDuration}`,
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricNameBlocksPerEpoch) === undefined)
-        registry.registerMetric(metricBlocksPerEpoch);
-    if (registry.getSingleMetric(metricNameMAB) === undefined) registry.registerMetric(metricMAB);
-    if (registry.getSingleMetric(metricNameEpochDuration) === undefined)
-        registry.registerMetric(metricEpochDuration);
-    if (registry.getSingleMetric(metricNameRotating) === undefined)
-        registry.registerMetric(metricRotating);
+    try {
+        if (registry.getSingleMetric(metricNameBlocksPerEpoch) === undefined)
+            registry.registerMetric(metricBlocksPerEpoch);
+        if (registry.getSingleMetric(metricNameMAB) === undefined)
+            registry.registerMetric(metricMAB);
+        if (registry.getSingleMetric(metricNameEpochDuration) === undefined)
+            registry.registerMetric(metricEpochDuration);
+        if (registry.getSingleMetric(metricNameRotating) === undefined)
+            registry.registerMetric(metricRotating);
 
-    metricBlocksPerEpoch.set(data.data.epoch.epoch_duration);
+        metricBlocksPerEpoch.set(data.data.epoch.epoch_duration);
 
-    if (data.data.epoch.min_active_bid != null) {
-        const MAB: number = Number(data.data.epoch.min_active_bid) / 10 ** 18;
-        metricMAB.set(MAB);
+        if (data.data.epoch.min_active_bid != null) {
+            const MAB: number = Number(data.data.epoch.min_active_bid) / 10 ** 18;
+            metricMAB.set(MAB);
+        }
+
+        const currentEpochDurationBlocks: number =
+            data.blockNumber - data.data.epoch.current_epoch_started_at;
+        metricEpochDuration.set(currentEpochDurationBlocks);
+
+        let metricValue: number;
+        if (data.data.epoch.rotation_phase === 'Idle') {
+            global.rotationInProgress = false;
+            metricValue = 0;
+        } else {
+            global.rotationInProgress = true;
+            metricValue = 1;
+        }
+        metricRotating.set(metricValue);
+
+        metricFailure.labels({ metric: metricNameBlocksPerEpoch }).set(0);
+        metricFailure.labels({ metric: metricNameMAB }).set(0);
+        metricFailure.labels({ metric: metricNameEpochDuration }).set(0);
+        metricFailure.labels({ metric: metricNameRotating }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricNameBlocksPerEpoch }).set(1);
+        metricFailure.labels({ metric: metricNameMAB }).set(1);
+        metricFailure.labels({ metric: metricNameEpochDuration }).set(1);
+        metricFailure.labels({ metric: metricNameRotating }).set(1);
     }
-
-    const currentEpochDurationBlocks: number =
-        data.blockNumber - data.data.epoch.current_epoch_started_at;
-    metricEpochDuration.set(currentEpochDurationBlocks);
-
-    let metricValue: number;
-    if (data.data.epoch.rotation_phase === 'Idle') {
-        global.rotationInProgress = false;
-        metricValue = 0;
-    } else {
-        global.rotationInProgress = true;
-        metricValue = 1;
-    }
-    metricRotating.set(metricValue);
 };

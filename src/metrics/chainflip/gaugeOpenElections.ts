@@ -89,12 +89,10 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
 
     logger.debug('scraping', { metric: metricNameOpenElection, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricNameOpenElection) === undefined)
-        registry.registerMetric(metricOpenElection);
-
-    metricFailure.labels({ metric: metricNameOpenElection }).set(0);
-
     try {
+        if (registry.getSingleMetric(metricNameOpenElection) === undefined)
+            registry.registerMetric(metricOpenElection);
+
         const api = data.blockApi;
 
         for (const chainConfig of CHAIN_CONFIGS) {
@@ -126,7 +124,9 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
                     .set(count);
             }
         }
+        metricFailure.labels({ metric: metricNameOpenElection }).set(0);
     } catch (e) {
+        logger.error(e);
         metricFailure.labels({ metric: metricNameOpenElection }).set(1);
     }
 };

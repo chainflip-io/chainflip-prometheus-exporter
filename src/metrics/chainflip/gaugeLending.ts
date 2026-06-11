@@ -79,23 +79,28 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
 
     logger.debug('scraping', { metric: metricNameLendingPools, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricNameLendingPools) === undefined)
-        registry.registerMetric(metricLendingPools);
-    if (registry.getSingleMetric(metricNameLtvRatioHistogram) === undefined)
-        registry.registerMetric(metricLtvRatioHistogram);
-    if (registry.getSingleMetric(metricNameAccountLtvRatio) === undefined)
-        registry.registerMetric(metricAccountLtvRatio);
-    if (registry.getSingleMetric(metricNameTotalLoansValue) === undefined)
-        registry.registerMetric(metricTotalLoansValue);
-    if (registry.getSingleMetric(metricNameTotalCollateralValue) === undefined)
-        registry.registerMetric(metricTotalCollateralValue);
-    if (registry.getSingleMetric(metricNameTotalLoansAmount) === undefined)
-        registry.registerMetric(metricTotalLoansAmount);
-    if (registry.getSingleMetric(metricNameTotalCollateralAmount) === undefined)
-        registry.registerMetric(metricTotalCollateralAmount);
-
     try {
-        const lendingPools = await makeRpcRequest(apiLatest, 'lending_pools', context.blockHash);
+        if (registry.getSingleMetric(metricNameLendingPools) === undefined)
+            registry.registerMetric(metricLendingPools);
+        if (registry.getSingleMetric(metricNameLtvRatioHistogram) === undefined)
+            registry.registerMetric(metricLtvRatioHistogram);
+        if (registry.getSingleMetric(metricNameAccountLtvRatio) === undefined)
+            registry.registerMetric(metricAccountLtvRatio);
+        if (registry.getSingleMetric(metricNameTotalLoansValue) === undefined)
+            registry.registerMetric(metricTotalLoansValue);
+        if (registry.getSingleMetric(metricNameTotalCollateralValue) === undefined)
+            registry.registerMetric(metricTotalCollateralValue);
+        if (registry.getSingleMetric(metricNameTotalLoansAmount) === undefined)
+            registry.registerMetric(metricTotalLoansAmount);
+        if (registry.getSingleMetric(metricNameTotalCollateralAmount) === undefined)
+            registry.registerMetric(metricTotalCollateralAmount);
+
+        const lendingPools = await makeRpcRequest(
+            apiLatest,
+            'lending_pools',
+            undefined,
+            data.blockHash,
+        );
         for (const pool of lendingPools) {
             metricLendingPools.labels(pool.asset.asset, 'total_amount').set(pool.total_amount);
             metricLendingPools
@@ -120,7 +125,12 @@ export const gaugeLending = async (context: Context, data: ProtocolData): Promis
             }
         }
 
-        const loanAccounts = await makeRpcRequest(apiLatest, 'loan_accounts', context.blockHash);
+        const loanAccounts = await makeRpcRequest(
+            apiLatest,
+            'loan_accounts',
+            undefined,
+            data.blockHash,
+        );
 
         const now = Date.now();
         const shouldObserveHistogram =

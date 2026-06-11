@@ -208,27 +208,27 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         blockNumber: data.blockNumber,
     });
 
-    if (registry.getSingleMetric(metricToUsdcName) === undefined)
-        registry.registerMetric(metricToUsdc);
-    if (registry.getSingleMetric(metricFromUsdcName) === undefined)
-        registry.registerMetric(metricFromUsdc);
-    if (registry.getSingleMetric(metricPriceDeltaNotWorkingName) === undefined)
-        registry.registerMetric(metricPriceDeltaNotWorking);
-    if (registry.getSingleMetric(metricIndexPriceName) === undefined) {
-        registry.registerMetric(metricIndexPrice);
-    }
-
-    if (swapSDK === undefined) {
-        const options: SwapSDKOptions = {
-            network: ChainflipNetworks.mainnet,
-            enabledFeatures: {
-                dca: true,
-            },
-        };
-        swapSDK = new SwapSDK(options);
-    }
-
     try {
+        if (registry.getSingleMetric(metricToUsdcName) === undefined)
+            registry.registerMetric(metricToUsdc);
+        if (registry.getSingleMetric(metricFromUsdcName) === undefined)
+            registry.registerMetric(metricFromUsdc);
+        if (registry.getSingleMetric(metricPriceDeltaNotWorkingName) === undefined)
+            registry.registerMetric(metricPriceDeltaNotWorking);
+        if (registry.getSingleMetric(metricIndexPriceName) === undefined) {
+            registry.registerMetric(metricIndexPrice);
+        }
+
+        if (swapSDK === undefined) {
+            const options: SwapSDKOptions = {
+                network: ChainflipNetworks.mainnet,
+                enabledFeatures: {
+                    dca: true,
+                },
+            };
+            swapSDK = new SwapSDK(options);
+        }
+
         // query all index prices
         const dataPrices = await axios.post(
             env.CACHE_ENDPOINT,

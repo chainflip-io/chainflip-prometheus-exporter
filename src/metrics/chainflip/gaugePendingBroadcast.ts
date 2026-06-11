@@ -17,26 +17,33 @@ export const gaugePendingBroadcast = async (
     if (context.config.skipMetrics.includes('cf_pending_broadcast')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    // Assethub
-    metric.labels('assethub').set(data.data.pending_broadcasts.assethub);
+        // Assethub
+        metric.labels('assethub').set(data.data.pending_broadcasts.assethub);
 
-    // Bitcoin
-    metric.labels('bitcoin').set(data.data.pending_broadcasts.bitcoin);
+        // Bitcoin
+        metric.labels('bitcoin').set(data.data.pending_broadcasts.bitcoin);
 
-    // Ethereum
-    metric.labels('ethereum').set(data.data.pending_broadcasts.ethereum);
+        // Ethereum
+        metric.labels('ethereum').set(data.data.pending_broadcasts.ethereum);
 
-    // Arbitrum
-    metric.labels('arbitrum').set(data.data.pending_broadcasts.arbitrum);
+        // Arbitrum
+        metric.labels('arbitrum').set(data.data.pending_broadcasts.arbitrum);
 
-    // Solana
-    metric.labels('solana').set(data.data.pending_broadcasts.solana);
+        // Solana
+        metric.labels('solana').set(data.data.pending_broadcasts.solana);
 
-    // Tron
-    metric.labels('tron').set(data.data.pending_broadcasts.tron);
+        // Tron
+        metric.labels('tron').set(data.data.pending_broadcasts.tron);
+
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricName }).set(1);
+    }
 };

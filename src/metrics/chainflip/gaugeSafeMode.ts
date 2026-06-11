@@ -19,12 +19,10 @@ export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promi
 
     logger.debug('scraping', { metric: metricNameSafeMode, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricNameSafeMode) === undefined)
-        registry.registerMetric(metricSafeMode);
-
-    metricFailure.labels({ metric: metricNameSafeMode }).set(0);
-
     try {
+        if (registry.getSingleMetric(metricNameSafeMode) === undefined)
+            registry.registerMetric(metricSafeMode);
+
         const safeModeResponse = await makeUncheckedRpcRequest(
             apiLatest,
             'safe_mode_statuses',
@@ -38,7 +36,9 @@ export const gaugeSafeMode = async (context: Context, data: ProtocolData): Promi
                 metricSafeMode.labels(name).set(safeModeEnabled);
             }
         }
+        metricFailure.labels({ metric: metricNameSafeMode }).set(0);
     } catch (e) {
+        logger.error(e);
         metricFailure.labels({ metric: metricNameSafeMode }).set(1);
     }
 };

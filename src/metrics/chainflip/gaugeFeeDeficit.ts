@@ -24,16 +24,23 @@ export const gaugeFeeDeficit = async (context: Context, data: ProtocolData): Pro
     if (context.config.skipMetrics.includes('cf_fee_deficit')) {
         return;
     }
-    const { logger, registry } = context;
+    const { logger, registry, metricFailure } = context;
 
     logger.debug('scraping', { metric: metricName, blockNumber: data.blockNumber });
 
-    if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
+    try {
+        if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
 
-    metric.labels('ethereum').set(feeImbalanceValue(data.data.fee_imbalance.ethereum, 1e18));
-    metric.labels('arbitrum').set(feeImbalanceValue(data.data.fee_imbalance.arbitrum, 1e18));
-    metric.labels('assethub').set(feeImbalanceValue(data.data.fee_imbalance.assethub, 1e10));
-    metric.labels('bitcoin').set(feeImbalanceValue(data.data.fee_imbalance.bitcoin, 1e8));
-    metric.labels('solana').set(feeImbalanceValue(data.data.fee_imbalance.solana, 1e9));
-    metric.labels('tron').set(feeImbalanceValue(data.data.fee_imbalance.tron, 1e6));
+        metric.labels('ethereum').set(feeImbalanceValue(data.data.fee_imbalance.ethereum, 1e18));
+        metric.labels('arbitrum').set(feeImbalanceValue(data.data.fee_imbalance.arbitrum, 1e18));
+        metric.labels('assethub').set(feeImbalanceValue(data.data.fee_imbalance.assethub, 1e10));
+        metric.labels('bitcoin').set(feeImbalanceValue(data.data.fee_imbalance.bitcoin, 1e8));
+        metric.labels('solana').set(feeImbalanceValue(data.data.fee_imbalance.solana, 1e9));
+        metric.labels('tron').set(feeImbalanceValue(data.data.fee_imbalance.tron, 1e6));
+
+        metricFailure.labels({ metric: metricName }).set(0);
+    } catch (e) {
+        logger.error(e);
+        metricFailure.labels({ metric: metricName }).set(1);
+    }
 };
