@@ -185,6 +185,8 @@ const HUBUSDT: asset = {
     chainAssetPriceId: DOTPriceId,
 };
 
+const QUOTE_TIMEOUT_MS = 10_000;
+
 const pointOneBtc = '10000000';
 const pointFiveBtc = '50000000';
 const oneBtc = '100000000';
@@ -248,43 +250,48 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
             return;
         }
 
-        /// ... -> USDC
-        calculateRateToUsdc(BTC, pointOneBtc);
-        calculateRateToUsdc(BTC, pointFiveBtc);
-        calculateRateToUsdc(BTC, oneBtc);
-        calculateRateToUsdc(ETH, fiveEth);
-        calculateRateToUsdc(ETH, twentyEth);
-        calculateRateToUsdc(FLIP, fiveKFlip);
-        calculateRateToUsdc(FLIP, tenKFlip);
-        calculateRateToUsdc(ARBETH, fiveEth);
-        calculateRateToUsdc(ARBETH, twentyEth);
-        calculateRateToUsdc(ARBUSDC, tenKUsdc);
-        calculateRateToUsdc(ARBUSDC, fiftyKUsdc);
-        calculateRateToUsdc(USDT, tenKUsdc);
-        calculateRateToUsdc(USDT, fiftyKUsdc);
-        calculateRateToUsdc(SOL, fiftySol);
-        calculateRateToUsdc(HUBDOT, oneKDot);
-        calculateRateToUsdc(HUBUSDC, tenKUsdc);
-        calculateRateToUsdc(HUBUSDT, tenKUsdc);
+        // Awaited so the per-block pipeline can apply backpressure: no quote
+        // request may outlive this gauge (each one is also bounded by
+        // QUOTE_TIMEOUT_MS).
+        await Promise.allSettled([
+            /// ... -> USDC
+            calculateRateToUsdc(BTC, pointOneBtc),
+            calculateRateToUsdc(BTC, pointFiveBtc),
+            calculateRateToUsdc(BTC, oneBtc),
+            calculateRateToUsdc(ETH, fiveEth),
+            calculateRateToUsdc(ETH, twentyEth),
+            calculateRateToUsdc(FLIP, fiveKFlip),
+            calculateRateToUsdc(FLIP, tenKFlip),
+            calculateRateToUsdc(ARBETH, fiveEth),
+            calculateRateToUsdc(ARBETH, twentyEth),
+            calculateRateToUsdc(ARBUSDC, tenKUsdc),
+            calculateRateToUsdc(ARBUSDC, fiftyKUsdc),
+            calculateRateToUsdc(USDT, tenKUsdc),
+            calculateRateToUsdc(USDT, fiftyKUsdc),
+            calculateRateToUsdc(SOL, fiftySol),
+            calculateRateToUsdc(HUBDOT, oneKDot),
+            calculateRateToUsdc(HUBUSDC, tenKUsdc),
+            calculateRateToUsdc(HUBUSDT, tenKUsdc),
 
-        /// USDC -> ...
-        calculateRateFromUsdc(BTC, tenKUsdc);
-        calculateRateFromUsdc(ETH, tenKUsdc);
-        calculateRateFromUsdc(FLIP, tenKUsdc);
-        calculateRateFromUsdc(BTC, fiftyKUsdc);
-        calculateRateFromUsdc(ETH, fiftyKUsdc);
-        // calculateRateFromUsdc(FLIP, fiftyKUsdc);
-        calculateRateFromUsdc(ARBETH, tenKUsdc);
-        calculateRateFromUsdc(ARBETH, fiftyKUsdc);
-        calculateRateFromUsdc(ARBUSDC, tenKUsdc);
-        calculateRateFromUsdc(ARBUSDC, fiftyKUsdc);
-        calculateRateFromUsdc(USDT, tenKUsdc);
-        calculateRateFromUsdc(USDT, fiftyKUsdc);
-        calculateRateFromUsdc(SOL, tenKUsdc);
-        calculateRateFromUsdc(SOLUSDC, tenKUsdc);
-        calculateRateFromUsdc(HUBDOT, tenKUsdc);
-        calculateRateFromUsdc(HUBUSDC, tenKUsdc);
-        calculateRateFromUsdc(HUBUSDT, tenKUsdc);
+            /// USDC -> ...
+            calculateRateFromUsdc(BTC, tenKUsdc),
+            calculateRateFromUsdc(ETH, tenKUsdc),
+            calculateRateFromUsdc(FLIP, tenKUsdc),
+            calculateRateFromUsdc(BTC, fiftyKUsdc),
+            calculateRateFromUsdc(ETH, fiftyKUsdc),
+            // calculateRateFromUsdc(FLIP, fiftyKUsdc),
+            calculateRateFromUsdc(ARBETH, tenKUsdc),
+            calculateRateFromUsdc(ARBETH, fiftyKUsdc),
+            calculateRateFromUsdc(ARBUSDC, tenKUsdc),
+            calculateRateFromUsdc(ARBUSDC, fiftyKUsdc),
+            calculateRateFromUsdc(USDT, tenKUsdc),
+            calculateRateFromUsdc(USDT, fiftyKUsdc),
+            calculateRateFromUsdc(SOL, tenKUsdc),
+            calculateRateFromUsdc(SOLUSDC, tenKUsdc),
+            calculateRateFromUsdc(HUBDOT, tenKUsdc),
+            calculateRateFromUsdc(HUBUSDC, tenKUsdc),
+            calculateRateFromUsdc(HUBUSDT, tenKUsdc),
+        ]);
     } catch (e) {
         logger.error(e);
         metricFailure.labels('cf_price_delta').set(1);
@@ -302,7 +309,9 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
 
         try {
             // @ts-expect-error "sdk is initialized"
-            const response = await swapSDK.getQuoteV2(quoteRequest);
+            const response = await swapSDK.getQuoteV2(quoteRequest, {
+                signal: AbortSignal.timeout(QUOTE_TIMEOUT_MS),
+            });
             let egressAmount = 0;
             for (const quote of response.quotes) {
                 egressAmount = Math.max(egressAmount, Number(quote.egressAmount) / 1e6);
@@ -336,7 +345,9 @@ export const gaugePriceDelta = async (context: Context, data: ProtocolData): Pro
         };
         try {
             // @ts-expect-error "sdk is initialized"
-            const response = await swapSDK.getQuoteV2(quoteRequest);
+            const response = await swapSDK.getQuoteV2(quoteRequest, {
+                signal: AbortSignal.timeout(QUOTE_TIMEOUT_MS),
+            });
             let egressAmount = 0;
             for (const quote of response.quotes) {
                 egressAmount = Math.max(
