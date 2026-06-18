@@ -205,7 +205,24 @@
     "network": "mainnet",
     "defaultMetrics": [],
     "contracts": [],
-    "wallets": [],
+    "wallets": [
+      {
+        "alias": "bashful",
+        "address": "419c1bc912afa4eb8a516ed50378e6163360264e84"
+      },
+      {
+        "alias": "doc",
+        "address": "410cb6f56ccefd56fbefca4146ca1dd9949100eb62"
+      },
+      {
+        "alias": "dopey",
+        "address": "41d0b108995911377d8d32b652c5dd1c233a6afc87"
+      },
+      {
+        "alias": "vault",
+        "address": "4132e07e5dfcb75c2977adddc593eb8d6b6e71f96e"
+      }
+    ],
     "tokens": [],
     "skipMetrics": []
   }
