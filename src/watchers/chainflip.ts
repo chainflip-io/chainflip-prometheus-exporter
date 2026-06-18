@@ -63,13 +63,6 @@ const metricBlocksDropped: promClient.Gauge = new promClient.Gauge({
     registers: [],
 });
 
-const metricBlockLagName: string = 'cf_exporter_block_lag';
-const metricBlockLag: promClient.Gauge = new promClient.Gauge({
-    name: metricBlockLagName,
-    help: 'Distance between the latest finalized head and the last block processed by the exporter',
-    registers: [],
-});
-
 const metricProcessingDurationName: string = 'cf_exporter_block_processing_duration_ms';
 const metricProcessingDuration: promClient.Gauge = new promClient.Gauge({
     name: metricProcessingDurationName,
@@ -189,8 +182,6 @@ async function startWatcher(context: Context) {
     // fully re-seeded zero baseline instead (PromQL increase()/rate() treat
     // the value drop as a counter reset). No-op on the first start.
     resetEventCountMetrics(context.config as FlipConfig);
-    metricBlocksDropped.set(0);
-    metricLaneBSkipped.set(0);
     const metricName: string = 'cf_watcher_failure';
     // Reuse the already-registered gauge on restart
     const metric: promClient.Gauge =
@@ -207,8 +198,6 @@ async function startWatcher(context: Context) {
         registry.registerMetric(metricQueueDepth);
     if (registry.getSingleMetric(metricBlocksDroppedName) === undefined)
         registry.registerMetric(metricBlocksDropped);
-    if (registry.getSingleMetric(metricBlockLagName) === undefined)
-        registry.registerMetric(metricBlockLag);
     if (registry.getSingleMetric(metricProcessingDurationName) === undefined)
         registry.registerMetric(metricProcessingDuration);
     if (registry.getSingleMetric(metricProcessingDurationHistName) === undefined)
@@ -343,7 +332,6 @@ async function startWatcher(context: Context) {
             } finally {
                 lastBlockProcessedAt = Date.now();
                 metricQueueDepth.set(queue.depth);
-                metricBlockLag.set(Math.max(0, (queue.latestHead ?? blockNumber) - blockNumber));
                 const elapsedMs = Date.now() - startedAt;
                 metricProcessingDuration.set(elapsedMs);
                 metricProcessingDurationHist.observe(elapsedMs);
