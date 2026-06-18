@@ -61,15 +61,7 @@ export const gaugeEpoch = async (context: Context, data: ProtocolData): Promise<
             data.blockNumber - data.data.epoch.current_epoch_started_at;
         metricEpochDuration.set(currentEpochDurationBlocks);
 
-        let metricValue: number;
-        if (data.data.epoch.rotation_phase === 'Idle') {
-            global.rotationInProgress = false;
-            metricValue = 0;
-        } else {
-            global.rotationInProgress = true;
-            metricValue = 1;
-        }
-        metricRotating.set(metricValue);
+        metricRotating.set(data.data.epoch.rotation_phase === 'Idle' ? 0 : 1);
 
         metricFailure.labels({ metric: metricNameBlocksPerEpoch }).set(0);
         metricFailure.labels({ metric: metricNameMAB }).set(0);

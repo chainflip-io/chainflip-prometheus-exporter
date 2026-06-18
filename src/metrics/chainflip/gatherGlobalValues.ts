@@ -6,4 +6,6 @@ export const gatherGlobalValues = (data: ProtocolData): void => {
     global.solAggKeyAddress = data.data.sol_aggkey;
     global.dotAggKeyAddress = data.data.dot_aggkey;
     global.solanaCurrentOnChainKey = data.data.sol_onchain_key;
+    global.currentAuthorities = data.data.authorities.authorities;
+    global.rotationInProgress = data.data.epoch.rotation_phase !== 'Idle';
 };

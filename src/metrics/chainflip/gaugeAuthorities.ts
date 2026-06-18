@@ -51,7 +51,6 @@ export const gaugeAuthorities = async (context: Context, data: ProtocolData): Pr
             registry.registerMetric(metricOnlineBackups);
 
         metricAuthorities.set(data.data.authorities.authorities);
-        global.currentAuthorities = data.data.authorities.authorities;
         metricOnlineAuthorities.set(data.data.authorities.online_authorities);
 
         metricBackups.set(data.data.authorities.backups);
