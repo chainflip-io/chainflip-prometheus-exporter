@@ -31,6 +31,13 @@ declare global {
     };
 }
 
+// Explicit per-request timeout for every outbound RPC / state query the
+// exporter makes (substrate ws, EVM JSON-RPC, solana, bitcoin, tron). Without
+// this we inherit a different default per library (60s polkadot, 120s ethers,
+// none at all for raw axios/fetch): a slow upstream must fail fast and loudly
+// (metric_scrape_failure) instead of pinning the per-block pipeline.
+export const RPC_TIMEOUT_MS = 30_000;
+
 export type ProtocolData = {
     blockHash: string;
     blockNumber: number;

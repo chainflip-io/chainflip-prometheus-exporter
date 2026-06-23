@@ -3,7 +3,7 @@ import Client from 'bitcoin-core';
 import { gaugeBlockHeight } from '../metrics/btc';
 import promClient from 'prom-client';
 import { BtcConfig } from '../config/interfaces';
-import { pollEndpoint } from '../utils/utils';
+import { pollEndpoint, RPC_TIMEOUT_MS } from '../utils/utils';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -35,6 +35,7 @@ async function startWatcher(context: Context) {
         port: protocol === 'https:' ? 443 : Number(port),
         ssl: { enabled: protocol === 'https:' },
         network: config.network,
+        timeout: RPC_TIMEOUT_MS,
     });
 
     pollEndpoint(gaugeBlockHeight, { ...context, bitcoinClient }, 5);

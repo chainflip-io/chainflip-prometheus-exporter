@@ -1,7 +1,7 @@
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import * as solanaWeb3 from '@solana/web3.js';
-import { pollEndpoint } from '../utils/utils';
+import { pollEndpoint, RPC_TIMEOUT_MS } from '../utils/utils';
 import { gaugeSolBalance } from '../metrics/sol/gaugeSolBalance';
 import { gaugeSolNonces } from '../metrics/sol/gaugeDurableNonces';
 import { gaugeTxOutcome } from '../metrics/sol/gaugeTransactionsOutcome';
@@ -27,6 +27,14 @@ export default async function startSolanaService(context: Context) {
     await startWatcher(context);
 }
 
+const fetchWithTimeout = (async (input: any, init?: any) =>
+    await fetch(input, {
+        ...init,
+        signal: init?.signal
+            ? (AbortSignal as any).any([init.signal, AbortSignal.timeout(RPC_TIMEOUT_MS)])
+            : AbortSignal.timeout(RPC_TIMEOUT_MS),
+    })) as any;
+
 async function startWatcher(context: Context) {
     const { logger, env, registry } = context;
 
@@ -42,6 +50,7 @@ async function startWatcher(context: Context) {
             context.connection = new solanaWeb3.Connection(solanaURL.href, {
                 commitment: 'finalized',
                 wsEndpoint: env.SOL_WS_ENDPOINT,
+                fetch: fetchWithTimeout,
             });
         } else {
             context.connection = new solanaWeb3.Connection(solanaURL.origin, {
@@ -54,6 +63,7 @@ async function startWatcher(context: Context) {
                 },
                 commitment: 'finalized',
                 wsEndpoint: env.SOL_WS_ENDPOINT,
+                fetch: fetchWithTimeout,
             });
         }
 

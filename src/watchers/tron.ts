@@ -3,7 +3,7 @@ import { Logger } from 'winston';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import { gaugeBlockHeight, gaugeTrxBalance, gaugeTrc20Balance } from '../metrics/tron';
-import { pollEndpoint } from '../utils/utils';
+import { pollEndpoint, RPC_TIMEOUT_MS } from '../utils/utils';
 
 const metricName: string = 'tron_watcher_failure';
 const metric: promClient.Gauge = new promClient.Gauge({
@@ -74,9 +74,17 @@ async function startWatcher(context: Context) {
             );
             headers.Authorization = `Basic ${auth}`;
         }
-        const httpProvider = new TronWeb({
+        const tronNode = new TronWeb.providers.HttpProvider(
             fullHost,
+            RPC_TIMEOUT_MS,
+            false,
+            false,
             headers,
+        );
+        const httpProvider = new TronWeb({
+            fullNode: tronNode,
+            solidityNode: tronNode,
+            eventServer: tronNode,
         });
         isWatcherRunning = true;
         metric.set(0);

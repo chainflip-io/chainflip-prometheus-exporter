@@ -36,7 +36,7 @@ import { customRpcs } from '../utils/customRpcSpecification';
 import stateChainTypes from '../utils/chainTypes';
 import makeRpcRequest from '../utils/makeRpcRequest';
 import { gaugeKeyActivationBroadcast } from '../metrics/chainflip/gaugeKeyActivationBroadcast';
-import { ProtocolData } from '../utils/utils';
+import { ProtocolData, RPC_TIMEOUT_MS } from '../utils/utils';
 import { gaugeOpenElections } from '../metrics/chainflip/gaugeOpenElections';
 import { gaugeSafeMode } from '../metrics/chainflip/gaugeSafeMode';
 import { BlockQueue } from '../utils/blockQueue';
@@ -340,7 +340,7 @@ async function startWatcher(context: Context) {
     };
 
     try {
-        const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000);
+        const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000, undefined, RPC_TIMEOUT_MS);
         provider.on('disconnected', (err) => {
             logger.error(`ws connection closed ${err}`);
             metric.set(1);

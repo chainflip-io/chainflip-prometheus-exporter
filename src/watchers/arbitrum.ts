@@ -3,7 +3,7 @@ import { Logger } from 'winston';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
 import { gaugeBlockHeight, gaugeEthBalance } from '../metrics/arb';
-import { pollEndpoint } from '../utils/utils';
+import { pollEndpoint, RPC_TIMEOUT_MS } from '../utils/utils';
 
 const metricName: string = 'arb_watcher_failure';
 const metric: promClient.Gauge = new promClient.Gauge({
@@ -68,12 +68,16 @@ async function startWatcher(context: Context) {
         const HTTP_URL = new URL(env.ARB_HTTP_ENDPOINT);
         let httpProvider;
         if (env.ARB_HTTP_ENDPOINT === 'http://localhost:8547') {
-            httpProvider = new ethers.providers.JsonRpcProvider(env.ARB_HTTP_ENDPOINT);
+            httpProvider = new ethers.providers.JsonRpcProvider({
+                url: env.ARB_HTTP_ENDPOINT,
+                timeout: RPC_TIMEOUT_MS,
+            });
         } else {
             httpProvider = new ethers.providers.JsonRpcProvider({
                 url: HTTP_URL.origin + HTTP_URL.pathname,
                 user: HTTP_URL.username,
                 password: HTTP_URL.password,
+                timeout: RPC_TIMEOUT_MS,
             });
         }
         isWatcherRunning = true;
