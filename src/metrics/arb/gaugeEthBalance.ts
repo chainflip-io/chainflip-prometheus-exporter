@@ -25,7 +25,7 @@ export const gaugeEthBalance = async (context: Context) => {
 
         for (const { address, alias } of wallets) {
             const weiBalance = await httpProvider.getBalance(address);
-            const ethBalance = ethers.utils.formatEther(weiBalance);
+            const ethBalance = ethers.formatEther(weiBalance);
             metric.labels({ address, alias }).set(Number(ethBalance));
         }
         metricFailure.labels({ metric: metricName }).set(0);
