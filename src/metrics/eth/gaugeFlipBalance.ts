@@ -18,7 +18,10 @@ export const gaugeFlipBalance = async (context: Context) => {
     const config = context.config as EthConfig;
     const contract = context.contract as Contract;
     try {
-        await contract.deployed();
+        // v6 equivalent of the old contract.deployed() guard
+        if ((await contract.getDeployedCode()) === null) {
+            throw new Error(`no contract code at ${String(contract.target)}`);
+        }
 
         logger.debug(`Scraping ${metricName}`);
 

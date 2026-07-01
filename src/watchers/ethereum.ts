@@ -75,20 +75,19 @@ async function startWatcher(context: Context) {
         if (mainRegistry.getSingleMetric(metricFailureName) === undefined)
             mainRegistry.registerMetric(metricFailure);
         const HTTP_URL = new URL(env.ETH_HTTP_ENDPOINT);
-        let httpProvider;
-        if (env.ETH_HTTP_ENDPOINT === 'http://localhost:8545') {
-            httpProvider = new ethers.providers.JsonRpcProvider({
-                url: env.ETH_HTTP_ENDPOINT,
-                timeout: RPC_TIMEOUT_MS,
-            });
-        } else {
-            httpProvider = new ethers.providers.JsonRpcProvider({
-                url: HTTP_URL.origin + HTTP_URL.pathname,
-                user: HTTP_URL.username,
-                password: HTTP_URL.password,
-                timeout: RPC_TIMEOUT_MS,
-            });
+        // Explicit per-request timeout: unlike ethers v5 (which only stopped
+        // waiting), v6 cancels the request and destroys the socket on timeout.
+        const fetchRequest = new ethers.FetchRequest(HTTP_URL.origin + HTTP_URL.pathname);
+        fetchRequest.timeout = RPC_TIMEOUT_MS;
+        if (HTTP_URL.username !== '' || HTTP_URL.password !== '') {
+            fetchRequest.setCredentials(HTTP_URL.username, HTTP_URL.password);
         }
+        // staticNetwork: skip repeated chain-id detection; batchMaxCount 1:
+        // keep one JSON-RPC call per HTTP request, as in v5
+        const httpProvider = new ethers.JsonRpcProvider(fetchRequest, undefined, {
+            staticNetwork: true,
+            batchMaxCount: 1,
+        });
         isWatcherRunning = true;
         metric.set(0);
 
