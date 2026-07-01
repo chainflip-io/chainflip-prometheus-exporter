@@ -2,6 +2,7 @@ import promClient, { Gauge } from 'prom-client';
 import { Context } from '../../lib/interfaces';
 import axios from 'axios';
 import { blockHeightStore } from '../../lib/blockHeightStore';
+import { RPC_TIMEOUT_MS } from '../../utils/utils';
 
 const metricName: string = 'btc_block_height';
 const metric: Gauge = new promClient.Gauge({
@@ -34,6 +35,7 @@ export const gaugeBlockHeight = async (context: Context) => {
                 headers: {
                     'Content-Type': 'text/plain',
                 },
+                timeout: RPC_TIMEOUT_MS,
             });
             result = response.data.result;
         } else {

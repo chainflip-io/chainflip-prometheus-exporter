@@ -2,7 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { countEvents, gaugeBlockHeight, gaugeBalance } from '../metrics/assetHub';
 import { Context } from '../lib/interfaces';
 import promClient from 'prom-client';
-import { pollEndpoint } from '../utils/utils';
+import { pollEndpoint, RPC_TIMEOUT_MS } from '../utils/utils';
 
 const metricFailureName: string = 'metric_scrape_failure';
 const metricFailure: promClient.Gauge = new promClient.Gauge({
@@ -34,7 +34,7 @@ async function startWatcher(context: Context) {
         registry.registerMetric(metricFailure);
 
     try {
-        const provider = new WsProvider(env.HUB_WS_ENDPOINT, 5000);
+        const provider = new WsProvider(env.HUB_WS_ENDPOINT, 5000, undefined, RPC_TIMEOUT_MS);
         provider.on('disconnected', async (err) => {
             logger.error(`ws connection closed ${err}`);
             metric.set(1);
