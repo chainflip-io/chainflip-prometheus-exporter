@@ -285,6 +285,15 @@ async function startWatcher(context: Context) {
             try {
                 const blockHash = (await api.rpc.chain.getBlockHash(blockNumber)).toJSON();
                 logger.info(`finalized_block_stream`, { blockNumber, blockHash });
+                // Leak diagnostics: correlate retained heap with block progress. A steady
+                // monotonic climb here (vs. a sawtooth) confirms per-block retention.
+                const mem = process.memoryUsage();
+                logger.debug(`heap_usage`, {
+                    blockNumber,
+                    heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024),
+                    rssMb: Math.round(mem.rss / 1024 / 1024),
+                    externalMb: Math.round(mem.external / 1024 / 1024),
+                });
                 const stateChainData = await makeRpcRequest(api, 'monitoring_data', blockHash);
                 const blockApi = await api.at(blockHash);
                 const data: ProtocolData = {

@@ -5,22 +5,12 @@ import { hex2bin, insertOrReplace, logStructureSize, ProtocolData } from '../../
 import makeRpcRequest from '../../utils/makeRpcRequest';
 
 const witnessHash10 = new Map<number, Set<string>>();
-const witnessHash50 = new Map<number, Set<string>>();
-const toDelete = new Map<string, number>();
 
 const metricName: string = 'cf_chain_tracking_witness_count';
 const metric: Gauge = new promClient.Gauge({
     name: metricName,
     help: 'Number of validator witnessing ChainStateUpdated for an external chain',
     labelNames: ['extrinsic', 'marginBlocks'],
-    registers: [],
-});
-
-const metricFailureName: string = 'cf_chain_tracking_witness_failure';
-const metricWitnessFailure: Gauge = new promClient.Gauge({
-    name: metricFailureName,
-    help: 'If 1 the number of witnesses is low, you can find the failing validators in the label `failing_validators`',
-    labelNames: ['extrinsic', 'failing_validators', 'witnessed_by'],
     registers: [],
 });
 
@@ -37,8 +27,6 @@ export const gaugeWitnessChainTracking = async (
 
         try {
             if (registry.getSingleMetric(metricName) === undefined) registry.registerMetric(metric);
-            if (registry.getSingleMetric(metricFailureName) === undefined)
-                registry.registerMetric(metricWitnessFailure);
 
             const signedBlock = data.signedBlock;
             const currentBlockNumber = data.blockNumber;
@@ -49,21 +37,6 @@ export const gaugeWitnessChainTracking = async (
                 currentBlockNumber,
                 { everyBlocks: 50 },
             );
-            logStructureSize(
-                logger,
-                'witnessChainTracking.witnessHash50',
-                witnessHash50.size,
-                currentBlockNumber,
-                { everyBlocks: 50 },
-            );
-            logStructureSize(
-                logger,
-                'witnessChainTracking.toDelete',
-                toDelete.size,
-                currentBlockNumber,
-                { everyBlocks: 50 },
-            );
-            deleteOldHashes(currentBlockNumber);
             await processHash10(
                 currentBlockNumber,
                 apiLatest,
@@ -71,7 +44,6 @@ export const gaugeWitnessChainTracking = async (
                 data.blockHash,
                 data.blockApi,
             );
-            await processHash50(currentBlockNumber, logger, data.blockApi);
             let ethBlock = 0;
             let arbBlock = 0;
             let hubBlock = 0;
@@ -113,16 +85,6 @@ export const gaugeWitnessChainTracking = async (
     }
 };
 
-function deleteOldHashes(currentBlockNumber: number) {
-    toDelete.forEach((block, labels) => {
-        if (block <= currentBlockNumber) {
-            const values = JSON.parse(labels);
-            metricWitnessFailure.remove(values.extrinsic, values.validators, values.witnessedBy);
-            toDelete.delete(labels);
-        }
-    });
-}
-
 function ethereumChainTracking(
     callData: any,
     blockNumber: number,
@@ -145,15 +107,6 @@ function ethereumChainTracking(
     if (Number(blockHeight) > ethBlock) {
         insertOrReplace(
             witnessHash10,
-            JSON.stringify({
-                type: `${callData.section}:${callData.method}`,
-                hash: blakeHash,
-            }),
-            blockNumber,
-            `${callData.section}:${callData.method}`,
-        );
-        insertOrReplace(
-            witnessHash50,
             JSON.stringify({
                 type: `${callData.section}:${callData.method}`,
                 hash: blakeHash,
@@ -191,15 +144,6 @@ function assetHubChainTracking(
     if (Number(blockHeight) > hubBlock) {
         insertOrReplace(
             witnessHash10,
-            JSON.stringify({
-                type: `${callData.section}:${callData.method}`,
-                hash: blakeHash,
-            }),
-            blockNumber,
-            `${callData.section}:${callData.method}`,
-        );
-        insertOrReplace(
-            witnessHash50,
             JSON.stringify({
                 type: `${callData.section}:${callData.method}`,
                 hash: blakeHash,
@@ -245,15 +189,6 @@ function arbitrumChainTracking(
             blockNumber,
             `${callData.section}:${callData.method}`,
         );
-        insertOrReplace(
-            witnessHash50,
-            JSON.stringify({
-                type: `${callData.section}:${callData.method}`,
-                hash: blakeHash,
-            }),
-            blockNumber,
-            `${callData.section}:${callData.method}`,
-        );
         return Number(blockHeight || 0);
     }
     return arbBlock;
@@ -283,43 +218,7 @@ async function processHash10(
                     metric.labels(parsedObj.type, '10').set(total);
                 }
                 // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                if (result && total > 0)
-                    log(total, result, currentBlockNumber, blockNumber, parsedObj, logger);
-            }
-        }
-    }
-}
-
-async function processHash50(currentBlockNumber: number, logger: any, blockApi: any) {
-    for (const [blockNumber, set] of witnessHash50) {
-        if (currentBlockNumber - blockNumber > 50) {
-            const tmpSet = new Set(set);
-            witnessHash50.delete(blockNumber);
-            for (const hash of tmpSet) {
-                const parsedObj = JSON.parse(hash);
-                try {
-                    const votes: { toJSON: () => any } = await blockApi.query.witnesser.votes(
-                        global.epochIndex,
-                        parsedObj.hash,
-                    );
-                    if (global.currentBlock === currentBlockNumber) {
-                        const vote = votes.toJSON();
-                        if (vote) {
-                            const binary = hex2bin(vote);
-                            const number = binary.match(/1/g)?.length || 0;
-
-                            metric.labels(parsedObj.type, '50').set(number);
-                            // log the hash if not all the validator witnessed it so we can quickly look up the hash and check which validator failed to do so
-                            if (number < global.currentAuthorities) {
-                                logger.info(
-                                    `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnessed by ${number} validators after 50 blocks!`,
-                                );
-                            }
-                        }
-                    }
-                } catch (err) {
-                    logger.warn(`Promise rejected ${err}`);
-                }
+                if (result && total > 0) log(total, result, blockNumber, parsedObj, logger);
             }
         }
     }
@@ -357,14 +256,7 @@ async function countWitnesses(
     return [result, total];
 }
 
-function log(
-    total: number,
-    result: any,
-    currentBlockNumber: number,
-    blockNumber: number,
-    parsedObj: any,
-    logger: any,
-) {
+function log(total: number, result: any, blockNumber: number, parsedObj: any, logger: any) {
     if (total < global.currentAuthorities) {
         const validators: string[] = [];
         result.validators.forEach(([ss58address, vanity, witness]: [string, string, boolean]) => {
@@ -376,18 +268,5 @@ function log(
             `Block ${blockNumber}: ${parsedObj.type} hash ${parsedObj.hash} witnessed by ${total} validators after 10 blocks!
             Failing validators: [${validators}]`,
         );
-        // in case less than 90% witnessed it
-        // create a temporary metric so that we can fetch the list of validators in our alerting system
-        if (total <= global.currentAuthorities * 0.9) {
-            metricWitnessFailure.labels(`${parsedObj.type}`, `${validators}`, `${total}`).set(1);
-            toDelete.set(
-                JSON.stringify({
-                    extrinsic: `${parsedObj.type}`,
-                    validators: `${validators}`,
-                    witnessedBy: `${total}`,
-                }),
-                currentBlockNumber + 40,
-            );
-        }
     }
 }

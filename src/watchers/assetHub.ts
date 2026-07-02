@@ -47,7 +47,16 @@ async function startWatcher(context: Context) {
         pollEndpoint(gaugeBlockHeight, context, 6);
         pollEndpoint(gaugeBalance, { ...context }, 6);
 
+        // countEvents calls api.at(blockHash) per finalized block; @polkadot rpc-core
+        // memoizes a registry lookup per hash with no eviction (see chainflip.ts). Re-arm
+        // the swap every N blocks to drop the stale per-hash cache. Mirrors chainflip.
+        const REGISTRY_SWAP_RESET_BLOCKS = 100;
         await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
+            if (header.number.toNumber() % REGISTRY_SWAP_RESET_BLOCKS === 0) {
+                (api as any)._rpcCore.setRegistrySwap(async (hash: Uint8Array) => {
+                    return await api.getBlockRegistry(hash);
+                });
+            }
             await countEvents({ ...context, header });
             metric.set(0);
         });
