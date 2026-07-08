@@ -68,6 +68,13 @@ tronRegistry.setDefaultLabels({
     network: config.tron.network,
 });
 
+// Process-level Node.js metrics (heap, rss, GC duration, event-loop lag) for leak
+// diagnosis. Kept on its own registry so the nodejs_*/process_* series aren't tagged
+// with a per-chain label. collectDefaultMetrics registers process-global state, so it
+// must be called exactly once.
+const processRegistry = new promClient.Registry();
+promClient.collectDefaultMetrics({ register: processRegistry });
+
 app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
     logger.info(`Network Prometheus Exporter started on port ${env.NETWORK_EXPORTER_PORT}`);
 
@@ -171,7 +178,8 @@ app.get('/metrics', async (req, res) => {
             (await arbitrumRegistry.metrics()) +
             (await solanaRegistry.metrics()) +
             (await assetHubRegistry.metrics()) +
-            (await tronRegistry.metrics()),
+            (await tronRegistry.metrics()) +
+            (await processRegistry.metrics()),
     );
 });
 
