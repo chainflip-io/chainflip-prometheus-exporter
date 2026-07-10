@@ -42,6 +42,8 @@ async function startWatcher(context: Context) {
         const api: ApiPromise = await ApiPromise.create({
             provider,
             noInitWarn: true,
+            // Cap rpc-core's decoded-storage LRU, never used capping it at 1 to avoid a mem leak.
+            rpcCacheCapacity: 1,
         });
         context.api = api;
         pollEndpoint(gaugeBlockHeight, context, 6);
