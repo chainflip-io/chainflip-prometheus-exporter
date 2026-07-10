@@ -362,6 +362,10 @@ async function startWatcher(context: Context) {
             noInitWarn: true,
             types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
             rpc: { ...customRpcs },
+            // rpc-core caches every decoded multi-key storage value in an LRU
+            // (default capacity 102,400) whose TTL refreshes on every block because of an implementation bug.
+            // Capping it at 1 to avoid a mem leak.
+            rpcCacheCapacity: 1,
         });
         context.apiLatest = api;
         api.on('error', (err: any) => logger.error(`api error ${err}`));
