@@ -101,19 +101,14 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
                 counts[key] = 0;
             }
 
-            const result = await api.query[chainConfig.palletName].electionProperties.entries();
-            result.forEach(([_, election_properties]: any[]) => {
-                const value = election_properties.toJSON();
-                if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-                    const electoral_system = Object.keys(value)[0].toUpperCase();
-                    if (electoral_system in counts) {
-                        counts[electoral_system] = counts[electoral_system] + 1;
-                    }
-                } else if (value !== null) {
-                    const key = value.toUpperCase();
-                    if (key in counts) {
-                        counts[key] = counts[key] + 1;
-                    }
+            // Count by storage KEY only. `.keys()` decodes each key to
+            // [uniqueMonotonicIdentifier, electoralSystemTag] without fetching the
+            // values;
+            const keys = await api.query[chainConfig.palletName].electionProperties.keys();
+            keys.forEach((storageKey: any) => {
+                const electoral_system = String(storageKey.args[0].toJSON()[1]).toUpperCase();
+                if (electoral_system in counts) {
+                    counts[electoral_system] += 1;
                 }
             });
 
