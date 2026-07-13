@@ -9,11 +9,14 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
+// Last observed runtime spec version.
+let lastSpecVersion: number | undefined;
+
 export const countEvents = async (context: Context): Promise<void> => {
     if (context.config.skipMetrics.includes('hub_events_count_total')) {
         return;
     }
-    const { logger, registry, header, api, metricFailure } = context;
+    const { logger, registry, api, metricFailure } = context;
     logger.debug(`Scraping ${metricName}`);
 
     if (registry.getSingleMetric(metricName) === undefined) {
@@ -22,12 +25,20 @@ export const countEvents = async (context: Context): Promise<void> => {
     }
 
     try {
-        const blockHash = await api.rpc.chain.getBlockHash(header.toJSON().number);
-        const apiAt = await api.at(blockHash);
-        const events = await apiAt.query.system.events();
+        const lastRuntimeUpgrade = (await api.query.system.lastRuntimeUpgrade()).toJSON() as {
+            specVersion: number;
+            specName: string;
+        } | null;
+        const specVersion = lastRuntimeUpgrade?.specVersion;
 
-        for (const { event } of events) {
-            metric.labels(`${event.section}:${event.method}`).inc();
+        if (specVersion !== undefined) {
+            if (lastSpecVersion !== undefined && specVersion !== lastSpecVersion) {
+                logger.info(
+                    `AssetHub runtime upgrade detected: specVersion ${lastSpecVersion} -> ${specVersion}`,
+                );
+                metric.labels('system:CodeUpdated').inc();
+            }
+            lastSpecVersion = specVersion;
         }
         metricFailure.labels('hub_events_count_total').set(0);
     } catch (e) {
