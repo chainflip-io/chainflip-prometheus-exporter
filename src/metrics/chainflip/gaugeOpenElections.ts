@@ -101,12 +101,12 @@ export const gaugeOpenElections = async (context: Context, data: ProtocolData): 
                 counts[key] = 0;
             }
 
-            // Count by storage KEY only. `.keys()` decodes each key to
-            // [uniqueMonotonicIdentifier, electoralSystemTag] without fetching the
-            // values;
             const keys = await api.query[chainConfig.palletName].electionProperties.keys();
             keys.forEach((storageKey: any) => {
-                const electoral_system = String(storageKey.args[0].toJSON()[1]).toUpperCase();
+                const identifier = storageKey.args[0].toJSON() as any[];
+                let tag: any = identifier[1];
+                if (tag && typeof tag === 'object') tag = Object.keys(tag)[0];
+                const electoral_system = String(tag).toUpperCase();
                 if (electoral_system in counts) {
                     counts[electoral_system] += 1;
                 }
