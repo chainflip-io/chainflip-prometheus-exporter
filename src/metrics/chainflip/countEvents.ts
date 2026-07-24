@@ -147,7 +147,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
     if (context.config.skipMetrics.includes('cf_events_count_total')) {
         return;
     }
-    const { logger, registry, apiLatest, metricFailure } = context;
+    const { logger, registry, metricFailure } = context;
     const api = data.blockApi;
     const config = context.config as FlipConfig;
     const { accounts, skipEvents } = config;
@@ -219,11 +219,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
 
             let error;
             if (event.method === 'ExtrinsicFailed') {
-                error = await getStateChainError(
-                    apiLatest,
-                    event.data.toJSON()[0].module,
-                    data.blockHash,
-                );
+                error = getStateChainError(api.registry, event.data.toJSON()[0].module);
                 const parsedError = error.data.name.split(':');
                 metricExtrinsicFailed.labels(`${parsedError[0]}`, `${parsedError[1]}`).inc();
             }

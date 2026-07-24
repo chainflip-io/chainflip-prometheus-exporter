@@ -1,5 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
+import type { Registry } from '@polkadot/types/types';
 import { Context } from '../lib/interfaces';
 import { customRpcs } from './customRpcSpecification';
 import { RpcReturnValue } from './makeRpcRequest';
@@ -189,21 +190,21 @@ export function hex2bin(hex: string) {
     return out;
 }
 
-export const getStateChainError = async (
-    api: ApiPromise,
+export const getStateChainError = (
+    registry: Registry,
     value: { error: `0x${string}`; index: number },
-    blockHash: any,
 ) => {
     // convert LE hex encoded number (e.g. "0x06000000") to BN (6)
     const error = new BN(value.error.slice(2), 'hex', 'le');
     const errorIndex = error.toNumber();
     const palletIndex = value.index;
 
-    // Always use metadata for the current block to handle runtime upgrades correctly.
-    // The polkadot API internally caches metadata per runtime version, so this is cheap.
-    const metadata = await api.rpc.state.getMetadata(blockHash);
-
-    const registryError = metadata.registry.findMetaError({
+    // The registry belongs to `api.at(blockHash)`, so it already carries the correct
+    // metadata for this block's runtime version (upgrade-safe) and findMetaError is a
+    // pure in-memory lookup. Fetching metadata per ExtrinsicFailed event instead (via
+    // api.rpc.state.getMetadata) is a heavy, event-loop-blocking decode that pins the
+    // CPU during DuplicateWitness storms — do not reintroduce it.
+    const registryError = registry.findMetaError({
         index: new BN(palletIndex),
         error,
     });
