@@ -144,6 +144,14 @@ function processBHW(
     });
 }
 
+export function countQueuedSafeElections(queuedSafe: Record<string, unknown>): number {
+    // Compact ranges are half-open; endpoints can be plain heights or composite `{ root }` heights.
+    return Object.entries(queuedSafe).reduce(
+        (sum, [from, to]) => sum + (toNumber(to) - toNumber(from)),
+        0,
+    );
+}
+
 function processElectionInstance(
     unsyncState: any,
     instance: ElectionInstance,
@@ -158,10 +166,7 @@ function processElectionInstance(
     const highestEverOngoing = toNumber(elections.highestEverOngoingElection);
     const queuedHash = elections.queuedHashElections;
     const queuedSafe = elections.queuedSafeElections.elections;
-    const queuedSafeCount = Object.entries(queuedSafe).reduce(
-        (sum, [key, value]) => sum + (Number(value) - Number(key)),
-        0,
-    );
+    const queuedSafeCount = countQueuedSafeElections(queuedSafe);
     const ongoing = elections.ongoing;
 
     metricSeenHeightsBelow.labels(chainName, instance.instanceLabel).set(seenHeightsBelow);
