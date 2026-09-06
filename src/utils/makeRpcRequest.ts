@@ -22,7 +22,20 @@ const flexibleHexString = U128;
 
 const Amount = U128;
 
-const Offence = z.enum(stateChainTypes.Offence._enum);
+const Offence = z
+    .union([
+        z.enum(stateChainTypes.Offence._enum),
+        z.object({ FailedToBroadcastTransaction: string }),
+        z.object({ FailedLivenessCheck: string }),
+    ])
+    .transform((offence) => {
+        if (typeof offence === 'string') {
+            return offence;
+        }
+
+        const [name, chain] = Object.entries(offence)[0];
+        return `${name}:${chain}`;
+    });
 const RpcPenalty = z.tuple([number, number]);
 const ValidatorId = string;
 const RpcSuspension = z.tuple([Offence, z.array(z.tuple([number, ValidatorId]))]);
