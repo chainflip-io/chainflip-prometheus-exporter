@@ -34,6 +34,14 @@ export const gaugeKeyActivationBroadcast = async (
             metricKeyBroadcast.labels('arbitrum').set(arbitrumBroadcastId);
         }
 
+        // BSC
+        const bscBroadcastId = data.data.activating_key_broadcast_ids.bsc;
+        if (bscBroadcastId == null) {
+            metricKeyBroadcast.labels('bsc').set(0);
+        } else {
+            metricKeyBroadcast.labels('bsc').set(bscBroadcastId);
+        }
+
         // Ethereum
         const ethereumBroadcastId = data.data.activating_key_broadcast_ids.ethereum;
         if (ethereumBroadcastId == null) {

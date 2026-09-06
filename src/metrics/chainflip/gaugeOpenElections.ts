@@ -69,6 +69,18 @@ const CHAIN_CONFIGS: ChainElectionOpenConfig[] = [
         ]),
     },
     {
+        chainName: 'bsc',
+        palletName: 'bscElections',
+        electoralSystems: new Map([
+            ['A', 'BscBlockHeightWitnesser'],
+            ['B', 'BscDepositChannelWitnessing'],
+            ['C', 'BscVaultDepositWitnessing'],
+            ['D', 'BscKeyManagerWitnessing'],
+            ['EE', 'BscFeeTracking'],
+            ['FF', 'BscLiveness'],
+        ]),
+    },
+    {
         chainName: 'tron',
         palletName: 'tronElections',
         electoralSystems: new Map([

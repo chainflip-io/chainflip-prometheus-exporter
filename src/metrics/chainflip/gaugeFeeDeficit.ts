@@ -33,6 +33,7 @@ export const gaugeFeeDeficit = async (context: Context, data: ProtocolData): Pro
 
         metric.labels('ethereum').set(feeImbalanceValue(data.data.fee_imbalance.ethereum, 1e18));
         metric.labels('arbitrum').set(feeImbalanceValue(data.data.fee_imbalance.arbitrum, 1e18));
+        metric.labels('bsc').set(feeImbalanceValue(data.data.fee_imbalance.bsc, 1e18));
         metric.labels('assethub').set(feeImbalanceValue(data.data.fee_imbalance.assethub, 1e10));
         metric.labels('bitcoin').set(feeImbalanceValue(data.data.fee_imbalance.bitcoin, 1e8));
         metric.labels('solana').set(feeImbalanceValue(data.data.fee_imbalance.solana, 1e9));

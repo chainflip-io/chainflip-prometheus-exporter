@@ -37,6 +37,9 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
         metric.labels('arbitrum').set(data.data.external_chains_height.arbitrum);
         blockHeightStore.setTracked('arbitrum', data.data.external_chains_height.arbitrum);
 
+        // BSC
+        metric.labels('bsc').set(data.data.external_chains_height.bsc);
+
         // Solana
         metric.labels('solana').set(data.data.external_chains_height.solana);
         blockHeightStore.setTracked('solana', data.data.external_chains_height.solana);

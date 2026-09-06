@@ -35,6 +35,9 @@ export const gaugePendingBroadcast = async (
         // Arbitrum
         metric.labels('arbitrum').set(data.data.pending_broadcasts.arbitrum);
 
+        // BSC
+        metric.labels('bsc').set(data.data.pending_broadcasts.bsc);
+
         // Solana
         metric.labels('solana').set(data.data.pending_broadcasts.solana);
 
