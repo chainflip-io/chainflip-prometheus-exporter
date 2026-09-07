@@ -10,6 +10,7 @@ import createContext from './lib/createContext';
 import loadDefaultMetrics from './lib/loadDefaultMetrics';
 import startBitcoinService from './watchers/bitcoin';
 import startArbitrumService from './watchers/arbitrum';
+import startBscService from './watchers/bsc';
 import startSolanaService from './watchers/solana';
 import startAssetHubService from './watchers/assetHub';
 import startTronService from './watchers/tron';
@@ -54,6 +55,12 @@ const arbitrumRegistry = new promClient.Registry();
 arbitrumRegistry.setDefaultLabels({
     chain: 'arbitrum',
     network: config.arb.network,
+});
+
+const bscRegistry = new promClient.Registry();
+bscRegistry.setDefaultLabels({
+    chain: 'bsc',
+    network: config.bsc.network,
 });
 
 const solanaRegistry = new promClient.Registry();
@@ -149,6 +156,15 @@ app.listen(env.NETWORK_EXPORTER_PORT || 9000, () => {
         );
         startArbitrumService(arbitrumContext);
     }
+    if (config.bsc.enabled) {
+        const bscLogger: Logger = logger.child({
+            chain: 'bsc',
+            network: config.bsc.network,
+        });
+        const bscContext: Context = createContext(bscLogger, bscRegistry, env, config.bsc);
+        loadDefaultMetrics(bscContext);
+        startBscService(bscContext);
+    }
     if (config.sol.enabled) {
         const solanaLogger: Logger = logger.child({
             chain: 'solana',
@@ -176,6 +192,7 @@ app.get('/metrics', async (req, res) => {
             (await ethereumRegistry.metrics()) +
             (await bitcoinRegistry.metrics()) +
             (await arbitrumRegistry.metrics()) +
+            (await bscRegistry.metrics()) +
             (await solanaRegistry.metrics()) +
             (await assetHubRegistry.metrics()) +
             (await tronRegistry.metrics()) +
