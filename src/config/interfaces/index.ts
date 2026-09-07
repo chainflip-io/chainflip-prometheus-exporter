@@ -46,6 +46,15 @@ export interface ArbConfig extends ConfigBase {
     wallets: ConfigWallet[];
 }
 
+export interface BscConfig extends ConfigBase {
+    defaultMetrics: DefaultMetrics[];
+    network: string;
+    networkId: number;
+    contracts: ConfigContract[];
+    wallets: ConfigWallet[];
+    tokens: ConfigToken[];
+}
+
 export interface TronConfig extends ConfigBase {
     defaultMetrics: DefaultMetrics[];
     network: string;
@@ -71,11 +80,6 @@ interface DotAccountConfig {
     publicKey: any;
 }
 
-export interface DotConfig extends ConfigBase {
-    defaultMetrics: DefaultMetrics[];
-    accounts: DotAccountConfig[];
-}
-
 export interface HubConfig extends ConfigBase {
     defaultMetrics: DefaultMetrics[];
     accounts: DotAccountConfig[];
@@ -96,10 +100,10 @@ export interface FlipConfig extends ConfigBase {
 export interface Config {
     eth: EthConfig;
     btc: BtcConfig;
-    dot: DotConfig;
     hub: HubConfig;
     flip: FlipConfig;
     arb: ArbConfig;
+    bsc: BscConfig;
     sol: SolConfig;
     tron: TronConfig;
 }
@@ -107,10 +111,10 @@ export interface Config {
 export type ChainConfig =
     | EthConfig
     | BtcConfig
-    | DotConfig
     | HubConfig
     | FlipConfig
     | ArbConfig
+    | BscConfig
     | SolConfig
     | TronConfig;
 

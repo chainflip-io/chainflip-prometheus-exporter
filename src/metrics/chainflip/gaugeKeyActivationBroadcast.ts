@@ -84,6 +84,14 @@ export const gaugeKeyActivationBroadcast = async (
             metricKeyBroadcast.labels('tron').set(tronBroadcastId);
         }
 
+        // BSC
+        const bscBroadcastId = data.data.activating_key_broadcast_ids.bsc;
+        if (bscBroadcastId == null) {
+            metricKeyBroadcast.labels('bsc').set(0);
+        } else {
+            metricKeyBroadcast.labels('bsc').set(bscBroadcastId);
+        }
+
         metricFailure.labels({ metric: metricKeyBroadcastName }).set(0);
     } catch (e) {
         logger.error(e);

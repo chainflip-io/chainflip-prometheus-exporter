@@ -89,6 +89,113 @@
       ],
       "type": "object"
     },
+    "BscConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "contracts": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "defaultMetrics": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "network": {
+          "type": "string"
+        },
+        "networkId": {
+          "type": "number"
+        },
+        "skipMetrics": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tokens": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "symbol",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "wallets": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "alias": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "alias",
+              "address"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "contracts",
+        "defaultMetrics",
+        "enabled",
+        "network",
+        "networkId",
+        "skipMetrics",
+        "tokens",
+        "wallets"
+      ],
+      "type": "object"
+    },
     "BtcConfig": {
       "additionalProperties": false,
       "properties": {
@@ -161,9 +268,6 @@
           "$ref": "#/definitions/BtcConfig"
         },
         {
-          "$ref": "#/definitions/DotConfig"
-        },
-        {
           "$ref": "#/definitions/HubConfig"
         },
         {
@@ -171,6 +275,9 @@
         },
         {
           "$ref": "#/definitions/ArbConfig"
+        },
+        {
+          "$ref": "#/definitions/BscConfig"
         },
         {
           "$ref": "#/definitions/SolConfig"
@@ -186,11 +293,11 @@
         "arb": {
           "$ref": "#/definitions/ArbConfig"
         },
+        "bsc": {
+          "$ref": "#/definitions/BscConfig"
+        },
         "btc": {
           "$ref": "#/definitions/BtcConfig"
-        },
-        "dot": {
-          "$ref": "#/definitions/DotConfig"
         },
         "eth": {
           "$ref": "#/definitions/EthConfig"
@@ -211,73 +318,12 @@
       "required": [
         "eth",
         "btc",
-        "dot",
         "hub",
         "flip",
         "arb",
+        "bsc",
         "sol",
         "tron"
-      ],
-      "type": "object"
-    },
-    "DotConfig": {
-      "additionalProperties": false,
-      "properties": {
-        "accounts": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "alias": {
-                "type": "string"
-              },
-              "publicKey": {}
-            },
-            "required": [
-              "alias",
-              "publicKey"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        },
-        "defaultMetrics": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "name",
-              "value"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "network": {
-          "type": "string"
-        },
-        "skipMetrics": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "accounts",
-        "defaultMetrics",
-        "enabled",
-        "network",
-        "skipMetrics"
       ],
       "type": "object"
     },

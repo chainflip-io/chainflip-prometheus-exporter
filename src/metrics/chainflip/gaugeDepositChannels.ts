@@ -44,6 +44,10 @@ export const gaugeDepositChannels = async (context: Context, data: ProtocolData)
         const tronChannels = data.data.open_deposit_channels.tron;
         metric.labels('tron').set(tronChannels);
 
+        // BSC
+        const bscChannels = data.data.open_deposit_channels.bsc;
+        metric.labels('bsc').set(bscChannels);
+
         metricFailure.labels({ metric: metricName }).set(0);
     } catch (e) {
         logger.error(e);

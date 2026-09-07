@@ -1,4 +1,11 @@
-export type BlockLagChain = 'bitcoin' | 'ethereum' | 'arbitrum' | 'solana' | 'assethub' | 'tron';
+export type BlockLagChain =
+    | 'bitcoin'
+    | 'ethereum'
+    | 'arbitrum'
+    | 'solana'
+    | 'assethub'
+    | 'tron'
+    | 'bsc';
 
 type Heights = { tracked: number | null; external: number | null };
 
@@ -9,6 +16,7 @@ const state: Record<BlockLagChain, Heights> = {
     solana: { tracked: null, external: null },
     assethub: { tracked: null, external: null },
     tron: { tracked: null, external: null },
+    bsc: { tracked: null, external: null },
 };
 
 export const blockHeightStore = {
@@ -22,4 +30,10 @@ export const blockHeightStore = {
     getExternal: (chain: BlockLagChain): number | null => state[chain].external,
     isChain: (value: string): value is BlockLagChain => value in state,
     chains: (): BlockLagChain[] => Object.keys(state) as BlockLagChain[],
+    reset: () => {
+        for (const heights of Object.values(state)) {
+            heights.tracked = null;
+            heights.external = null;
+        }
+    },
 };

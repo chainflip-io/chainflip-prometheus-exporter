@@ -63,16 +63,20 @@ const metricReorgDetected: Gauge = new promClient.Gauge({
 let activeReorgChains: Set<string> = new Set<string>();
 
 // Track CCM broadcasts with their block numbers for TTL cleanup
-const ccmBroadcasts: Map<number, number> = new Map<number, number>();
+const ccmBroadcasts: Map<string, number> = new Map<string, number>();
 const CCM_BROADCAST_TTL_BLOCKS = 1000; // Clean up after 1000 blocks (~2 hours)
 
 function cleanupStaleCcmBroadcasts(currentBlock: number, logger: any) {
-    const sizeBefore = ccmBroadcasts.size;
-    for (const [broadcastId, blockNumber] of ccmBroadcasts.entries()) {
+    for (const [broadcastKey, blockNumber] of ccmBroadcasts.entries()) {
         if (currentBlock - blockNumber > CCM_BROADCAST_TTL_BLOCKS) {
-            ccmBroadcasts.delete(broadcastId);
+            ccmBroadcasts.delete(broadcastKey);
         }
     }
+}
+
+function ccmBroadcastKey(eventSection: string, broadcastId: unknown): string {
+    const chain = eventSection.replace(/(?:IngressEgress|Broadcaster)$/, '');
+    return `${chain}:${String(broadcastId)}`;
 }
 
 export const resetEventCountMetrics = (config: FlipConfig): void => {
@@ -83,6 +87,7 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metricBroadcastAborted.reset();
     metricReorgDetected.reset();
     activeReorgChains.clear();
+    ccmBroadcasts.clear();
 
     metric.labels('governance:Approved').set(0);
     metric.labels('governance:Executed').set(0);
@@ -120,11 +125,17 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metric.labels('tronIngressEgress:ChannelOpeningFeePaid').set(0);
     metric.labels('tronChainTracking:ChainStateUpdated').set(0);
     metric.labels('tronIngressEgress:TransferFallbackRequested').set(0);
+    metric.labels('bscBroadcaster:BroadcastAborted').set(0);
+    metric.labels('bscBroadcaster:BroadcastTimeout').set(0);
+    metric.labels('bscIngressEgress:ChannelOpeningFeePaid').set(0);
+    metric.labels('bscChainTracking:ChainStateUpdated').set(0);
+    metric.labels('bscIngressEgress:TransferFallbackRequested').set(0);
 
     metricReorgDetected.labels('bitcoin').set(0);
     metricReorgDetected.labels('ethereum').set(0);
     metricReorgDetected.labels('arbitrum').set(0);
     metricReorgDetected.labels('tron').set(0);
+    metricReorgDetected.labels('bsc').set(0);
 
     for (const { ss58Address, alias } of config.accounts) {
         const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
@@ -137,6 +148,7 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
         'ethereumBroadcaster',
         'solanaBroadcaster',
         'tronBroadcaster',
+        'bscBroadcaster',
     ]) {
         metricCcmBroadcastAborted.labels(broadcaster).set(0);
         metricBroadcastAborted.labels(broadcaster).set(0);
@@ -195,15 +207,15 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
 
             // Save the list of broadcastId for CCM with current block number
             if (event.method === 'CcmBroadcastRequested') {
-                const broacastId = event.data.toJSON()[0];
-                ccmBroadcasts.set(broacastId, data.blockNumber);
+                const broadcastId = event.data.toJSON()[0];
+                ccmBroadcasts.set(ccmBroadcastKey(event.section, broadcastId), data.blockNumber);
             }
 
             // Whenever a broadcast aborted is received we check if the broadcastId is in the list and if so we remove it
             // and increase the metric ccmBroadcastAborted
             if (event.method === 'BroadcastAborted') {
-                const broacastId = event.data.toJSON()[0];
-                if (ccmBroadcasts.delete(broacastId)) {
+                const broadcastId = event.data.toJSON()[0];
+                if (ccmBroadcasts.delete(ccmBroadcastKey(event.section, broadcastId))) {
                     // this is a ccm broadcast aborted!
                     metricCcmBroadcastAborted.labels(event.section).inc();
                 } else {
@@ -213,8 +225,8 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
             }
             // Remove it on broadcast success to avoid saving the broadcast_id indefinitely
             if (event.method === 'BroadcastSuccess') {
-                const broacastId = event.data.toJSON()[0];
-                ccmBroadcasts.delete(broacastId);
+                const broadcastId = event.data.toJSON()[0];
+                ccmBroadcasts.delete(ccmBroadcastKey(event.section, broadcastId));
             }
 
             let error;

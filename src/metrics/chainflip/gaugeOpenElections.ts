@@ -79,6 +79,18 @@ const CHAIN_CONFIGS: ChainElectionOpenConfig[] = [
             ['EE', 'TronLiveness'],
         ]),
     },
+    {
+        chainName: 'bsc',
+        palletName: 'bscElections',
+        electoralSystems: new Map([
+            ['A', 'BscBlockHeightWitnesser'],
+            ['B', 'BscDepositChannelWitnessing'],
+            ['C', 'BscVaultDepositWitnessing'],
+            ['D', 'BscKeyManagerWitnessing'],
+            ['EE', 'BscFeeTracking'],
+            ['FF', 'BscLiveness'],
+        ]),
+    },
 ];
 
 export const gaugeOpenElections = async (context: Context, data: ProtocolData): Promise<void> => {

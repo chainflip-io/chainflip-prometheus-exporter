@@ -205,9 +205,9 @@ blockchain state itself — you can't scrape a chain. So we built a translator.
 ## Our component: the chainflip-prometheus-exporter
 
 - A **Node/TypeScript** service that reads **on-chain data & state**, turns it into Prometheus metrics.
-- **7 chain watchers**, each with its own registry, individually toggled per network (localnet / perseverance / berghain / mainnet):
+- **8 chain watchers**, each with its own registry, individually toggled per network (localnet / perseverance / berghain / mainnet):
 
-  **Chainflip State Chain** · **Ethereum** · **Bitcoin** · **Arbitrum** · **Solana** · **AssetHub** · **Tron**
+  **Chainflip State Chain** · **Ethereum** · **Bitcoin** · **Arbitrum** · **BSC** · **Solana** · **AssetHub** · **Tron**
 
 - Also exposes **`/health/block-lag`** probes that flag when an external chain's witnessing falls behind its real chain tip.
 
@@ -227,7 +227,7 @@ RPC; external chains via ethers / bitcoin-core / @solana/web3.js / tronweb.
 - Operations: rotations, `cf_swapping_queue`, `cf_open_deposit_channels`, `cf_pending_redemptions`, broadcasts
 - Economics: `cf_flip_total_supply`, fees, lending/LTV (`cf_ltv_ratio_histogram`), oracle prices
 
-**External chains:** block height + balances (`eth_balance`, `eth_token_balance`, `sol_balance`, `tron_trx_balance`)
+**External chains:** block height + balances (`eth_balance`, `eth_token_balance`, `bsc_bnb_balance`, `bsc_token_balance`, `sol_balance`, `tron_trx_balance`)
 
 <!--
 Pick 2-3 of these to show live on a Grafana dashboard if you can. The point:
