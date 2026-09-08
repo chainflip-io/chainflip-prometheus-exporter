@@ -230,8 +230,8 @@ describe('BSC protocol monitoring data', () => {
     });
 });
 
-describe('BSC election metrics', () => {
-    it('emits BHW/BW gauges and all six open-election identifiers', async () => {
+describe('2.3 election metrics', () => {
+    it('emits BSC and AssetHub BHW/BW gauges and open-election identifiers', async () => {
         const electionState = (seed: number) => ({
             elections: {
                 seenHeightsBelow: seed,
@@ -250,14 +250,23 @@ describe('BSC election metrics', () => {
             {},
             {},
         ];
+        const assethubUnsynchronisedState = [
+            { phase: { runningAssethub: { witnessFrom: { root: 1200 }, headers: [] } } },
+            electionState(401),
+            electionState(501),
+            {},
+            {},
+        ];
         const bscTags = ['A', 'B', 'C', 'D', 'EE', 'FF'];
-        const keys = bscTags.map((tag) => ({
-            args: [
-                {
-                    toJSON: () => [0, { [tag.toLowerCase()]: null }],
-                },
-            ],
-        }));
+        const assethubTags = ['A', 'B', 'C', 'D', 'EE'];
+        const electionKeys = (tags: string[]) =>
+            tags.map((tag) => ({
+                args: [
+                    {
+                        toJSON: () => [0, { [tag.toLowerCase()]: null }],
+                    },
+                ],
+            }));
         const emptyElectionPallet = {
             electionProperties: { keys: vi.fn().mockResolvedValue([]) },
         };
@@ -268,11 +277,19 @@ describe('BSC election metrics', () => {
                 arbitrumElections: emptyElectionPallet,
                 solanaElections: emptyElectionPallet,
                 tronElections: emptyElectionPallet,
+                assethubElections: {
+                    electoralUnsynchronisedState: vi.fn().mockResolvedValue({
+                        toJSON: () => assethubUnsynchronisedState,
+                    }),
+                    electionProperties: {
+                        keys: vi.fn().mockResolvedValue(electionKeys(assethubTags)),
+                    },
+                },
                 bscElections: {
                     electoralUnsynchronisedState: vi.fn().mockResolvedValue({
                         toJSON: () => unsynchronisedState,
                     }),
-                    electionProperties: { keys: vi.fn().mockResolvedValue(keys) },
+                    electionProperties: { keys: vi.fn().mockResolvedValue(electionKeys(bscTags)) },
                 },
             },
         };
@@ -333,12 +350,144 @@ describe('BSC election metrics', () => {
                 }),
             ).toBe(1);
         }
+
+        expect(
+            await metricValue(registry, 'cf_bhw_witness_from', { tracked_chain: 'assethub' }),
+        ).toBe(1200);
+        for (const [instance, seenHeight] of [
+            ['deposit_channels', 401],
+            ['egresses', 501],
+        ] as const) {
+            expect(
+                await metricValue(registry, 'cf_bw_seen_heights_below', {
+                    tracked_chain: 'assethub',
+                    bw_instance: instance,
+                }),
+            ).toBe(seenHeight);
+            expect(
+                await metricValue(registry, 'cf_bw_queued_hash_elections', {
+                    tracked_chain: 'assethub',
+                    bw_instance: instance,
+                }),
+            ).toBe(1);
+            expect(
+                await metricValue(registry, 'cf_bw_queued_safe_elections', {
+                    tracked_chain: 'assethub',
+                    bw_instance: instance,
+                }),
+            ).toBe(2);
+        }
+
+        for (const identifier of [
+            'A_AssethubBlockHeightWitnesser',
+            'B_AssethubDepositChannelWitnessing',
+            'C_AssethubEgressWitnessing',
+            'D_AssethubFeeTracking',
+            'EE_AssethubLiveness',
+        ]) {
+            expect(
+                await metricValue(registry, 'cf_open_elections', {
+                    for_chain: 'assethub',
+                    electoral_system: identifier,
+                }),
+            ).toBe(1);
+        }
     });
 });
 
-describe('BSC event metrics', () => {
+describe('2.3 chain event metrics', () => {
     beforeEach(() => {
         resetEventCountMetrics({ accounts: [] } as never);
+    });
+
+    it('seeds every applicable chain event baseline', async () => {
+        const blockApi = {
+            query: {
+                system: { events: vi.fn().mockResolvedValue([]) },
+            },
+        };
+        const registry = new Registry();
+        const context = makeContext(registry, {
+            skipMetrics: ['cf_rotation_phase_attempts'],
+            config: { accounts: [], skipEvents: [], eventLog: false },
+        });
+        const data = makeData(customRpcTypes.monitoring_data.parse(monitoringPayload()), blockApi);
+
+        await countEvents(context, data);
+
+        for (const chain of [
+            'ethereum',
+            'bitcoin',
+            'arbitrum',
+            'solana',
+            'assethub',
+            'tron',
+            'bsc',
+        ]) {
+            const broadcaster = `${chain}Broadcaster`;
+            const ingressEgress = `${chain}IngressEgress`;
+
+            for (const eventName of [
+                `${broadcaster}:BroadcastAborted`,
+                `${broadcaster}:BroadcastTimeout`,
+                `${ingressEgress}:ChannelOpeningFeePaid`,
+                `${ingressEgress}:BoostedDepositLost`,
+                `${ingressEgress}:TransferFallbackRequested`,
+            ]) {
+                const value = await metricValue(registry, 'cf_events_count_total', {
+                    event: eventName,
+                });
+                expect(value, `missing baseline for ${eventName}`).toBe(0);
+            }
+
+            expect(await metricValue(registry, 'cf_ccm_broadcast_aborted', { broadcaster })).toBe(
+                0,
+            );
+            expect(await metricValue(registry, 'cf_broadcast_aborted', { broadcaster })).toBe(0);
+        }
+
+        for (const chain of [
+            'ethereum',
+            'bitcoin',
+            'arbitrum',
+            'solana',
+            'assethub',
+            'tron',
+            'bsc',
+        ]) {
+            expect(
+                await metricValue(registry, 'cf_events_count_total', {
+                    event: `${chain}ChainTracking:ChainStateUpdated`,
+                }),
+            ).toBe(0);
+        }
+
+        expect(
+            await metricValue(registry, 'cf_events_count_total', {
+                event: 'polkadotBroadcaster:BroadcastAborted',
+            }),
+        ).toBeUndefined();
+        expect(
+            await metricValue(registry, 'cf_events_count_total', {
+                event: 'polkadotChainTracking:ChainStateUpdated',
+            }),
+        ).toBeUndefined();
+
+        for (const signer of ['evm', 'polkadot', 'bitcoin', 'solana']) {
+            for (const method of ['RetryRequested', 'KeygenFailure']) {
+                expect(
+                    await metricValue(registry, 'cf_events_count_total', {
+                        event: `${signer}ThresholdSigner:${method}`,
+                    }),
+                ).toBe(0);
+            }
+        }
+
+        for (const chain of ['ethereum', 'bitcoin', 'arbitrum', 'assethub', 'tron', 'bsc']) {
+            expect(await metricValue(registry, 'cf_reorg_detected', { tracked_chain: chain })).toBe(
+                0,
+            );
+        }
     });
 
     it('seeds the intended events, detects reorgs, and scopes CCM IDs by chain', async () => {
@@ -384,7 +533,7 @@ describe('BSC event metrics', () => {
             await metricValue(registry, 'cf_events_count_total', {
                 event: 'bscIngressEgress:BoostedDepositLost',
             }),
-        ).toBeUndefined();
+        ).toBe(0);
         expect(
             await metricValue(registry, 'cf_ccm_broadcast_aborted', {
                 broadcaster: 'bscBroadcaster',
@@ -401,10 +550,26 @@ describe('BSC event metrics', () => {
             }),
         ).toBe(0);
         expect(await metricValue(registry, 'cf_reorg_detected', { tracked_chain: 'bsc' })).toBe(3);
+        expect(
+            await metricValue(registry, 'cf_reorg_detected', { tracked_chain: 'assethub' }),
+        ).toBe(0);
 
-        currentEvents = [];
+        currentEvents = [
+            event('assethubElections', 'ElectoralEvent', [
+                { reorgDetected: { reorgedBlocks: [{ root: 2000 }, { root: 2002 }] } },
+            ]),
+        ];
         await countEvents(context, { ...data, blockNumber: 101 });
         expect(await metricValue(registry, 'cf_reorg_detected', { tracked_chain: 'bsc' })).toBe(0);
+        expect(
+            await metricValue(registry, 'cf_reorg_detected', { tracked_chain: 'assethub' }),
+        ).toBe(3);
+
+        currentEvents = [];
+        await countEvents(context, { ...data, blockNumber: 102 });
+        expect(
+            await metricValue(registry, 'cf_reorg_detected', { tracked_chain: 'assethub' }),
+        ).toBe(0);
     });
 });
 

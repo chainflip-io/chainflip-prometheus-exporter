@@ -126,10 +126,6 @@ export const customRpcTypes = {
     penalties: z.array(z.tuple([Offence, RpcPenalty])),
     suspensions: z.array(RpcSuspension),
     tx_fee_multiplier: Amount,
-    witness_count: z.object({
-        failing_count: U32,
-        validators: z.array(z.tuple([string, string, boolean])),
-    }),
     monitoring_data: z.object({
         external_chains_height: z.object({
             bitcoin: U32,
@@ -391,7 +387,6 @@ type RpcParamsMap = {
     eth_key_manager_address: [];
     eth_state_chain_gateway_address: [];
     flip_supply: [];
-    witness_count: [hash: string, epoch_index?: number, at?: string];
     monitoring_data: [at?: string];
     monitoring_accounts_info: [accounts: string[], at?: string];
     safe_mode_statuses: [];

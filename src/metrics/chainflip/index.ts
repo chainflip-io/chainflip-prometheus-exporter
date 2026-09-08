@@ -15,8 +15,6 @@ export * from './gaugeTssRetryQueues';
 export * from './gaugeSwappingQueue';
 export * from './gaugeBtcUtxos';
 export * from './gatherGlobalValues';
-export * from './gaugeWitnessChainTracking';
-export * from './gaugeWitnessCount';
 export * from './gaugeFeeDeficit';
 export * from './guageExternalChainsBlockHeight';
 export * from './gaugePriceDelta';

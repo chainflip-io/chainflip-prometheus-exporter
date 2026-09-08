@@ -304,10 +304,6 @@ const stateChainTypes = {
     },
     Version: 'SemVer',
     VoteCount: 'u32',
-    RpcFailingWitnessValidators: {
-        failing_count: 'u32',
-        validators: 'Vec<(ValidatorId, Vec<u8>, bool)>',
-    },
     VaultImbalance: {
         _enum: {
             Surplus: 'u128',
