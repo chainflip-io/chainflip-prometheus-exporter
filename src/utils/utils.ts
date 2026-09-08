@@ -220,10 +220,20 @@ export const getStateChainError = (
 };
 
 export function toNumber(value: any): number {
-    if (typeof value === 'object' && value !== null && 'root' in value) {
-        return Number(value.root);
+    // Chains with a composite block height serialise it as an object (`{ root: 123 }`),
+    // and as a JSON-encoded string when it is used as a map key (`'{"root":123}'`).
+    let height = value;
+    if (typeof height === 'string' && height.startsWith('{')) {
+        try {
+            height = JSON.parse(height);
+        } catch {
+            return Number(value);
+        }
     }
-    return Number(value);
+    if (typeof height === 'object' && height !== null && 'root' in height) {
+        return Number(height.root);
+    }
+    return Number(height);
 }
 
 // Used to remove the commas from numbers

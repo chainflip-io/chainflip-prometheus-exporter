@@ -12,7 +12,7 @@
     "build": "tsc",
     "lint": "eslint ./src*",
     "prettier": "pnpm exec prettier --write src/**/*.ts src/*.ts src/**/**/*.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tsx --test \"src/**/*.test.ts\"",
     "metrics": "curl localhost:9000/metrics",
     "dev": "tsx watch src/app.ts",
     "start:dev:local": "CF_NETWORK=localnet pnpm dev",
