@@ -1,11 +1,4 @@
 {
-  "dot": {
-    "enabled": true,
-    "network": "polkadot",
-    "defaultMetrics": [],
-    "accounts": [],
-    "skipMetrics": []
-  },
   "hub": {
 		"enabled": true,
 		"network": "assethub",
@@ -185,6 +178,47 @@
       {
         "alias": "vault",
         "address": "0x79001a5e762f3befc8e5871b42f6734e00498920"
+      }
+    ],
+    "skipMetrics": []
+  },
+  "bsc": {
+    "enabled": true,
+    "networkId": 56,
+    "network": "mainnet",
+    "defaultMetrics": [],
+    "contracts": [
+      {
+        "alias": "key-manager",
+        "address": "0xBFe612c77C2807Ac5a6A41F84436287578000275"
+      },
+      {
+        "alias": "vault",
+        "address": "0x79001a5e762f3bEFC8e5871b42F6734e00498920"
+      }
+    ],
+    "wallets": [
+      {
+        "alias": "bashful",
+        "address": "0x9c1bc912afa4eb8a516ed50378e6163360264e84"
+      },
+      {
+        "alias": "doc",
+        "address": "0x0cb6f56ccefd56fbefca4146ca1dd9949100eb62"
+      },
+      {
+        "alias": "dopey",
+        "address": "0xd0b108995911377d8d32b652c5dd1c233a6afc87"
+      },
+      {
+        "alias": "vault",
+        "address": "0x79001a5e762f3befc8e5871b42f6734e00498920"
+      }
+    ],
+    "tokens": [
+      {
+        "address": "0x55d398326f99059fF775485246999027B3197955",
+        "symbol": "USDT"
       }
     ],
     "skipMetrics": []

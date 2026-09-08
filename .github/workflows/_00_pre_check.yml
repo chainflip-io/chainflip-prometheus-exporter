@@ -52,6 +52,9 @@ jobs:
       - name: Create schema 📝
         run: pnpm schema
 
+      - name: Check generated schema 📝
+        run: git diff --exit-code -- config/schema.json
+
       - name: Validate schema 📝
         run: pnpm validate
 #

@@ -41,6 +41,9 @@ export const gaugePendingBroadcast = async (
         // Tron
         metric.labels('tron').set(data.data.pending_broadcasts.tron);
 
+        // BSC
+        metric.labels('bsc').set(data.data.pending_broadcasts.bsc);
+
         metricFailure.labels({ metric: metricName }).set(0);
     } catch (e) {
         logger.error(e);

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import stateChainTypes from './chainTypes';
 import { customRpcs } from './customRpcSpecification';
 
 const boolean = z.boolean();
@@ -22,7 +21,30 @@ const flexibleHexString = U128;
 
 const Amount = U128;
 
-const Offence = z.enum(stateChainTypes.Offence._enum);
+const UnitOffence = z.enum([
+    'ParticipateSigningFailed',
+    'ParticipateKeygenFailed',
+    'MissedAuthorshipSlot',
+    'MissedHeartbeat',
+    'GrandpaEquivocation',
+    'ParticipateKeyHandoverFailed',
+    'FailedToWitnessInTime',
+]);
+const ForeignChain = z.enum([
+    'Ethereum',
+    'Polkadot',
+    'Bitcoin',
+    'Arbitrum',
+    'Solana',
+    'Assethub',
+    'Tron',
+    'Bsc',
+]);
+const Offence = z.union([
+    UnitOffence,
+    z.object({ FailedToBroadcastTransaction: ForeignChain }),
+    z.object({ FailedLivenessCheck: ForeignChain }),
+]);
 const RpcPenalty = z.tuple([number, number]);
 const ValidatorId = string;
 const RpcSuspension = z.tuple([Offence, z.array(z.tuple([number, ValidatorId]))]);
@@ -36,12 +58,21 @@ const CurrentEpochStartedAt = U32;
 const EpochDuration = U32;
 const VaultImbalance = z.union([z.object({ Surplus: U128 }), z.object({ Deficit: U128 })]);
 
-// Helper function to get decimals for an asset
+const CHAIN_ASSET_DECIMALS: Record<string, Record<string, number>> = {
+    Ethereum: { ETH: 1e18, FLIP: 1e18, USDC: 1e6, USDT: 1e6, WBTC: 1e8, CBBTC: 1e8 },
+    Polkadot: { DOT: 1e10 },
+    Bitcoin: { BTC: 1e8 },
+    Arbitrum: { ETH: 1e18, USDC: 1e6, USDT: 1e6 },
+    Solana: { SOL: 1e9, USDC: 1e6, USDT: 1e6 },
+    Assethub: { DOT: 1e10, USDC: 1e6, USDT: 1e6 },
+    Tron: { TRX: 1e6, USDT: 1e6 },
+    Bsc: { BNB: 1e18, USDT: 1e18 },
+};
+
+// Helper function to get decimals for a chain-specific asset
 function getAssetDecimals(chain: string, asset: string): number {
-    if (asset === 'BTC') return 1e8;
-    if (asset === 'ETH') return 1e18;
-    if (asset === 'SOL') return 1e9;
-    if (asset === 'USDT' || asset === 'USDC') return 1e6;
+    const chainDecimals = CHAIN_ASSET_DECIMALS[chain]?.[asset];
+    if (chainDecimals !== undefined) return chainDecimals;
     // Default fallback
     return 1e18;
 }
@@ -108,6 +139,7 @@ export const customRpcTypes = {
             solana: U32,
             assethub: U32,
             tron: U32,
+            bsc: U32,
         }),
         btc_utxos: z.object({
             total_balance: U128,
@@ -132,6 +164,7 @@ export const customRpcTypes = {
             solana: U32,
             assethub: U32,
             tron: U32,
+            bsc: U32,
         }),
         pending_tss: z.object({
             evm: U32,
@@ -147,6 +180,7 @@ export const customRpcTypes = {
             solana: U32,
             assethub: U32,
             tron: U32,
+            bsc: U32,
         }),
         fee_imbalance: z.object({
             ethereum: VaultImbalance,
@@ -156,6 +190,7 @@ export const customRpcTypes = {
             solana: VaultImbalance,
             assethub: VaultImbalance,
             tron: VaultImbalance,
+            bsc: VaultImbalance,
         }),
         authorities: z.object({
             authorities: U32,
@@ -188,6 +223,7 @@ export const customRpcTypes = {
             assethub: U32.nullish(),
             solana: z.tuple([U32.nullish(), string.nullish()]),
             tron: U32.nullish(),
+            bsc: U32.nullable(),
         }),
     }),
     monitoring_accounts_info: z.array(

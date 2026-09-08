@@ -3,6 +3,9 @@
 Prometheus exporter to retrieve important data for our monitoring and alerting system.
 Designed to retrieve data from several APIs on multiple chains.
 
+The exporter runs eight independently configurable watchers: Chainflip State Chain, Ethereum, Bitcoin, Arbitrum, BSC,
+Solana, AssetHub, and Tron.
+
 ## Deploying on Kubernetes
 
 ```shell
@@ -78,7 +81,7 @@ docker-compose restart prometheus
 
 ### Custom Config File
 
-Check out the config file in `config/local.json`. This can be modified to point at different chains and networks. You
+Check out the config file in `config/localnet.json`. This can be modified to point at different chains and networks. You
 can update the tracked wallets and Chainflip accounts.
 
 #### Enable/Disable Chains
@@ -90,17 +93,34 @@ You can enable or disable tracking for any of the chains as needed.
     "eth": {
         "enabled": true
     },
-    "dot": {
-        "enabled": true
-    },
     "btc": {
         "enabled": true
     },
     "flip": {
         "enabled": true
+    },
+    "bsc": {
+        "enabled": true
     }
 }
 ```
+
+#### BSC
+
+Set `BSC_HTTP_ENDPOINT` to an HTTP JSON-RPC endpoint for the configured BSC network. The default localnet endpoint is
+`http://localhost:8645`. The required `bsc` configuration contains `networkId`, the Chainflip contracts, wallets whose
+BNB and token balances should be tracked, and configured BEP-20 tokens. See
+[`config/localnet.json`](config/localnet.json), [`config/sisyphos.json`](config/sisyphos.json), or
+[`config/berghain.json`](config/berghain.json) for complete examples.
+
+The standalone watcher exposes `bsc_block_height`, `bsc_bnb_balance`, and `bsc_token_balance`. The State Chain watcher
+also exposes BSC through the applicable `cf_*` metric labels, including external height, broadcasts, deposit channels,
+fee imbalance, key activation, elections, events, reorgs, safe mode, and suspended validators. BSC shares the EVM TSS
+queue and does not emit a separate BSC TSS series.
+
+Use those three standalone metric names in `bsc.skipMetrics` to disable individual scrapes. Watcher-level failures are
+reported by `bsc_watcher_failure`, per-scrape failures by `metric_scrape_failure{metric="..."}`, and tracked-versus-node
+height is available from `/health/block-lag/bsc` (default maximum lag: 8,000 blocks).
 
 #### Adding Your Validator
 

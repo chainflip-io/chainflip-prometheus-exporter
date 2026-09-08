@@ -45,6 +45,10 @@ export const gaugeExternalChainsBlockHeight = async (context: Context, data: Pro
         metric.labels('tron').set(data.data.external_chains_height.tron);
         blockHeightStore.setTracked('tron', data.data.external_chains_height.tron);
 
+        // BSC
+        metric.labels('bsc').set(data.data.external_chains_height.bsc);
+        blockHeightStore.setTracked('bsc', data.data.external_chains_height.bsc);
+
         metricFailure.labels({ metric: metricName }).set(0);
     } catch (e) {
         logger.error(e);

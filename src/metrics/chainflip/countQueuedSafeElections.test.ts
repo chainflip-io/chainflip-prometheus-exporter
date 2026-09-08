@@ -1,7 +1,6 @@
-import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { countQueuedSafeElections } from './gaugeElections';
 
 type ElectionLog = {
@@ -17,21 +16,20 @@ test('counts queued safe elections from Ethereum and Arbitrum log lines', () => 
         .split('\n')
         .map((line) => JSON.parse(line) as ElectionLog);
 
-    assert.equal(logs.length, 2);
+    expect(logs).toHaveLength(2);
     const [arbitrumLog, ethereumLog] = logs;
 
-    assert.equal(arbitrumLog.message, 'Arbitrum_BW_deposit_channels_state');
-    assert.deepEqual(Object.entries(arbitrumLog.data.bw_deposit_channels_queued_safe), [
+    expect(arbitrumLog.message).toBe('Arbitrum_BW_deposit_channels_state');
+    expect(Object.entries(arbitrumLog.data.bw_deposit_channels_queued_safe)).toEqual([
         ['{"root":497523120}', { root: 497920536 }],
     ]);
-    assert.equal(
-        countQueuedSafeElections(arbitrumLog.data.bw_deposit_channels_queued_safe),
+    expect(countQueuedSafeElections(arbitrumLog.data.bw_deposit_channels_queued_safe)).toBe(
         397_416,
     );
 
-    assert.equal(ethereumLog.message, 'Ethereum_BW_deposit_channels_state');
-    assert.deepEqual(Object.entries(ethereumLog.data.bw_deposit_channels_queued_safe), [
+    expect(ethereumLog.message).toBe('Ethereum_BW_deposit_channels_state');
+    expect(Object.entries(ethereumLog.data.bw_deposit_channels_queued_safe)).toEqual([
         ['25817364', 25825664],
     ]);
-    assert.equal(countQueuedSafeElections(ethereumLog.data.bw_deposit_channels_queued_safe), 8_300);
+    expect(countQueuedSafeElections(ethereumLog.data.bw_deposit_channels_queued_safe)).toBe(8_300);
 });

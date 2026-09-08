@@ -10,6 +10,23 @@ const metric: Gauge = new promClient.Gauge({
     registers: [],
 });
 
+export function formatOffenceLabel(offence: unknown): string {
+    if (typeof offence === 'string') {
+        return offence;
+    }
+
+    if (typeof offence === 'object' && offence !== null) {
+        const entries = Object.entries(offence);
+        if (entries.length === 1) {
+            const [name, value] = entries[0];
+            return value === null || value === undefined ? name : `${name}:${String(value)}`;
+        }
+        return JSON.stringify(offence);
+    }
+
+    return String(offence);
+}
+
 export const gaugeSuspendedValidator = async (
     context: Context,
     data: ProtocolData,
@@ -25,7 +42,7 @@ export const gaugeSuspendedValidator = async (
 
         const suspensionList: any = data.data.suspended_validators;
         suspensionList.forEach(([offence, count]: [any, any]) => {
-            metric.labels(offence).set(count);
+            metric.labels(formatOffenceLabel(offence)).set(count);
         });
 
         metricFailure.labels({ metric: metricName }).set(0);

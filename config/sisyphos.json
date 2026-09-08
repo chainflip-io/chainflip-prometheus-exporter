@@ -1,11 +1,4 @@
 {
-  "dot": {
-    "enabled": true,
-    "network": "pdot",
-    "defaultMetrics": [],
-    "accounts": [],
-    "skipMetrics": []
-  },
   "hub": {
 		"enabled": true,
 		"network": "passethub",
@@ -121,6 +114,51 @@
       {
         "alias": "vault",
         "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+      }
+    ],
+    "skipMetrics": []
+  },
+  "bsc": {
+    "enabled": true,
+    "networkId": 97,
+    "network": "testnet",
+    "defaultMetrics": [],
+    "contracts": [
+      {
+        "alias": "key-manager",
+        "address": "0xcA2Fc8ABb5ACEc1CA19c684BdF2959B32e83bacF"
+      },
+      {
+        "alias": "vault",
+        "address": "0x3362FD7D8264387Ac7D686084CBB774bB09732DF"
+      }
+    ],
+    "wallets": [
+      {
+        "alias": "deployer",
+        "address": "0xa56A6be23b6Cf39D9448FF6e897C29c41c8fbDFF"
+      },
+      {
+        "alias": "bashful",
+        "address": "0x58f63aa23974665ecf2b08b7c0b72e4286aa822b"
+      },
+      {
+        "alias": "doc",
+        "address": "0x93bba670696Ad5412c9d40d0326b1Fa608FE02B3"
+      },
+      {
+        "alias": "dopey",
+        "address": "0x8A64ac13B9C271CDe34fA1a540CeF0a12Ed340f2"
+      },
+      {
+        "alias": "vault",
+        "address": "0xF1B061aCCDAa4B7c029128b49aBc047F89D5CB8d"
+      }
+    ],
+    "tokens": [
+      {
+        "address": "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd",
+        "symbol": "USDT"
       }
     ],
     "skipMetrics": []

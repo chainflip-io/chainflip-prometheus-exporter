@@ -12,7 +12,7 @@
     "build": "tsc",
     "lint": "eslint ./src*",
     "prettier": "pnpm exec prettier --write src/**/*.ts src/*.ts src/**/**/*.ts",
-    "test": "tsx --test \"src/**/*.test.ts\"",
+    "test": "vitest run",
     "metrics": "curl localhost:9000/metrics",
     "dev": "tsx watch src/app.ts",
     "start:dev:local": "CF_NETWORK=localnet pnpm dev",
@@ -70,6 +70,7 @@
     "eslint-plugin-promise": "^6.0.0",
     "prettier": "2.8.8",
     "tsx": "^3.12.7",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^3.2.4"
   }
 }

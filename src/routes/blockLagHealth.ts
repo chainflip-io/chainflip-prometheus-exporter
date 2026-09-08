@@ -21,6 +21,7 @@ const sourcesFor = (config: Config): Record<BlockLagChain, BlockLagSource> => ({
     solana: { enabled: config.sol.enabled, defaultMaxLag: 9000 },
     assethub: { enabled: config.hub.enabled, defaultMaxLag: 1800 },
     tron: { enabled: config.tron.enabled, defaultMaxLag: 1200 },
+    bsc: { enabled: config.bsc.enabled, defaultMaxLag: 8000 },
 });
 
 const parseMaxLag = (value: unknown): number | null => {

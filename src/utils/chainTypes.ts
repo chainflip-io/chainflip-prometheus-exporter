@@ -97,6 +97,9 @@ const stateChainTypes = {
         validator_bond: 'Amount',
     },
     FlipBalance: 'u128',
+    ForeignChain: {
+        _enum: ['Ethereum', 'Polkadot', 'Bitcoin', 'Arbitrum', 'Solana', 'Assethub', 'Tron', 'Bsc'],
+    },
     H256: '[u8; 32]',
     InternalSource: {
         _enum: {
@@ -144,17 +147,17 @@ const stateChainTypes = {
     },
     Nonce: 'u64',
     Offence: {
-        _enum: [
-            'ParticipateSigningFailed',
-            'ParticipateKeygenFailed',
-            'FailedToBroadcastTransaction',
-            'FailedToSignTransaction',
-            'MissedAuthorshipSlot',
-            'MissedHeartbeat',
-            'GrandpaEquivocation',
-            'ParticipateKeyHandoverFailed',
-            'FailedToWitnessInTime',
-        ],
+        _enum: {
+            ParticipateSigningFailed: '',
+            ParticipateKeygenFailed: '',
+            FailedToBroadcastTransaction: 'ForeignChain',
+            MissedAuthorshipSlot: '',
+            MissedHeartbeat: '',
+            GrandpaEquivocation: '',
+            ParticipateKeyHandoverFailed: '',
+            FailedToWitnessInTime: '',
+            FailedLivenessCheck: 'ForeignChain',
+        },
     },
     OnlineCredits: 'BlockNumber',
     OnlineCreditsFor: 'BlockNumber',

@@ -67,6 +67,19 @@ const CHAIN_CONFIGS: ChainElectionConfig[] = [
         ],
         skipMetricKey: 'cf_tron_elections',
     },
+    {
+        chainName: 'bsc',
+        palletName: 'bscElections',
+        bhwFieldPath: 'runningBsc',
+        electionInstances: [
+            { index: 1, instanceLabel: 'deposit_channels' },
+            { index: 2, instanceLabel: 'vaults' },
+            { index: 3, instanceLabel: 'key_manager' },
+            // index 4: FeeTracking - skipped
+            // index 5: Liveness - skipped
+        ],
+        skipMetricKey: 'cf_bsc_elections',
+    },
 ];
 
 const metricNameWitnessFrom: string = 'cf_bhw_witness_from';
