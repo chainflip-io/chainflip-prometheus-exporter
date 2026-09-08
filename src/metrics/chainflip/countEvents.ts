@@ -89,11 +89,13 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metric.labels('governance:Proposed').set(0);
     metric.labels('ethereumBroadcaster:BroadcastAborted').set(0);
     metric.labels('arbitrumBroadcaster:BroadcastAborted').set(0);
+    metric.labels('bscBroadcaster:BroadcastAborted').set(0);
     metric.labels('bitcoinBroadcaster:BroadcastAborted').set(0);
     metric.labels('solanaBroadcaster:BroadcastAborted').set(0);
     metric.labels('bitcoinBroadcaster:BroadcastTimeout').set(0);
     metric.labels('ethereumBroadcaster:BroadcastTimeout').set(0);
     metric.labels('arbitrumBroadcaster:BroadcastTimeout').set(0);
+    metric.labels('bscBroadcaster:BroadcastTimeout').set(0);
     metric.labels('solanaBroadcaster:BroadcastTimeout').set(0);
     metric.labels('evmThresholdSigner:RetryRequested').set(0);
     metric.labels('bitcoinThresholdSigner:RetryRequested').set(0);
@@ -105,12 +107,15 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metric.labels('bitcoinIngressEgress:ChannelOpeningFeePaid').set(0);
     metric.labels('ethereumIngressEgress:ChannelOpeningFeePaid').set(0);
     metric.labels('arbitrumIngressEgress:ChannelOpeningFeePaid').set(0);
+    metric.labels('bscIngressEgress:ChannelOpeningFeePaid').set(0);
     metric.labels('flip:SlashingPerformed').set(0);
     metric.labels('ethereumChainTracking:ChainStateUpdated').set(0);
     metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
     metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
+    metric.labels('bscChainTracking:ChainStateUpdated').set(0);
     metric.labels('bitcoinIngressEgress:BoostedDepositLost').set(0);
     metric.labels('arbitrumIngressEgress:TransferFallbackRequested').set(0);
+    metric.labels('bscIngressEgress:TransferFallbackRequested').set(0);
     metric.labels('ethereumIngressEgress:TransferFallbackRequested').set(0);
     metric.labels('solanaIngressEgress:TransferFallbackRequested').set(0);
     metric.labels('assethubIngressEgress:TransferFallbackRequested').set(0);
@@ -124,6 +129,7 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metricReorgDetected.labels('bitcoin').set(0);
     metricReorgDetected.labels('ethereum').set(0);
     metricReorgDetected.labels('arbitrum').set(0);
+    metricReorgDetected.labels('bsc').set(0);
     metricReorgDetected.labels('tron').set(0);
 
     for (const { ss58Address, alias } of config.accounts) {
@@ -133,6 +139,7 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
 
     for (const broadcaster of [
         'arbitrumBroadcaster',
+        'bscBroadcaster',
         'bitcoinBroadcaster',
         'ethereumBroadcaster',
         'solanaBroadcaster',

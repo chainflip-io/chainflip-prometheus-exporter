@@ -36,6 +36,10 @@ export const gaugeDepositChannels = async (context: Context, data: ProtocolData)
         const arbChannels = data.data.open_deposit_channels.arbitrum;
         metric.labels('arbitrum').set(arbChannels);
 
+        // BSC
+        const bscChannels = data.data.open_deposit_channels.bsc;
+        metric.labels('bsc').set(bscChannels);
+
         // SOL
         const solChannels = data.data.open_deposit_channels.solana;
         metric.labels('solana').set(solChannels);
