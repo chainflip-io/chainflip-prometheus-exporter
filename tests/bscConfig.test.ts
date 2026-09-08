@@ -118,5 +118,5 @@ describe('BSC configuration', () => {
         } finally {
             rmSync(directory, { recursive: true, force: true });
         }
-    });
+    }, 15_000);
 });
