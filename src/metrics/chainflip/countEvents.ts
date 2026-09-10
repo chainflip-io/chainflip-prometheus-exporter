@@ -59,6 +59,22 @@ const metricReorgDetected: Gauge = new promClient.Gauge({
     registers: [],
 });
 
+const FOREIGN_CHAINS = [
+    'ethereum',
+    'bitcoin',
+    'arbitrum',
+    'solana',
+    'assethub',
+    'tron',
+    'bsc',
+] as const;
+
+// EVM is shared by Ethereum, Arbitrum, Tron, and BSC. AssetHub uses the Polkadot signer.
+const THRESHOLD_SIGNERS = ['evm', 'polkadot', 'bitcoin', 'solana'] as const;
+
+// These are the election pallets whose ElectoralEvent can contain ReorgDetected in runtime 2.3.
+const REORG_CHAINS = FOREIGN_CHAINS.filter((chain) => chain !== 'solana');
+
 // Track which chains have had reorg events so we can reset them to 0 when no reorg is detected
 let activeReorgChains: Set<string> = new Set<string>();
 
@@ -92,66 +108,34 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metric.labels('governance:Approved').set(0);
     metric.labels('governance:Executed').set(0);
     metric.labels('governance:Proposed').set(0);
-    metric.labels('ethereumBroadcaster:BroadcastAborted').set(0);
-    metric.labels('arbitrumBroadcaster:BroadcastAborted').set(0);
-    metric.labels('bitcoinBroadcaster:BroadcastAborted').set(0);
-    metric.labels('solanaBroadcaster:BroadcastAborted').set(0);
-    metric.labels('bitcoinBroadcaster:BroadcastTimeout').set(0);
-    metric.labels('ethereumBroadcaster:BroadcastTimeout').set(0);
-    metric.labels('arbitrumBroadcaster:BroadcastTimeout').set(0);
-    metric.labels('solanaBroadcaster:BroadcastTimeout').set(0);
-    metric.labels('evmThresholdSigner:RetryRequested').set(0);
-    metric.labels('bitcoinThresholdSigner:RetryRequested').set(0);
-    metric.labels('solanaThresholdSigner:RetryRequested').set(0);
-    metric.labels('evmThresholdSigner:KeygenFailure').set(0);
-    metric.labels('bitcoinThresholdSigner:KeygenFailure').set(0);
-    metric.labels('solanaThresholdSigner:KeygenFailure').set(0);
-    metric.labels('solanaIngressEgress:ChannelOpeningFeePaid').set(0);
-    metric.labels('bitcoinIngressEgress:ChannelOpeningFeePaid').set(0);
-    metric.labels('ethereumIngressEgress:ChannelOpeningFeePaid').set(0);
-    metric.labels('arbitrumIngressEgress:ChannelOpeningFeePaid').set(0);
     metric.labels('flip:SlashingPerformed').set(0);
-    metric.labels('ethereumChainTracking:ChainStateUpdated').set(0);
-    metric.labels('bitcoinChainTracking:ChainStateUpdated').set(0);
-    metric.labels('arbitrumChainTracking:ChainStateUpdated').set(0);
-    metric.labels('bitcoinIngressEgress:BoostedDepositLost').set(0);
-    metric.labels('arbitrumIngressEgress:TransferFallbackRequested').set(0);
-    metric.labels('ethereumIngressEgress:TransferFallbackRequested').set(0);
-    metric.labels('solanaIngressEgress:TransferFallbackRequested').set(0);
-    metric.labels('assethubIngressEgress:TransferFallbackRequested').set(0);
-    metric.labels('bitcoinIngressEgress:TransferFallbackRequested').set(0);
-    metric.labels('tronBroadcaster:BroadcastAborted').set(0);
-    metric.labels('tronBroadcaster:BroadcastTimeout').set(0);
-    metric.labels('tronIngressEgress:ChannelOpeningFeePaid').set(0);
-    metric.labels('tronChainTracking:ChainStateUpdated').set(0);
-    metric.labels('tronIngressEgress:TransferFallbackRequested').set(0);
-    metric.labels('bscBroadcaster:BroadcastAborted').set(0);
-    metric.labels('bscBroadcaster:BroadcastTimeout').set(0);
-    metric.labels('bscIngressEgress:ChannelOpeningFeePaid').set(0);
-    metric.labels('bscChainTracking:ChainStateUpdated').set(0);
-    metric.labels('bscIngressEgress:TransferFallbackRequested').set(0);
 
-    metricReorgDetected.labels('bitcoin').set(0);
-    metricReorgDetected.labels('ethereum').set(0);
-    metricReorgDetected.labels('arbitrum').set(0);
-    metricReorgDetected.labels('tron').set(0);
-    metricReorgDetected.labels('bsc').set(0);
+    for (const chain of FOREIGN_CHAINS) {
+        const broadcaster = `${chain}Broadcaster`;
+        const ingressEgress = `${chain}IngressEgress`;
+
+        metric.labels(`${broadcaster}:BroadcastAborted`).set(0);
+        metric.labels(`${broadcaster}:BroadcastTimeout`).set(0);
+        metric.labels(`${ingressEgress}:ChannelOpeningFeePaid`).set(0);
+        metric.labels(`${ingressEgress}:BoostedDepositLost`).set(0);
+        metric.labels(`${ingressEgress}:TransferFallbackRequested`).set(0);
+        metric.labels(`${chain}ChainTracking:ChainStateUpdated`).set(0);
+        metricCcmBroadcastAborted.labels(broadcaster).set(0);
+        metricBroadcastAborted.labels(broadcaster).set(0);
+    }
+
+    for (const signer of THRESHOLD_SIGNERS) {
+        metric.labels(`${signer}ThresholdSigner:RetryRequested`).set(0);
+        metric.labels(`${signer}ThresholdSigner:KeygenFailure`).set(0);
+    }
+
+    for (const chain of REORG_CHAINS) {
+        metricReorgDetected.labels(chain).set(0);
+    }
 
     for (const { ss58Address, alias } of config.accounts) {
         const hex = `0x${Buffer.from(decodeAddress(ss58Address)).toString('hex')}`;
         metricSlash.labels(ss58Address, hex, alias).set(0);
-    }
-
-    for (const broadcaster of [
-        'arbitrumBroadcaster',
-        'bitcoinBroadcaster',
-        'ethereumBroadcaster',
-        'solanaBroadcaster',
-        'tronBroadcaster',
-        'bscBroadcaster',
-    ]) {
-        metricCcmBroadcastAborted.labels(broadcaster).set(0);
-        metricBroadcastAborted.labels(broadcaster).set(0);
     }
 };
 

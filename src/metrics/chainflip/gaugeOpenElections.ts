@@ -80,6 +80,17 @@ const CHAIN_CONFIGS: ChainElectionOpenConfig[] = [
         ]),
     },
     {
+        chainName: 'assethub',
+        palletName: 'assethubElections',
+        electoralSystems: new Map([
+            ['A', 'AssethubBlockHeightWitnesser'],
+            ['B', 'AssethubDepositChannelWitnessing'],
+            ['C', 'AssethubEgressWitnessing'],
+            ['D', 'AssethubFeeTracking'],
+            ['EE', 'AssethubLiveness'],
+        ]),
+    },
+    {
         chainName: 'bsc',
         palletName: 'bscElections',
         electoralSystems: new Map([

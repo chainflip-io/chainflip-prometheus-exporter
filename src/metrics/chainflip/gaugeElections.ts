@@ -68,6 +68,18 @@ const CHAIN_CONFIGS: ChainElectionConfig[] = [
         skipMetricKey: 'cf_tron_elections',
     },
     {
+        chainName: 'assethub',
+        palletName: 'assethubElections',
+        bhwFieldPath: 'runningAssethub',
+        electionInstances: [
+            { index: 1, instanceLabel: 'deposit_channels' },
+            { index: 2, instanceLabel: 'egresses' },
+            // index 3: FeeTracking - skipped
+            // index 4: Liveness - skipped
+        ],
+        skipMetricKey: 'cf_assethub_elections',
+    },
+    {
         chainName: 'bsc',
         palletName: 'bscElections',
         bhwFieldPath: 'runningBsc',

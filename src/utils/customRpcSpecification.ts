@@ -113,21 +113,6 @@ export const customRpcs = {
             type: 'RpcAuctionState',
             description: '',
         },
-        witness_count: {
-            params: [
-                {
-                    name: 'hash',
-                    type: 'String',
-                },
-                {
-                    name: 'epoch_index',
-                    type: 'Option<u32>',
-                    isOptional: true,
-                },
-            ],
-            type: 'RpcFailingWitnessValidators',
-            description: '',
-        },
         monitoring_data: {
             params: [],
             type: 'RpcMonitoringData',
