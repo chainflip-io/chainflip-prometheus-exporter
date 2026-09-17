@@ -215,10 +215,10 @@ async function startWatcher(context: Context) {
     // The worker has its own liveness check: heads arriving but no block completing
     // means the pipeline is wedged on something the per-request timeouts didn't catch.
     const WORKER_STALL_TIMEOUT_MS = 300_000;
-    // Bound on the catch-up backlog: ~10 minutes of chain at 6s/block. Beyond this
+    // Bound on the catch-up backlog: ~60 minutes of chain at 6s/block. Beyond this
     // the oldest blocks are dropped (loudly, via cf_exporter_blocks_dropped_total) —
     // staying alive and current beats replaying arbitrarily old history.
-    const BLOCK_QUEUE_CAPACITY = 100;
+    const BLOCK_QUEUE_CAPACITY = 600;
     // rpc-core memoizes a registry lookup per block hash with no eviction (one entry
     // per finalized block, kept forever — see RpcCore.setRegistrySwap). Re-arming the
     // swap every N blocks replaces the memoized function and drops the stale cache.
