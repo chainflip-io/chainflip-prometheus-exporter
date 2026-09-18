@@ -59,6 +59,13 @@ const metricReorgDetected: Gauge = new promClient.Gauge({
     registers: [],
 });
 
+const metricNameStaleUtxosDiscarded: string = 'cf_stale_utxos_discarded';
+const metricStaleUtxosDiscarded: Gauge = new promClient.Gauge({
+    name: metricNameStaleUtxosDiscarded,
+    help: 'Count of stale UTXOs discarded events',
+    registers: [],
+});
+
 const FOREIGN_CHAINS = [
     'ethereum',
     'bitcoin',
@@ -102,6 +109,7 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metricCcmBroadcastAborted.reset();
     metricBroadcastAborted.reset();
     metricReorgDetected.reset();
+    metricStaleUtxosDiscarded.set(0);
     activeReorgChains.clear();
     ccmBroadcasts.clear();
 
@@ -109,6 +117,7 @@ export const resetEventCountMetrics = (config: FlipConfig): void => {
     metric.labels('governance:Executed').set(0);
     metric.labels('governance:Proposed').set(0);
     metric.labels('flip:SlashingPerformed').set(0);
+    metric.labels('environment:StaleUtxosDiscarded').set(0);
 
     for (const chain of FOREIGN_CHAINS) {
         const broadcaster = `${chain}Broadcaster`;
@@ -162,6 +171,8 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
             registry.registerMetric(metricBroadcastAborted);
         if (registry.getSingleMetric(metricNameReorgDetected) === undefined)
             registry.registerMetric(metricReorgDetected);
+        if (registry.getSingleMetric(metricNameStaleUtxosDiscarded) === undefined)
+            registry.registerMetric(metricStaleUtxosDiscarded);
         cleanupStaleCcmBroadcasts(data.blockNumber, logger);
         logStructureSize(
             logger,
@@ -188,6 +199,10 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
                 continue;
             }
             metric.labels(`${event.section}:${event.method}`).inc(1);
+
+            if (event.section === 'environment' && event.method === 'StaleUtxosDiscarded') {
+                metricStaleUtxosDiscarded.inc();
+            }
 
             // Save the list of broadcastId for CCM with current block number
             if (event.method === 'CcmBroadcastRequested') {
