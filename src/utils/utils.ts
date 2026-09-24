@@ -1,5 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
+import type { DispatchError } from '@polkadot/types/interfaces';
 import type { Registry } from '@polkadot/types/types';
 import { Context } from '../lib/interfaces';
 import { customRpcs } from './customRpcSpecification';
@@ -105,24 +106,29 @@ export function logStructureSize(
     structureSizeLogState.set(key, state);
 }
 
-export const getStateChainError = (
-    registry: Registry,
-    value: { error: `0x${string}`; index: number },
-) => {
-    // convert LE hex encoded number (e.g. "0x06000000") to BN (6)
-    const error = new BN(value.error.slice(2), 'hex', 'le');
+export const getStateChainError = (registry: Registry, value: DispatchError) => {
+    if (!value.isModule) {
+        // Dispatch errors such as BadOrigin have no pallet index. Keep nested enum
+        // variants distinct without putting arbitrary error text into metric labels.
+        let name: string = value.type;
+        if (value.isToken) name += `.${value.asToken.type}`;
+        else if (value.isArithmetic) name += `.${value.asArithmetic.type}`;
+        else if (value.isTransactional) name += `.${value.asTransactional.type}`;
+
+        return { data: { name: `dispatch:${name}`, docs: '' } };
+    }
+
+    const moduleError = value.asModule;
+    const error = new BN(moduleError.error.toU8a(), 'le');
     const errorIndex = error.toNumber();
-    const palletIndex = value.index;
+    const palletIndex = moduleError.index.toNumber();
 
     // The registry belongs to `api.at(blockHash)`, so it already carries the correct
     // metadata for this block's runtime version (upgrade-safe) and findMetaError is a
     // pure in-memory lookup. Fetching metadata per ExtrinsicFailed event instead (via
     // api.rpc.state.getMetadata) is a heavy, event-loop-blocking decode that pins the
     // CPU during DuplicateWitness storms — do not reintroduce it.
-    const registryError = registry.findMetaError({
-        index: new BN(palletIndex),
-        error,
-    });
+    const registryError = registry.findMetaError(moduleError);
 
     return {
         data: {

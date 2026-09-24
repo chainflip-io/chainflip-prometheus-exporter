@@ -186,8 +186,9 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
 
         const events = await api.query.system.events();
         const reorgChains: Set<string> = new Set<string>();
+        let failed = false;
         await eventsRotationInfo(context, data, events);
-        for (const { event } of events) {
+        for (const [eventIndex, { event }] of events.entries()) {
             let skip = false;
             for (const { section, method } of skipEvents) {
                 if (event.section === section && event.method === method) {
@@ -230,7 +231,22 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
 
             let error;
             if (event.method === 'ExtrinsicFailed') {
-                error = getStateChainError(api.registry, event.data.toJSON()[0].module);
+                try {
+                    error = getStateChainError(api.registry, event.data[0]);
+                } catch (e) {
+                    // Preserve the failure count and process the remaining events even
+                    // if a future runtime error cannot be decoded with this registry.
+                    failed = true;
+                    error = { data: { name: 'dispatch:Unknown', docs: '' } };
+                    logger.error('Failed to decode extrinsic error', {
+                        block: data.blockNumber,
+                        blockHash: data.blockHash,
+                        event: `${event.section}:${event.method}`,
+                        eventIndex,
+                        error: e instanceof Error ? e.message : String(e),
+                        stack: e instanceof Error ? e.stack : undefined,
+                    });
+                }
                 const parsedError = error.data.name.split(':');
                 metricExtrinsicFailed.labels(`${parsedError[0]}`, `${parsedError[1]}`).inc();
             }
@@ -295,7 +311,7 @@ export const countEvents = async (context: Context, data: ProtocolData): Promise
         }
         activeReorgChains = reorgChains;
 
-        metricFailure.labels('events_metrics').set(0);
+        metricFailure.labels('events_metrics').set(failed ? 1 : 0);
     } catch (e) {
         logger.error(e);
         metricFailure.labels('events_metrics').set(1);
