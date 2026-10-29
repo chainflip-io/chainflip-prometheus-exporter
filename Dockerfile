@@ -18,6 +18,11 @@ COPY . .
 
 RUN pnpm build
 
+# Node 22's built-in WebSocket fires `error` but never `close` when a connection
+# fails, so polkadot's WsProvider never reconnects and leaks a timer per attempt.
+# Disabling the global makes polkadot fall back to the `ws` package.
+ENV NODE_OPTIONS=--no-experimental-websocket
+
 EXPOSE 9000
 
 CMD [ "pnpm", "start" ]

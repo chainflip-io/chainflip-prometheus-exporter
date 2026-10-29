@@ -14,7 +14,7 @@
     "prettier": "pnpm exec prettier --write src/**/*.ts src/*.ts src/**/**/*.ts",
     "test": "vitest run",
     "metrics": "curl localhost:9000/metrics",
-    "dev": "tsx watch src/app.ts",
+    "dev": "NODE_OPTIONS=\"$NODE_OPTIONS --no-experimental-websocket\" tsx watch src/app.ts",
     "start:dev:local": "CF_NETWORK=localnet pnpm dev",
     "start:dev:backspin": "CF_NETWORK=backspin pnpm dev",
     "start:dev:sisyphos": "CF_NETWORK=sisyphos pnpm dev",
