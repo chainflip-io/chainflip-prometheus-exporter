@@ -27,6 +27,17 @@ logger.add(
 const app: Express = express();
 const config: Config = getConfig(logger);
 
+// Polkadot prefers Node's built-in WebSocket when it exists, but that one never
+// fires `close` after a failed connect, so polkadot never reconnects. The
+// Dockerfile and `pnpm dev` disable it with --no-experimental-websocket.
+if ((globalThis as { WebSocket?: unknown }).WebSocket === undefined) {
+    logger.info('Polkadot WebSocket client: ws package');
+} else {
+    logger.warn(
+        "Polkadot WebSocket client: Node built-in (won't reconnect after a failed connect); run with NODE_OPTIONS=--no-experimental-websocket",
+    );
+}
+
 const chainflipRegistry = new promClient.Registry();
 chainflipRegistry.setDefaultLabels({
     chain: 'chainflip',

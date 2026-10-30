@@ -40,6 +40,18 @@ declare global {
 // (metric_scrape_failure) instead of pinning the per-block pipeline.
 export const RPC_TIMEOUT_MS = 30_000;
 
+// Readable text for anything thrown or emitted as an error. WebSocket `error`
+// events are ErrorEvents: they print as "[object ErrorEvent]" but carry the
+// cause in `message` (e.g. "connect ECONNREFUSED 10.0.0.1:9944").
+export function describeError(err: unknown): string {
+    if (err instanceof Error) return err.stack ?? err.message;
+    if (typeof err === 'object' && err !== null && 'message' in err) {
+        const { message } = err;
+        if (typeof message === 'string' && message !== '') return message;
+    }
+    return String(err);
+}
+
 export type ProtocolData = {
     blockHash: string;
     blockNumber: number;

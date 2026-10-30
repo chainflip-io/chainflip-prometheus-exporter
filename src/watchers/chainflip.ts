@@ -34,7 +34,7 @@ import { customRpcs } from '../utils/customRpcSpecification';
 import stateChainTypes from '../utils/chainTypes';
 import makeRpcRequest from '../utils/makeRpcRequest';
 import { gaugeKeyActivationBroadcast } from '../metrics/chainflip/gaugeKeyActivationBroadcast';
-import { ProtocolData, RPC_TIMEOUT_MS } from '../utils/utils';
+import { describeError, ProtocolData, RPC_TIMEOUT_MS } from '../utils/utils';
 import { gaugeOpenElections } from '../metrics/chainflip/gaugeOpenElections';
 import { gaugeSafeMode } from '../metrics/chainflip/gaugeSafeMode';
 import { BlockQueue } from '../utils/blockQueue';
@@ -205,8 +205,8 @@ async function startWatcher(context: Context) {
     global.currentBlock = 0;
     global.prices = new Map();
 
-    // If the subscription stalls (connection wedged, silent half-open socket, or a
-    // failed auto-reconnect) we tear the watcher down and rebuild it. We do NOT restart
+    // If startup or the subscription stalls (connection wedged, silent half-open socket,
+    // or a failed auto-reconnect) we tear the watcher down and rebuild it. We do NOT restart
     // on every `disconnected` event: polkadot auto-reconnects and resubscribes transient
     // drops within `autoConnectMs`
     const STALL_TIMEOUT_MS = 120_000; // ~20 finalized blocks
@@ -228,6 +228,7 @@ async function startWatcher(context: Context) {
     let lastBlockProcessedAt = Date.now();
     let watchdog: ReturnType<typeof setInterval> | undefined;
     let unsubscribe: (() => void) | undefined;
+    let provider: WsProvider | undefined;
     let api: any;
 
     const queue = new BlockQueue({
@@ -255,7 +256,7 @@ async function startWatcher(context: Context) {
         // Fully drop the old connection before spinning up a new one, otherwise we'd
         // leak a second provider/api/subscription on every restart.
         Promise.resolve()
-            .then(() => api?.disconnect?.())
+            .then(() => (api ? api.disconnect() : provider?.disconnect()))
             .catch((e) => logger.error(`Error disconnecting api: ${e}`));
         // fire-and-forget: the new watcher manages its own lifecycle/errors
         setTimeout(() => {
@@ -343,15 +344,19 @@ async function startWatcher(context: Context) {
     };
 
     try {
-        const provider = new WsProvider(env.CF_WS_ENDPOINT, 5000, undefined, RPC_TIMEOUT_MS);
-        provider.on('disconnected', (err) => {
-            logger.error(`ws connection closed ${err}`);
+        provider = new WsProvider(env.CF_WS_ENDPOINT, 5000, undefined, RPC_TIMEOUT_MS);
+        provider.on('disconnected', () => {
+            if (stopped) return;
+            logger.error(`ws connection closed`);
             metric.set(1);
         });
         provider.on('error', (err) => {
-            logger.error(`ws provider error ${err}`);
+            if (stopped) return;
+            logger.error(`ws provider error ${describeError(err)}`);
         });
-        api = await ApiPromise.create({
+        // Keep the instance before awaiting readiness so restart() can disconnect
+        // an API that never finishes initializing.
+        api = new ApiPromise({
             provider,
             noInitWarn: true,
             types: stateChainTypes as DeepMutable<typeof stateChainTypes>,
@@ -361,22 +366,12 @@ async function startWatcher(context: Context) {
             // Capping it at 1 to avoid a mem leak.
             rpcCacheCapacity: 1,
         });
-        context.apiLatest = api;
-        api.on('error', (err: any) => logger.error(`api error ${err}`));
-
-        // The callback stays synchronous and allocation-free: all per-block work
-        // happens in the worker, which pulls block numbers off the queue in order.
-        unsubscribe = await api.rpc.chain.subscribeFinalizedHeads((header: any) => {
-            if (stopped) return; // ignore late deliveries arriving during teardown
-            lastHeadAt = Date.now();
-            queue.pushHead(header.toJSON().number);
-            metricQueueDepth.set(queue.depth);
+        api.on('error', (err: any) => {
+            if (stopped) return;
+            logger.error(`api error ${describeError(err)}`);
         });
 
-        void runWorker();
-
-        lastHeadAt = Date.now();
-        lastBlockProcessedAt = Date.now();
+        // Cover readiness and subscription setup too: either await can remain pending.
         watchdog = setInterval(() => {
             if (stopped) return;
             const sinceLastHead = Date.now() - lastHeadAt;
@@ -393,8 +388,30 @@ async function startWatcher(context: Context) {
                 );
             }
         }, WATCHDOG_INTERVAL_MS);
+
+        await api.isReadyOrError;
+        if (stopped) return;
+
+        // The callback stays synchronous and allocation-free: all per-block work
+        // happens in the worker, which pulls block numbers off the queue in order.
+        const unsubscribeHeads = await api.rpc.chain.subscribeFinalizedHeads((header: any) => {
+            if (stopped) return; // ignore late deliveries arriving during teardown
+            lastHeadAt = Date.now();
+            queue.pushHead(header.toJSON().number);
+            metricQueueDepth.set(queue.depth);
+        });
+        if (stopped) {
+            unsubscribeHeads();
+            return;
+        }
+        unsubscribe = unsubscribeHeads;
+        context.apiLatest = api;
+
+        lastHeadAt = Date.now();
+        lastBlockProcessedAt = Date.now();
+        void runWorker();
     } catch (e) {
-        logger.error(e);
-        restart(`startup failure: ${e instanceof Error ? e.stack : e}`);
+        if (stopped) return;
+        restart(`startup failure: ${describeError(e)}`);
     }
 }
